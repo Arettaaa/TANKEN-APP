@@ -1,931 +1,510 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TANKEN | Define Your Motion</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        tanken: {
+                            black: '#111111',
+                            dark: '#1C1C1C',
+                            gray: '#F9F9F9',
+                            border: '#EAEAEA',
+                            text: '#666666'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: #FFFFFF;
-            color: #111111;
-            overflow-x: hidden;
-        }
-
-        a { text-decoration: none; color: inherit; }
-        ul { list-style: none; }
-
-        /* --- NAVBAR --- */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 5%;
-            background-color: #FFFFFF;
-            border-bottom: 1px solid #F0F0F0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-        .nav-brand i { font-size: 26px; }
-        .nav-links {
-            display: flex;
-            gap: 35px;
-        }
-        .nav-links a {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: color 0.3s;
-        }
-        .nav-links a:hover { color: #666; }
-        .nav-icons {
-            display: flex;
-            gap: 20px;
-            font-size: 20px;
-        }
-        .nav-icons i { cursor: pointer; transition: color 0.3s; }
-        .nav-icons i:hover { color: #666; }
-
-        /* --- HERO SECTION --- */
-        .hero {
+        /* Custom Voucher Styling */
+        .voucher-card {
             position: relative;
-            height: 85vh;
-            background-image: url('https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=2070');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 5%;
+            background: white;
+            border: 1px solid #EAEAEA;
         }
-        .hero::before {
+        /* Left Cutout */
+        .voucher-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%);
+            left: -13px;
+            top: 55%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background-color: white; /* Matches section bg */
+            border-right: 1px solid #EAEAEA;
+            border-radius: 50%;
+            z-index: 10;
         }
-        .hero-content {
-            position: relative;
-            z-index: 1;
-            max-width: 800px;
-            margin-top: -50px;
-        }
-        .hero-content h1 {
-            font-size: 90px;
-            font-weight: 900;
-            color: white;
-            line-height: 0.95;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-            letter-spacing: -2px;
-        }
-        .hero-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        .btn-solid-white {
-            background: white;
-            color: #111;
-            padding: 14px 30px;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.3s;
-        }
-        .btn-solid-white:hover { background: #F0F0F0; }
-        
-        .btn-outline-white {
-            background: transparent;
-            color: white;
-            border: 1px solid white;
-            padding: 14px 30px;
-            font-size: 14px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.3s, color 0.3s;
-        }
-        .btn-outline-white:hover {
-            background: white;
-            color: #111;
-        }
-
-        /* --- MARQUEE --- */
-        .marquee-container {
+        /* Right Cutout */
+        .voucher-card::after {
+            content: '';
             position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            background: rgba(17, 17, 17, 0.9);
-            color: white;
-            padding: 12px 0;
-            overflow: hidden;
-            display: flex;
-            white-space: nowrap;
-            z-index: 2;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            right: -13px;
+            top: 55%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background-color: white; /* Matches section bg */
+            border-left: 1px solid #EAEAEA;
+            border-radius: 50%;
+            z-index: 10;
         }
-        .marquee-content {
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            display: inline-flex;
-            gap: 50px;
-            animation: marquee 20s linear infinite;
-        }
+        
+        /* Marquee Animation */
         @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-50%); }
         }
-
-        /* --- CATEGORIES SPLIT (WOMEN / MEN) --- */
-        .category-split {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            height: 400px;
-        }
-        .cat-box {
-            position: relative;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: flex-end;
-            padding: 40px 5%;
-            overflow: hidden;
-        }
-        .cat-box::before {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 60%;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            transition: height 0.3s;
-        }
-        .cat-box:hover::before { height: 80%; }
-        .cat-box-content {
-            position: relative;
-            z-index: 1;
-            color: white;
-        }
-        .cat-box-content h2 {
-            font-size: 48px;
-            font-weight: 800;
-            margin-bottom: 5px;
-            letter-spacing: -1px;
-        }
-        .cat-box-content a {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: gap 0.3s;
-        }
-        .cat-box-content a:hover { gap: 10px; }
-
-        /* --- GLOBAL SECTION STYLES --- */
-        .section-container {
-            padding: 80px 5%;
-        }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 40px;
-        }
-        .section-title h4 {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-        }
-        .section-title h2 {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-        .view-all-link {
-            font-size: 13px;
-            font-weight: 600;
-            color: #666;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: color 0.3s;
-        }
-        .view-all-link:hover { color: #111; }
-
-        /* --- FEATURED PIECES --- */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-        .product-card {
-            cursor: pointer;
-        }
-        .product-img {
-            width: 100%;
-            height: 300px;
-            background: #F5F5F5;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-        .product-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s;
-        }
-        .product-card:hover .product-img img { transform: scale(1.05); }
-        
-        .product-title {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-        }
-        .product-cat {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 10px;
-        }
-        .product-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .product-price {
-            font-size: 16px;
-            font-weight: 700;
-        }
-        .product-rating {
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .product-rating i { color: #F0B100; }
-
-        /* --- STATS SECTION --- */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            text-align: center;
-            padding: 60px 5%;
-            border-top: 1px solid #F0F0F0;
-            border-bottom: 1px solid #F0F0F0;
-        }
-        .stat-item {
-            border-right: 1px solid #F0F0F0;
-        }
-        .stat-item:last-child { border-right: none; }
-        .stat-item h3 {
-            font-size: 42px;
-            font-weight: 800;
-            margin-bottom: 5px;
-            letter-spacing: -1px;
-        }
-        .stat-item p {
-            font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        /* --- EXCLUSIVE VOUCHERS --- */
-        .vouchers-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-        }
-        .voucher-card {
-            border: 1px solid #EAEAEA;
-            border-radius: 8px;
-            padding: 25px;
-            background: #FFFFFF;
-            transition: box-shadow 0.3s;
-        }
-        .voucher-card:hover {
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-        .voucher-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        .voucher-title h3 {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 5px;
-        }
-        .voucher-title p {
-            font-size: 12px;
-            color: #666;
-            line-height: 1.5;
-        }
-        .voucher-icon {
-            width: 40px; height: 40px;
-            background: #111;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-        }
-        .voucher-divider {
-            border-top: 2px dashed #EAEAEA;
-            margin: 20px 0;
-        }
-        .voucher-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #F9F9F9;
-            padding: 12px 15px;
-            border-radius: 4px;
-        }
-        .voucher-code {
-            font-family: monospace;
-            font-size: 15px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .btn-copy {
-            font-size: 12px;
-            font-weight: 600;
-            color: #111;
-            cursor: pointer;
-            border: none;
-            background: none;
-            text-transform: uppercase;
-        }
-
-        /* --- SPRING COLLECTION BANNER --- */
-        .spring-banner {
-            position: relative;
-            height: 60vh;
-            background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            display: flex;
-            align-items: center;
-            padding: 0 5%;
-        }
-        .spring-banner::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(17, 17, 17, 0.7);
-        }
-        .spring-content {
-            position: relative;
-            z-index: 1;
-            color: white;
-            max-width: 600px;
-        }
-        .spring-content h2 {
-            font-size: 56px;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 20px;
-            letter-spacing: -1.5px;
-        }
-        .spring-content p {
-            font-size: 16px;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-
-        /* --- WHY TANKEN --- */
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-        }
-        .feature-card {
-            padding: 20px 0;
-        }
-        .feature-icon {
-            width: 45px; height: 45px;
-            background: #F5F5F5;
-            color: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 22px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .feature-card h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-        .feature-card p {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* --- JOIN COMMUNITY --- */
-        .community-section {
-            background-color: #111111;
-            color: white;
-            padding: 80px 5%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-        }
-        .comm-left h2 {
-            font-size: 48px;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            letter-spacing: -1px;
-        }
-        .comm-left p {
-            font-size: 15px;
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .comm-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 40px;
-        }
-        .comm-list li {
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .comm-list li i { color: #10B981; font-size: 18px; }
-        
-        .comm-right {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .comm-stat {
-            background: #111;
-            padding: 40px 30px;
-        }
-        .comm-stat h3 {
-            font-size: 36px;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-        .comm-stat p {
-            font-size: 12px;
-            color: rgba(255,255,255,0.5);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            background-color: #0A0A0A;
-            color: white;
-            padding: 80px 5% 30px;
-        }
-        .footer-top {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 60px;
-        }
-        .footer-brand h2 {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            letter-spacing: -0.5px;
-        }
-        .footer-brand p {
-            color: rgba(255,255,255,0.5);
-            font-size: 13px;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            max-width: 300px;
-        }
-        .footer-contact {
-            color: rgba(255,255,255,0.6);
-            font-size: 13px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .footer-contact div {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .footer-links h4 {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .footer-links ul {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .footer-links a {
-            color: rgba(255,255,255,0.5);
-            font-size: 13px;
-            transition: color 0.3s;
-        }
-        .footer-links a:hover { color: white; }
-        
-        .footer-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 30px;
-            font-size: 12px;
-            color: rgba(255,255,255,0.4);
-        }
-        .footer-legal {
-            display: flex;
-            gap: 20px;
-        }
-        .footer-legal a:hover { color: white; }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .hero-content h1 { font-size: 64px; }
-            .category-split, .community-section { grid-template-columns: 1fr; height: auto; }
-            .cat-box { height: 300px; }
-            .products-grid, .stats-grid, .vouchers-grid, .features-grid { grid-template-columns: repeat(2, 1fr); }
-            .footer-top { grid-template-columns: 1fr 1fr; }
-        }
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .hero-content h1 { font-size: 48px; }
-            .products-grid, .stats-grid, .vouchers-grid, .features-grid, .footer-top { grid-template-columns: 1fr; }
-            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; }
+        .animate-marquee {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: marquee 40s linear infinite;
         }
     </style>
 </head>
-<body>
+<body class="bg-white text-tanken-black antialiased">
 
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i class="ph-fill ph-triangle"></i>
-            TANKEN
-        </div>
-        <div class="nav-links">
-            <a href="#">Shop</a>
-            <a href="#">Women</a>
-            <a href="#">Men</a>
-            <a href="#">Help</a>
-        </div>
-        <div class="nav-icons">
-            <i class="ph ph-magnifying-glass"></i>
-            <i class="ph ph-heart"></i> <i class="ph ph-shopping-cart"></i>
-            <i class="ph ph-user"></i>
+    <nav class="sticky top-0 z-50 bg-white border-b border-tanken-border">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 h-[72px] flex items-center justify-between">
+            <a href="{{ route('pelanggan.beranda') }}" class="flex items-center gap-2">
+                <i class="ph-fill ph-triangle text-3xl"></i>
+                <span class="text-[22px] font-black tracking-tighter">TANKEN</span>
+            </a>
+
+            <div class="hidden md:flex items-center gap-10">
+                <a href="{{ route('pelanggan.shop') }}" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Shop</a>
+                <a href="{{ route('pelanggan.shop') }}" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Women</a>
+                <a href="{{ route('pelanggan.shop') }}" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Men</a>
+                <a href="#" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Help</a>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <button class="hover:opacity-60 transition-opacity"><i class="ph ph-magnifying-glass text-[22px]"></i></button>
+                <a href="{{ route('pelanggan.wishlist') }}" class="hover:opacity-60 transition-opacity"><i class="ph ph-heart text-[22px]"></i></a>
+                <a href="{{ route('pelanggan.keranjang') }}" class="hover:opacity-60 transition-opacity"><i class="ph ph-shopping-cart text-[22px]"></i></a>
+                <a href="{{ route('pelanggan.profil') }}" class="hover:opacity-60 transition-opacity"><i class="ph ph-user text-[22px]"></i></a>
+            </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Define<br>Your<br>Motion.</h1>
-            <div class="hero-buttons">
-                <a href="#" class="btn-solid-white">Shop Collection</a>
-                <a href="#" class="btn-outline-white">Explore Categories</a>
-            </div>
-        </div>
-        <div class="marquee-container">
-            <div class="marquee-content">
-                <span>Premium Quality</span>
-                <span>•</span>
-                <span>Engineered Comfort</span>
-                <span>•</span>
-                <span>Modern Fit</span>
-                <span>•</span>
-                <span>Durability</span>
-                <span>•</span>
-                <span>Premium Quality</span>
-                <span>•</span>
-                <span>Engineered Comfort</span>
-                <span>•</span>
-                <span>Modern Fit</span>
-                <span>•</span>
-                <span>Durability</span>
-            </div>
-        </div>
-    </section>
-
-    <section class="category-split">
-        <div class="cat-box" style="background-image: url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920');">
-            <div class="cat-box-content">
-                <h2>Women</h2>
-                <a href="#">Shop Collection <i class="ph ph-arrow-right"></i></a>
-            </div>
-        </div>
-        <div class="cat-box" style="background-image: url('https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?q=80&w=2070');">
-            <div class="cat-box-content">
-                <h2>Men</h2>
-                <a href="#">Shop Collection <i class="ph ph-arrow-right"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-container">
-        <div class="section-header">
-            <div class="section-title">
-                <h4>Shop</h4>
-                <h2>Featured Pieces</h2>
-            </div>
-            <a href="#" class="view-all-link">View All <i class="ph ph-caret-right"></i></a>
-        </div>
+    <section class="relative h-[85vh] flex flex-col justify-center">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=2070');">
+            <div class="absolute inset-0 bg-black/50"></div> </div>
         
-        <div class="products-grid">
-            <div class="product-card">
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1624378439575-d1ead6bb17f0?q=80&w=1974" alt="Essential Cargo Shorts">
-                </div>
-                <h3 class="product-title">Essential Cargo Shorts</h3>
-                <p class="product-cat">Casual</p>
-                <div class="product-bottom">
-                    <span class="product-price">$69.99</span>
-                    <span class="product-rating"><i class="ph-fill ph-star"></i> 4.8</span>
-                </div>
+        <div class="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-12 w-full mt-[-40px]">
+            <p class="text-white text-[10px] font-bold uppercase tracking-[0.2em] mb-4">SPRING COLLECTION 2026</p>
+            <h1 class="text-white text-6xl md:text-[110px] font-black leading-[0.85] tracking-tighter uppercase mb-10">
+                DEFINE<br>YOUR<br>MOTION.
+            </h1>
+            <div class="flex flex-wrap items-center gap-4">
+                <a href="{{ route('pelanggan.shop') }}" class="bg-white text-black px-8 py-3.5 text-[11px] font-black uppercase tracking-widest flex items-center gap-3 hover:bg-gray-200 transition">
+                    SHOP NOW <i class="ph ph-arrow-right text-sm"></i>
+                </a>
+                <a href="{{ route('pelanggan.shop') }}" class="border border-white/30 text-white px-8 py-3.5 text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-white/10 transition">
+                    WOMEN <i class="ph ph-arrow-up-right text-sm"></i>
+                </a>
+                <a href="{{ route('pelanggan.shop') }}" class="border border-white/30 text-white px-8 py-3.5 text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-white/10 transition">
+                    MEN <i class="ph ph-arrow-up-right text-sm"></i>
+                </a>
             </div>
-            <div class="product-card">
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1974" alt="Active Flow Shorts">
-                </div>
-                <h3 class="product-title">Active Flow Shorts</h3>
-                <p class="product-cat">Sport</p>
-                <div class="product-bottom">
-                    <span class="product-price">$54.99</span>
-                    <span class="product-rating"><i class="ph-fill ph-star"></i> 4.9</span>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1594938298596-eb5fd3f510fd?q=80&w=1964" alt="Lounge Sweatshorts">
-                </div>
-                <h3 class="product-title">Lounge Sweatshorts</h3>
-                <p class="product-cat">Casual</p>
-                <div class="product-bottom">
-                    <span class="product-price">$49.99</span>
-                    <span class="product-rating"><i class="ph-fill ph-star"></i> 4.7</span>
-                </div>
-            </div>
-            <div class="product-card">
-                <div class="product-img">
-                    <img src="https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1974" alt="Tailored Chino Shorts">
-                </div>
-                <h3 class="product-title">Tailored Chino Shorts</h3>
-                <p class="product-cat">Formal</p>
-                <div class="product-bottom">
-                    <span class="product-price">$79.99</span>
-                    <span class="product-rating"><i class="ph-fill ph-star"></i> 4.6</span>
-                </div>
+        </div>
+
+        <div class="absolute bottom-0 w-full bg-black/80 text-white/70 py-3 overflow-hidden backdrop-blur-sm border-t border-white/10">
+            <div class="animate-marquee text-[10px] font-bold uppercase tracking-[0.2em]">
+                @for ($i = 0; $i < 4; $i++)
+                    <span class="mx-8">FREE SHIPPING OVER $100</span> <span class="text-white/30">—</span>
+                    <span class="mx-8">PREMIUM QUALITY</span> <span class="text-white/30">—</span>
+                    <span class="mx-8">MOVE WITH STYLE</span> <span class="text-white/30">—</span>
+                    <span class="mx-8">ENGINEERED COMFORT</span> <span class="text-white/30">—</span>
+                    <span class="mx-8">NEW COLLECTION</span> <span class="text-white/30">—</span>
+                    <span class="mx-8">SPRING 2026</span> <span class="text-white/30">—</span>
+                @endfor
             </div>
         </div>
     </section>
 
-    <section class="stats-grid">
-        <div class="stat-item">
-            <h3>50K+</h3>
-            <p>Happy Customers</p>
+    <section class="grid grid-cols-1 md:grid-cols-2">
+        <div class="relative h-[600px] overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Women">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-12">
+                <p class="text-white/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">EFFORTLESS. POWERFUL. YOU.</p>
+                <h2 class="text-white text-[64px] font-black tracking-tighter leading-none mb-4">Women</h2>
+                <a href="{{ route('pelanggan.shop') }}" class="text-white text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    SHOP COLLECTION <i class="ph ph-arrow-right"></i>
+                </a>
+            </div>
         </div>
-        <div class="stat-item">
-            <h3>4.9</h3>
-            <p>Average Rating</p>
-        </div>
-        <div class="stat-item">
-            <h3>100%</h3>
-            <p>Premium Quality</p>
-        </div>
-        <div class="stat-item">
-            <h3>24/7</h3>
-            <p>Customer Support</p>
+        <div class="relative h-[600px] overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?q=80&w=2070" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Men">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-12">
+                <p class="text-white/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">PRECISION. MOVEMENT. STYLE.</p>
+                <h2 class="text-white text-[64px] font-black tracking-tighter leading-none mb-4">Men</h2>
+                <a href="{{ route('pelanggan.shop') }}" class="text-white text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+                    SHOP COLLECTION <i class="ph ph-arrow-right"></i>
+                </a>
+            </div>
         </div>
     </section>
 
-    <section class="section-container">
-        <div class="section-header">
-            <div class="section-title">
-                <h4>Promotions</h4>
-                <h2>Exclusive Vouchers</h2>
+    <section class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
+        <div class="flex justify-between items-end mb-12">
+            <div>
+                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-[0.2em] mb-2">NEW IN</p>
+                <h2 class="text-[40px] font-black tracking-tighter leading-none">Featured Pieces</h2>
             </div>
-            <a href="#" class="view-all-link" style="color: #888;">Log in to claim <i class="ph ph-caret-right"></i></a>
+            <a href="{{ route('pelanggan.shop') }}" class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors">
+                VIEW ALL <i class="ph ph-arrow-right"></i>
+            </a>
         </div>
 
-        <div class="vouchers-grid">
-            <div class="voucher-card">
-                <div class="voucher-top">
-                    <div class="voucher-title">
-                        <h3>20% OFF</h3>
-                        <p>For all casual items. Min spend $100. Valid until Dec 31.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="group cursor-pointer">
+                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
+                    <img src="https://images.unsplash.com/photo-1624378439575-d1ead6bb17f0?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Classic Cargo Pants">
+                </div>
+                <h3 class="font-bold text-[14px] text-black">Classic Cargo Pants</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CARGO</p>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-[15px]">Rp 119.000</span>
+                    <div class="flex items-center gap-1 text-[12px] font-bold">
+                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.8
                     </div>
-                    <div class="voucher-icon"><i class="ph ph-arrow-down-right"></i></div>
-                </div>
-                <div class="voucher-divider"></div>
-                <div class="voucher-bottom">
-                    <span class="voucher-code">CASUAL20</span>
-                    <button class="btn-copy">Copy Code</button>
                 </div>
             </div>
-            <div class="voucher-card">
-                <div class="voucher-top">
-                    <div class="voucher-title">
-                        <h3>FREE SHIP</h3>
-                        <p>Free shipping on all orders over $150. Nationwide.</p>
+
+            <div class="group cursor-pointer">
+                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
+                    <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Sport Active Joggers">
+                </div>
+                <h3 class="font-bold text-[14px] text-black">Sport Active Joggers</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">SPORT</p>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-[15px]">Rp 79.000</span>
+                    <div class="flex items-center gap-1 text-[12px] font-bold">
+                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.9
                     </div>
-                    <div class="voucher-icon"><i class="ph ph-arrow-down-right"></i></div>
-                </div>
-                <div class="voucher-divider"></div>
-                <div class="voucher-bottom">
-                    <span class="voucher-code">FREESHIP150</span>
-                    <button class="btn-copy">Copy Code</button>
                 </div>
             </div>
-            <div class="voucher-card">
-                <div class="voucher-top">
-                    <div class="voucher-title">
-                        <h3>30% OFF</h3>
-                        <p>First time user only. No minimum spend required.</p>
+
+            <div class="group cursor-pointer">
+                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
+                    <img src="https://images.unsplash.com/photo-1594938298596-eb5fd3f510fd?q=80&w=1964" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Formal Office Trousers">
+                </div>
+                <h3 class="font-bold text-[14px] text-black">Formal Office Trousers</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">FORMAL</p>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-[15px]">Rp 129.000</span>
+                    <div class="flex items-center gap-1 text-[12px] font-bold">
+                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.7
                     </div>
-                    <div class="voucher-icon"><i class="ph ph-arrow-down-right"></i></div>
-                </div>
-                <div class="voucher-divider"></div>
-                <div class="voucher-bottom">
-                    <span class="voucher-code">WELCOME30</span>
-                    <button class="btn-copy">Copy Code</button>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <section class="spring-banner">
-        <div class="spring-content">
-            <h2>Spring<br>Collection<br>2026</h2>
-            <p>New styles, same premium quality. Discover what's new for the season ahead.</p>
-            <a href="#" class="btn-solid-white">Shop Collection <i class="ph ph-arrow-right"></i></a>
-        </div>
-    </section>
-
-    <section class="section-container">
-        <div class="section-header">
-            <div class="section-title">
-                <h4>Features</h4>
-                <h2>Why TANKEN</h2>
-            </div>
-        </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon"><i class="ph ph-medal"></i></div>
-                <h3>Premium Materials</h3>
-                <p>Carefully selected fabrics engineered for durability and comfort. Every piece is crafted from the finest materials available.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="ph ph-scissors"></i></div>
-                <h3>Engineered Comfort</h3>
-                <p>Advanced construction techniques for maximum mobility. Move freely without restrictions, all day long.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon"><i class="ph ph-shield-check"></i></div>
-                <h3>Modern Fit Technology</h3>
-                <p>Precision-tailored designs that adapt to your movement. Perfect fit that looks great and feels even better.</p>
+            <div class="group cursor-pointer">
+                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
+                    <img src="https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Casual Everyday Pants">
+                </div>
+                <h3 class="font-bold text-[14px] text-black">Casual Everyday Pants</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CASUAL</p>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-[15px]">Rp 89.000</span>
+                    <div class="flex items-center gap-1 text-[12px] font-bold">
+                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.6
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <section class="community-section">
-        <div class="comm-left">
-            <h2>Join the<br>TANKEN<br>Community</h2>
-            <p>Become part of a global movement of individuals who define their own motion. Get exclusive access to new drops, special discounts, and community events.</p>
+    <section class="border-y border-tanken-border py-16">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-tanken-border">
+            <div>
+                <h3 class="text-[40px] font-black tracking-tighter mb-1">50K+</h3>
+                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">HAPPY CUSTOMERS</p>
+            </div>
+            <div>
+                <h3 class="text-[40px] font-black tracking-tighter mb-1">4.9</h3>
+                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">AVERAGE RATING</p>
+            </div>
+            <div>
+                <h3 class="text-[40px] font-black tracking-tighter mb-1">100%</h3>
+                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">PREMIUM QUALITY</p>
+            </div>
+            <div>
+                <h3 class="text-[40px] font-black tracking-tighter mb-1">24/7</h3>
+                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">CUSTOMER SUPPORT</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24 bg-white">
+        <div class="flex justify-between items-end mb-12">
+            <div>
+                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-[0.2em] mb-2">LIMITED OFFERS</p>
+                <h2 class="text-[40px] font-black tracking-tighter leading-none">Exclusive Vouchers</h2>
+            </div>
+            <p class="text-[12px] text-tanken-text">Apply at checkout for instant savings</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <ul class="comm-list">
-                <li><i class="ph-fill ph-check-circle"></i> Premium Quality</li>
-                <li><i class="ph-fill ph-check-circle"></i> Early Access</li>
-                <li><i class="ph-fill ph-check-circle"></i> Special Events</li>
-                <li><i class="ph-fill ph-check-circle"></i> VIP Support</li>
-            </ul>
+            <div class="voucher-card p-8 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest mb-1">WELCOME OFFER</p>
+                        <h3 class="text-[40px] font-black tracking-tighter leading-none">20% OFF</h3>
+                    </div>
+                    <div class="w-10 h-10 bg-black rounded-full flex justify-center items-center text-white">
+                        <i class="ph ph-arrow-down-right text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-[13px] text-tanken-text mb-8 w-5/6">For new customers on their first order above $50.</p>
+                
+                <div class="border-t border-dashed border-tanken-border w-full absolute left-0 top-[55%]"></div>
+                
+                <div class="mt-auto pt-6">
+                    <p class="text-[9px] font-bold text-tanken-text uppercase tracking-widest mb-2">VOUCHER CODE</p>
+                    <div class="bg-[#F9F9F9] border border-tanken-border rounded flex justify-between items-center p-3 mb-3">
+                        <span class="font-bold text-[14px] tracking-[0.2em]">WELCOME20</span>
+                        <button class="text-[11px] font-bold uppercase flex items-center gap-1 hover:text-gray-500"><i class="ph ph-copy"></i> COPY</button>
+                    </div>
+                    <p class="text-[10px] text-tanken-text">Valid for first-time purchases only. Min. order $50.</p>
+                </div>
+            </div>
 
-            <a href="#" class="btn-solid-white">Join For Free <i class="ph ph-arrow-right"></i></a>
+            <div class="voucher-card p-8 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest mb-1">FREE DELIVERY</p>
+                        <h3 class="text-[40px] font-black tracking-tighter leading-none">FREE SHIP</h3>
+                    </div>
+                    <div class="w-10 h-10 bg-black rounded-full flex justify-center items-center text-white">
+                        <i class="ph ph-arrow-down-right text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-[13px] text-tanken-text mb-8 w-5/6">Free shipping on all orders over $100, nationwide.</p>
+                
+                <div class="border-t border-dashed border-tanken-border w-full absolute left-0 top-[55%]"></div>
+                
+                <div class="mt-auto pt-6">
+                    <p class="text-[9px] font-bold text-tanken-text uppercase tracking-widest mb-2">VOUCHER CODE</p>
+                    <div class="bg-[#F9F9F9] border border-tanken-border rounded flex justify-between items-center p-3 mb-3">
+                        <span class="font-bold text-[14px] tracking-[0.2em]">FREESHIP100</span>
+                        <button class="text-[11px] font-bold uppercase flex items-center gap-1 hover:text-gray-500"><i class="ph ph-copy"></i> COPY</button>
+                    </div>
+                    <p class="text-[10px] text-tanken-text">Valid on all delivery zones. No expiry date.</p>
+                </div>
+            </div>
+
+            <div class="voucher-card p-8 flex flex-col h-full">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest mb-1">SPRING SALE</p>
+                        <h3 class="text-[40px] font-black tracking-tighter leading-none">30% OFF</h3>
+                    </div>
+                    <div class="w-10 h-10 bg-black rounded-full flex justify-center items-center text-white">
+                        <i class="ph ph-arrow-down-right text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-[13px] text-tanken-text mb-8 w-5/6">Valid on selected Spring Collection 2026 items.</p>
+                
+                <div class="border-t border-dashed border-tanken-border w-full absolute left-0 top-[55%]"></div>
+                
+                <div class="mt-auto pt-6">
+                    <p class="text-[9px] font-bold text-tanken-text uppercase tracking-widest mb-2">VOUCHER CODE</p>
+                    <div class="bg-[#F9F9F9] border border-tanken-border rounded flex justify-between items-center p-3 mb-3">
+                        <span class="font-bold text-[14px] tracking-[0.2em]">SPRING30</span>
+                        <button class="text-[11px] font-bold uppercase flex items-center gap-1 hover:text-gray-500"><i class="ph ph-copy"></i> COPY</button>
+                    </div>
+                    <p class="text-[10px] text-tanken-text">Applies to selected items only. Limited time offer.</p>
+                </div>
+            </div>
+
         </div>
-        <div class="comm-right">
-            <div class="comm-stat">
-                <h3>100+</h3>
-                <p>Retail Partners</p>
+    </section>
+
+    <section class="relative h-[600px] flex items-center">
+        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070');">
+            <div class="absolute inset-0 bg-[#111111]/80"></div>
+        </div>
+        <div class="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-12 w-full">
+            <p class="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">LIMITED EDITION</p>
+            <h2 class="text-white text-[64px] font-black tracking-tighter leading-[1] mb-6">
+                Spring<br>Collection<br>2026
+            </h2>
+            <p class="text-white/70 text-[14px] max-w-sm mb-10 leading-relaxed">
+                New styles, same premium quality. Up to 30% off select pieces for a limited time.
+            </p>
+            <a href="{{ route('pelanggan.shop') }}" class="bg-white text-black px-8 py-3.5 text-[11px] font-black uppercase tracking-widest inline-flex items-center gap-3 hover:bg-gray-200 transition">
+                SHOP COLLECTION <i class="ph ph-arrow-right text-sm"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
+        <div class="mb-16">
+            <p class="text-[10px] font-bold text-tanken-text uppercase tracking-[0.2em] mb-2">OUR PROMISE</p>
+            <h2 class="text-[40px] font-black tracking-tighter leading-none">Why TANKEN</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div>
+                <div class="w-12 h-12 bg-tanken-black text-white flex items-center justify-center rounded mb-6">
+                    <i class="ph ph-sparkle text-[24px]"></i>
+                </div>
+                <h3 class="text-[16px] font-bold mb-3">Premium Materials</h3>
+                <p class="text-[13px] text-tanken-text leading-relaxed">Carefully selected fabrics engineered for durability and comfort, crafted from the finest materials available.</p>
             </div>
-            <div class="comm-stat">
-                <h3>50+</h3>
-                <p>Countries Served</p>
+            <div>
+                <div class="w-12 h-12 bg-tanken-black text-white flex items-center justify-center rounded mb-6">
+                    <i class="ph ph-lightning text-[24px]"></i>
+                </div>
+                <h3 class="text-[16px] font-bold mb-3">Engineered Comfort</h3>
+                <p class="text-[13px] text-tanken-text leading-relaxed">Advanced construction techniques for maximum mobility. Move freely without restrictions, all day long.</p>
             </div>
-            <div class="comm-stat">
-                <h3>$5M+</h3>
-                <p>Community Value</p>
-            </div>
-            <div class="comm-stat">
-                <h3>98%</h3>
-                <p>Satisfaction Rate</p>
+            <div>
+                <div class="w-12 h-12 bg-tanken-black text-white flex items-center justify-center rounded mb-6">
+                    <i class="ph ph-shield-check text-[24px]"></i>
+                </div>
+                <h3 class="text-[16px] font-bold mb-3">Modern Fit Technology</h3>
+                <p class="text-[13px] text-tanken-text leading-relaxed">Precision-tailored designs that adapt to your movement. Perfect fit that looks great and feels even better.</p>
             </div>
         </div>
     </section>
 
-    <footer>
-        <div class="footer-top">
-            <div class="footer-brand">
-                <h2><i class="ph-fill ph-triangle"></i> TANKEN</h2>
-                <p>Move with style. Premium athletic and casual wear designed for the modern lifestyle. Quality you can feel, style you can see.</p>
-                <div class="footer-contact">
-                    <div><i class="ph ph-map-pin"></i> 123 Fashion Street, New York, NY 10001</div>
-                    <div><i class="ph ph-phone"></i> 1-800-TANKEN (826536)</div>
-                    <div><i class="ph ph-envelope-simple"></i> support@tanken.com</div>
+    <section class="bg-[#1A1A1A] py-24 border-t border-[#2A2A2A]">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            <div class="text-white">
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-4">GROW WITH US</p>
+                <h2 class="text-[48px] font-black tracking-tighter leading-[1.1] mb-6">Join the<br>TANKEN<br>Community</h2>
+                <p class="text-[14px] text-white/70 leading-relaxed mb-10 max-w-md">
+                    We're always looking for passionate partners to grow together. Whether you're a retailer, influencer, distributor, or creative collaborator — let's build something amazing.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-10">
+                    <div>
+                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Premium Quality</h4>
+                        <p class="text-[11px] text-white/50 pl-3">Industry-leading products</p>
+                    </div>
+                    <div>
+                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Fast Growth</h4>
+                        <p class="text-[11px] text-white/50 pl-3">Rapid market expansion</p>
+                    </div>
+                    <div>
+                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Competitive Terms</h4>
+                        <p class="text-[11px] text-white/50 pl-3">Attractive margins</p>
+                    </div>
+                    <div>
+                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Full Support</h4>
+                        <p class="text-[11px] text-white/50 pl-3">Dedicated team assistance</p>
+                    </div>
+                </div>
+
+                <a href="{{ route('pelanggan.mitra.pengajuan') }}" class="bg-white text-black px-8 py-3.5 text-[11px] font-black uppercase tracking-widest inline-flex items-center gap-3 hover:bg-gray-200 transition">
+                    APPLY FOR PARTNERSHIP <i class="ph ph-arrow-right text-sm"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="border border-white/10 p-10 flex flex-col justify-center">
+                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">100+</h3>
+                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">ACTIVE PARTNERS</p>
+                </div>
+                <div class="border border-white/10 p-10 flex flex-col justify-center">
+                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">50+</h3>
+                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">COUNTRIES WORLDWIDE</p>
+                </div>
+                <div class="border border-white/10 p-10 flex flex-col justify-center">
+                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">$5M+</h3>
+                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">REVENUE GENERATED</p>
+                </div>
+                <div class="border border-white/10 p-10 flex flex-col justify-center">
+                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">98%</h3>
+                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">PARTNER SATISFACTION</p>
                 </div>
             </div>
-            <div class="footer-links">
-                <h4>Shop</h4>
-                <ul>
-                    <li><a href="#">All Products</a></li>
-                    <li><a href="#">Women</a></li>
-                    <li><a href="#">Men</a></li>
-                    <li><a href="#">Unisex</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Help</h4>
-                <ul>
-                    <li><a href="#">My Orders</a></li>
-                    <li><a href="#">Shipping Info</a></li>
-                    <li><a href="#">Returns</a></li>
-                    <li><a href="#">Size Guide</a></li>
-                    <li><a href="#">FAQ</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Company</h4>
-                <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Sustainability</a></li>
-                </ul>
-            </div>
+
         </div>
-        
-        <div class="footer-bottom">
-            <div>© 2026 TANKEN. All rights reserved.</div>
-            <div class="footer-legal">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Service</a>
-                <a href="#">Cookie Policy</a>
+    </section>
+
+    <footer class="bg-tanken-black text-white pt-24 pb-8">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
+                
+                <div class="md:col-span-1">
+                    <a href="{{ route('pelanggan.beranda') }}" class="flex items-center gap-2 mb-6">
+                        <i class="ph-fill ph-triangle text-[28px]"></i>
+                        <span class="text-[24px] font-black tracking-tighter">TANKEN</span>
+                    </a>
+                    <p class="text-[13px] text-white/60 leading-relaxed mb-8 max-w-[280px]">
+                        Move with style. Premium athletic and casual pants designed for the modern lifestyle. Quality you can feel, style you can see.
+                    </p>
+                    <div class="flex flex-col gap-3 text-[13px] text-white/60">
+                        <div class="flex items-center gap-3"><i class="ph ph-map-pin text-lg"></i> 123 Fashion Street, New York, NY 10001</div>
+                        <div class="flex items-center gap-3"><i class="ph ph-phone text-lg"></i> 1-800-TANKEN (826536)</div>
+                        <div class="flex items-center gap-3"><i class="ph ph-envelope-simple text-lg"></i> support@tanken.com</div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-[14px] mb-6">Shop</h4>
+                    <ul class="flex flex-col gap-4 text-[13px] text-white/60">
+                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">All Products</a></li>
+                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">Women</a></li>
+                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">Men</a></li>
+                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">Unisex</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-[14px] mb-6">Help</h4>
+                    <ul class="flex flex-col gap-4 text-[13px] text-white/60">
+                        <li><a href="#" class="hover:text-white transition-colors">My Orders</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Shipping Info</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Size Guide</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-[14px] mb-6">Company</h4>
+                    <ul class="flex flex-col gap-4 text-[13px] text-white/60">
+                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Sustainability</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[12px] text-white/40">
+                <p>© 2026 TANKEN. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors">Cookie Policy</a>
+                </div>
             </div>
         </div>
     </footer>
