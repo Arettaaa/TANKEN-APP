@@ -176,14 +176,15 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
             <div class="group cursor-pointer">
                 <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1624378439575-d1ead6bb17f0?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Classic Cargo Pants">
+                    <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Outdoor Nylon Taslan Olive">
                 </div>
-                <h3 class="font-bold text-[14px] text-black">Classic Cargo Pants</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CARGO</p>
+                <h3 class="font-bold text-[14px] text-black">Outdoor Nylon Taslan Olive</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">OUTDOOR</p>
                 <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 119.000</span>
+                    <span class="font-bold text-[15px]">Rp 159.000</span>
                     <div class="flex items-center gap-1 text-[12px] font-bold">
                         <i class="ph-fill ph-star text-[#F5B000]"></i> 4.8
                     </div>
@@ -192,12 +193,12 @@
 
             <div class="group cursor-pointer">
                 <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Sport Active Joggers">
+                    <img src="https://images.unsplash.com/photo-1594938298596-eb5fd3f510fd?q=80&w=1964" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Nylon Crinkle Shortpants Sora">
                 </div>
-                <h3 class="font-bold text-[14px] text-black">Sport Active Joggers</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">SPORT</p>
+                <h3 class="font-bold text-[14px] text-black">Nylon Crinkle Shortpants Sora</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CASUAL</p>
                 <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 79.000</span>
+                    <span class="font-bold text-[15px]">Rp 89.000</span>
                     <div class="flex items-center gap-1 text-[12px] font-bold">
                         <i class="ph-fill ph-star text-[#F5B000]"></i> 4.9
                     </div>
@@ -206,12 +207,12 @@
 
             <div class="group cursor-pointer">
                 <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1594938298596-eb5fd3f510fd?q=80&w=1964" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Formal Office Trousers">
+                    <img src="https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Cargo Shortpants Meru Petrol">
                 </div>
-                <h3 class="font-bold text-[14px] text-black">Formal Office Trousers</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">FORMAL</p>
+                <h3 class="font-bold text-[14px] text-black">Cargo Shortpants Meru Petrol</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CARGO</p>
                 <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 129.000</span>
+                    <span class="font-bold text-[15px]">Rp 159.000</span>
                     <div class="flex items-center gap-1 text-[12px] font-bold">
                         <i class="ph-fill ph-star text-[#F5B000]"></i> 4.7
                     </div>
@@ -220,17 +221,18 @@
 
             <div class="group cursor-pointer">
                 <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Casual Everyday Pants">
+                    <img src="https://images.unsplash.com/photo-1624378439575-d1ead6bb17f0?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Cargo Shortpants Yama black">
                 </div>
-                <h3 class="font-bold text-[14px] text-black">Casual Everyday Pants</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CASUAL</p>
+                <h3 class="font-bold text-[14px] text-black">Cargo Shortpants Yama black</h3>
+                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CARGO</p>
                 <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 89.000</span>
+                    <span class="font-bold text-[15px]">Rp 159.000</span>
                     <div class="flex items-center gap-1 text-[12px] font-bold">
                         <i class="ph-fill ph-star text-[#F5B000]"></i> 4.6
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 

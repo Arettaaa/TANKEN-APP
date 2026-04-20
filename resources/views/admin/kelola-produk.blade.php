@@ -852,7 +852,7 @@
                         <tr>
                             <td class="td-product">
                                 <img src="https://images.unsplash.com/photo-1594938298596-eb5fd3f510fd?q=80&w=200" alt="Produk" class="product-img">
-                                <span class="product-name">Nylon Crinkle Shortpants sora</span>
+                                <span class="product-name">Nylon Crinkle Shortpants Sora</span>
                             </td>
                             <td class="td-sku">TNK-WN-001</td>
                             <td><span class="badge-cat wanita">Wanita</span></td>
@@ -912,7 +912,7 @@
                         <tr>
                             <td class="td-product">
                                 <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?q=80&w=200" alt="Produk" class="product-img">
-                                <span class="product-name">Cargo Shortpants Gama Petrol</span>
+                                <span class="product-name">Cargo Shortpants Meru Petrol</span>
                             </td>
                             <td class="td-sku">TNK-PR-005</td>
                             <td><span class="badge-cat">Pria</span></td>
@@ -927,7 +927,7 @@
                         <tr>
                             <td class="td-product">
                                 <img src="https://unsplash.com/id/foto/seorang-pria-berdiri-di-samping-kolam-renang-ABHLcp7juXU" alt="Produk" class="product-img">
-                                <span class="product-name">Cargo Shortpants Gama black</span>
+                                <span class="product-name">Cargo Shortpants Yama black</span>
                             </td>
                             <td class="td-sku">TNK-PR-006</td>
                             <td><span class="badge-cat">Pria</span></td>
