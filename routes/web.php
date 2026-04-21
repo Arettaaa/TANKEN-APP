@@ -16,8 +16,12 @@ Route::get('/beranda', function () {
 
 // Shop / Catalog
 Route::get('/katalog', function () {
-    return view('pelanggan.homepage'); // ganti dengan view katalog nanti
+    return view('pelanggan.katalog');
 })->name('katalog');
+
+Route::get('/produk/{slug}', function ($slug) {
+    return view('pelanggan.produk-detail');
+})->name('produk.detail');
 
 // Women collection
 Route::get('/women', function () {
@@ -34,10 +38,6 @@ Route::get('/help', function () {
     return view('pelanggan.homepage'); // ganti dengan view help nanti
 })->name('help');
 
-// Product detail (placeholder)
-Route::get('/produk/{slug}', function ($slug) {
-    return view('pelanggan.homepage'); // ganti dengan view detail produk nanti
-})->name('produk.detail');
 
 // ==========================================
 // RUTE ADMIN (DASHBOARD & MANAJEMEN)

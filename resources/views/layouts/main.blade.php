@@ -251,10 +251,11 @@
                     </a>
 
                     {{-- Cart --}}
-                    <a href="#" class="nav-icon" aria-label="Keranjang">
+                    <a href="#" class="nav-icon relative" aria-label="Keranjang" id="cart-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18">
                             <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
                         </svg>
+                        <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
                     </a>
 
                     {{-- Masuk / Daftar (desktop) --}}
@@ -372,8 +373,58 @@
                 </div>
             </div>
 
+            {{-- Social Media & Newsletter --}}
+            <div class="mt-12 pt-8 border-t border-gray-700 flex flex-col md:flex-row items-center justify-between gap-6">
+
+                {{-- Follow us on social media --}}
+                <div>
+                    <p class="text-xs text-gray-400 mb-3 uppercase tracking-widest font-semibold">Follow us on social media</p>
+                    <div class="flex items-center gap-3">
+                        {{-- Instagram --}}
+                        <a href="#" aria-label="Instagram"
+                           class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                                <circle cx="12" cy="12" r="4"/>
+                                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/>
+                            </svg>
+                        </a>
+                        {{-- Facebook --}}
+                        <a href="#" aria-label="Facebook"
+                           class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                            </svg>
+                        </a>
+                        {{-- Twitter / X --}}
+                        <a href="#" aria-label="Twitter"
+                           class="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.43 1a9 9 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.11 0c-2.5 0-4.52 2.02-4.52 4.52 0 .35.04.7.11 1.03C7.69 5.37 4.07 3.58 1.64.9a4.52 4.52 0 0 0-.61 2.27c0 1.57.8 2.95 2.01 3.76a4.5 4.5 0 0 1-2.05-.57v.06c0 2.19 1.56 4.02 3.63 4.43a4.54 4.54 0 0 1-2.04.08 4.53 4.53 0 0 0 4.22 3.14A9.07 9.07 0 0 1 0 19.54a12.8 12.8 0 0 0 6.92 2.03c8.3 0 12.85-6.88 12.85-12.85 0-.2 0-.39-.01-.58A9.17 9.17 0 0 0 23 3z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Subscribe to newsletter --}}
+                <div>
+                    <p class="text-xs text-gray-400 mb-3 uppercase tracking-widest font-semibold">Subscribe to our newsletter</p>
+                    <div class="flex items-center gap-2">
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            class="bg-transparent border border-gray-600 rounded-full px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gray-400 w-52 transition-colors"
+                        >
+                        <button
+                            class="bg-white text-black text-sm font-semibold px-5 py-2 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap">
+                            Subscribe
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             {{-- Bottom bar --}}
-            <div class="mt-12 pt-6 border-t border-gray-700 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+            <div class="mt-6 pt-6 border-t border-gray-700 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-500">
                 <span>© 2026 TANKEN. All rights reserved.</span>
                 <div class="flex items-center gap-6">
                     <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
@@ -433,6 +484,24 @@
                 searchInput.value = '';
             }
         });
+    </script>
+
+    {{-- Cart badge global script --}}
+    <script>
+        function updateCartBadge() {
+            const cart = JSON.parse(sessionStorage.getItem('tanken_cart') || '[]');
+            const total = cart.reduce((sum, item) => sum + item.qty, 0);
+            const badge = document.getElementById('cart-badge');
+            if (!badge) return;
+            if (total > 0) {
+                badge.textContent = total > 99 ? '99+' : total;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateCartBadge);
+        window.addEventListener('cartUpdated', updateCartBadge);
     </script>
 
     @stack('scripts')
