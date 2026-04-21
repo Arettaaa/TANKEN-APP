@@ -198,6 +198,18 @@
         #mobile-menu {
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
+
+        /* Mobile touch targets - bigger hit areas */
+        @media (max-width: 768px) {
+            .nav-icon { min-width: 36px; min-height: 36px; }
+            .size-btn  { min-width: 44px; min-height: 44px; }
+            .color-btn { padding: 10px 16px; }
+        }
+
+        /* Footer newsletter input mobile */
+        @media (max-width: 640px) {
+            footer .flex.items-center.gap-2 input[type=email] { width: 100%; }
+        }
     </style>
 
     @stack('styles')
@@ -205,7 +217,7 @@
 <body class="font-body">
 
     {{-- ====== NAVBAR ====== --}}
-    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-6 lg:px-10">
             <div class="flex items-center justify-between h-14">
 

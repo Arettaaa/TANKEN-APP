@@ -123,7 +123,7 @@
                      data-gender="men"
                      data-style="panjang"
                      data-price="1399000">
-                    <a href="{{ route('produk.detail', 'classic-cargo-pants') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'classic-cargo-pants') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
                             <img src="{{ asset('images/men-home.jpg') }}"
                                  alt="Classic Cargo Pants"
@@ -147,7 +147,7 @@
                      data-gender="unisex"
                      data-style="pendek"
                      data-price="1249000">
-                    <a href="{{ route('produk.detail', 'yama-crinkle-nylon-boardshorts') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'yama-crinkle-nylon-boardshorts') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3 relative">
                             <img src="{{ asset('images/men-home2.jpg') }}"
                                  alt="Yama Crinkle Nylon Boardshorts"
@@ -176,7 +176,7 @@
                      data-gender="men"
                      data-style="panjang"
                      data-price="1599000">
-                    <a href="{{ route('produk.detail', 'formal-office-trousers') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'formal-office-trousers') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
                             <img src="{{ asset('images/men-home3.jpg') }}"
                                  alt="Formal Office Trousers"
@@ -200,7 +200,7 @@
                      data-gender="women"
                      data-style="pendek"
                      data-price="1099000">
-                    <a href="{{ route('produk.detail', 'casual-everyday-pants') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'casual-everyday-pants') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
                             <img src="{{ asset('images/women-home.jpg') }}"
                                  alt="Casual Everyday Pants"
@@ -227,7 +227,7 @@
                      data-gender="women"
                      data-style="pendek"
                      data-price="1499000">
-                    <a href="{{ route('produk.detail', 'athletic-performance-pants') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'athletic-performance-pants') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
                             <img src="{{ asset('images/women-home2.jpg') }}"
                                  alt="Athletic Performance Pants"
@@ -251,7 +251,7 @@
                      data-gender="unisex"
                      data-style="panjang"
                      data-price="1199000">
-                    <a href="{{ route('produk.detail', 'relaxed-fit-joggers') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'relaxed-fit-joggers') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
                             <img src="{{ asset('images/women-home3.jpg') }}"
                                  alt="Relaxed Fit Joggers"
@@ -275,7 +275,7 @@
                      data-gender="men"
                      data-style="panjang"
                      data-price="1349000">
-                    <a href="{{ route('produk.detail', 'urban-slim-chinos') }}">
+                    <a href="{{ route('pelanggan.produk.detail', 'urban-slim-chinos') }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
                             <img src="{{ asset('images/men-home2.jpg') }}"
                                  alt="Urban Slim Chinos"

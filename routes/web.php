@@ -2,26 +2,39 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Import Controller Admin
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\StockController;
+use App\Http\Controllers\Admin\PromoController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ProfileController;
+
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes — PELANGGAN
 |--------------------------------------------------------------------------
 */
+Route::redirect('/', '/beranda');
 
-// ---- Homepage ----
-Route::get('/beranda', function () {
-    return view('pelanggan.homepage');
-})->name('home');
+Route::name('pelanggan.')->group(function () {
+    // Nama rute jadi: pelanggan.home
+    Route::get('/beranda', function () {
+        return view('pelanggan.homepage');
+    })->name('home');
 
-// Shop / Catalog
-Route::get('/katalog', function () {
-    return view('pelanggan.katalog');
-})->name('katalog');
+    // Nama rute jadi: pelanggan.katalog
+    Route::get('/katalog', function () {
+        return view('pelanggan.katalog');
+    })->name('katalog');
 
-Route::get('/produk/{slug}', function ($slug) {
-    return view('pelanggan.produk-detail');
-})->name('produk.detail');
+    Route::get('/produk/{slug}', function ($slug) {
+        return view('pelanggan.produk-detail');
+    })->name('produk.detail');
+});
 
 // Women collection
 Route::get('/women', function () {
@@ -39,21 +52,42 @@ Route::get('/help', function () {
 })->name('help');
 
 
-// ==========================================
-// RUTE ADMIN (DASHBOARD & MANAJEMEN)
-// ==========================================
 
-// Mengelompokkan semua rute yang berawalan "/admin"
+// ==========================================
+// RUTE ADMIN
+// ==========================================
 Route::prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/dasbor', function () {return view('admin.dasbor');})->name('dasbor');
-    Route::get('/produk', function () {return view('admin.kelola-produk'); })->name('produk');
-    Route::get('/ulasan', function () {return view('admin.ulasan');})->name('ulasan');
-    Route::get('/stok', function () {return view('admin.stok');})->name('stok');
-    Route::get('/pesanan', function () {return view('admin.pesanan'); })->name('pesanan');
-    Route::get('/pembayaran', function () {return view('admin.pembayaran'); })->name('pembayaran');
-    Route::get('/laporan', function () {return view('admin.laporan');})->name('laporan');
-    Route::get('/pengguna', function () {return view('admin.pengguna'); })->name('pengguna');
-    Route::get('/voucher', function () {return view('admin.voucher');})->name('voucher');
-    Route::get('/kemitraan', function () {return view('admin.kemitraan'); })->name('kemitraan');
+    // Products
+    Route::resource('products', ProductController::class);
+    Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
+         ->name('products.updateStock');
+
+    // Orders
+    Route::resource('orders', OrderController::class)->only(['index', 'show']);
+    Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
+         ->name('orders.updateStatus');
+
+    // Stock
+    Route::get('stock', [StockController::class, 'index'])->name('stock.index');
+    Route::patch('stock/{stock}', [StockController::class, 'update'])->name('stock.update');
+
+    // Users
+    Route::resource('users', UserController::class)->only(['index', 'show']);
+
+    // Promo & Voucher
+    Route::get('promo', [PromoController::class, 'index'])->name('promo.index');
+    Route::post('promo', [PromoController::class, 'store'])->name('promo.store');
+    Route::delete('promo/{voucher}', [PromoController::class, 'destroy'])->name('promo.destroy');
+
+    // Reports
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+
+    // Profile
+    Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('profile/password', [ProfileController::class, 'updatePassword'])
+         ->name('profile.password');
 });
