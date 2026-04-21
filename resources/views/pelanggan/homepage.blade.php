@@ -1,515 +1,676 @@
-<!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TANKEN | Define Your Motion</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        tanken: {
-                            black: '#111111',
-                            dark: '#1C1C1C',
-                            gray: '#F9F9F9',
-                            border: '#EAEAEA',
-                            text: '#666666'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+@extends('layouts.main')
 
-    <style>
-        /* Custom Voucher Styling */
-        .voucher-card {
-            position: relative;
-            background: white;
-            border: 1px solid #EAEAEA;
-        }
-        /* Left Cutout */
-        .voucher-card::before {
-            content: '';
-            position: absolute;
-            left: -13px;
-            top: 55%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background-color: white; /* Matches section bg */
-            border-right: 1px solid #EAEAEA;
-            border-radius: 50%;
-            z-index: 10;
-        }
-        /* Right Cutout */
-        .voucher-card::after {
-            content: '';
-            position: absolute;
-            right: -13px;
-            top: 55%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background-color: white; /* Matches section bg */
-            border-left: 1px solid #EAEAEA;
-            border-radius: 50%;
-            z-index: 10;
-        }
-        
-        /* Marquee Animation */
-        @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-            display: inline-flex;
-            white-space: nowrap;
-            animation: marquee 40s linear infinite;
-        }
-    </style>
-</head>
-<body class="bg-white text-tanken-black antialiased">
+@section('title', 'TANKEN — Define Your Motion')
 
-    <nav class="sticky top-0 z-50 bg-white border-b border-tanken-border">
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 h-[72px] flex items-center justify-between">
-            <a href="{{ route('pelanggan.beranda') }}" class="flex items-center gap-2">
-                <i class="ph-fill ph-triangle text-3xl"></i>
-                <span class="text-[22px] font-black tracking-tighter">TANKEN</span>
-            </a>
+@push('styles')
+<style>
+    /* Hero */
+    .hero-section {
+        position: relative;
+        min-height: 92vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+    }
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        background-image: url('{{ asset("images/Nature-1.jpg") }}');
+        background-size: cover;
+        background-position: center 20%;
+        filter: brightness(0.45);
+    }
+    .hero-section:hover .hero-bg {
+        /* no zoom animation */
+    }
 
-            <div class="hidden md:flex items-center gap-10">
-                <a href="{{ route('pelanggan.shop') }}" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Shop</a>
-                <a href="{{ route('pelanggan.shop') }}" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Women</a>
-                <a href="{{ route('pelanggan.shop') }}" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Men</a>
-                <a href="#" class="text-[13px] font-bold text-black hover:text-gray-500 transition-colors">Help</a>
-            </div>
+    /* Hero heading */
+    .hero-heading {
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: clamp(4rem, 10vw, 9rem);
+        line-height: 0.9;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+        color: #ffffff;
+        text-shadow: 0 4px 32px rgba(0,0,0,0.3);
+    }
 
-            <div class="flex items-center gap-6">
-                <button class="hover:opacity-60 transition-opacity"><i class="ph ph-magnifying-glass text-[22px]"></i></button>
-                <a href="{{ route('pelanggan.wishlist') }}" class="hover:opacity-60 transition-opacity"><i class="ph ph-heart text-[22px]"></i></a>
-                <a href="{{ route('pelanggan.keranjang') }}" class="hover:opacity-60 transition-opacity"><i class="ph ph-shopping-cart text-[22px]"></i></a>
-                <a href="{{ route('pelanggan.profil') }}" class="hover:opacity-60 transition-opacity"><i class="ph ph-user text-[22px]"></i></a>
-            </div>
-        </div>
-    </nav>
+    /* Collection grid */
+    .collection-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
 
-    <section class="relative h-[85vh] flex flex-col justify-center">
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=2070');">
-            <div class="absolute inset-0 bg-black/50"></div> </div>
-        
-        <div class="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-12 w-full mt-[-40px]">
-            <p class="text-white text-[10px] font-bold uppercase tracking-[0.2em] mb-4">SPRING COLLECTION 2026</p>
-            <h1 class="text-white text-6xl md:text-[110px] font-black leading-[0.85] tracking-tighter uppercase mb-10">
-                DEFINE<br>YOUR<br>MOTION.
-            </h1>
-            <div class="flex flex-wrap items-center gap-4">
-                <a href="{{ route('pelanggan.shop') }}" class="bg-white text-black px-8 py-3.5 text-[11px] font-black uppercase tracking-widest flex items-center gap-3 hover:bg-gray-200 transition">
-                    SHOP NOW <i class="ph ph-arrow-right text-sm"></i>
-                </a>
-                <a href="{{ route('pelanggan.shop') }}" class="border border-white/30 text-white px-8 py-3.5 text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-white/10 transition">
-                    WOMEN <i class="ph ph-arrow-up-right text-sm"></i>
-                </a>
-                <a href="{{ route('pelanggan.shop') }}" class="border border-white/30 text-white px-8 py-3.5 text-[11px] font-bold uppercase tracking-widest flex items-center gap-3 hover:bg-white/10 transition">
-                    MEN <i class="ph ph-arrow-up-right text-sm"></i>
-                </a>
-            </div>
-        </div>
+    /* Featured card overlay */
+    .collection-card {
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .collection-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+    }
+    .collection-card:hover .collection-overlay {
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 50%, transparent 100%);
+    }
 
-        <div class="absolute bottom-0 w-full bg-black/80 text-white/70 py-3 overflow-hidden backdrop-blur-sm border-t border-white/10">
-            <div class="animate-marquee text-[10px] font-bold uppercase tracking-[0.2em]">
-                @for ($i = 0; $i < 4; $i++)
-                    <span class="mx-8">FREE SHIPPING OVER $100</span> <span class="text-white/30">—</span>
-                    <span class="mx-8">PREMIUM QUALITY</span> <span class="text-white/30">—</span>
-                    <span class="mx-8">MOVE WITH STYLE</span> <span class="text-white/30">—</span>
-                    <span class="mx-8">ENGINEERED COMFORT</span> <span class="text-white/30">—</span>
-                    <span class="mx-8">NEW COLLECTION</span> <span class="text-white/30">—</span>
-                    <span class="mx-8">SPRING 2026</span> <span class="text-white/30">—</span>
-                @endfor
-            </div>
-        </div>
-    </section>
+    /* Ticker */
+    .ticker-wrap {
+        overflow: hidden;
+        background: #111111;
+        padding: 10px 0;
+    }
+    .ticker-content {
+        display: inline-block;
+        animation: ticker 30s linear infinite;
+        white-space: nowrap;
+    }
+    .ticker-content span {
+        display: inline-block;
+        padding: 0 2rem;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 0.65rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #aaaaaa;
+    }
+    .ticker-content span.dot {
+        color: #555;
+        padding: 0 0.5rem;
+    }
+    @keyframes ticker {
+        0%   { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
 
-    <section class="grid grid-cols-1 md:grid-cols-2">
-        <div class="relative h-[600px] overflow-hidden group">
-            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1920" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Women">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-12">
-                <p class="text-white/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">EFFORTLESS. POWERFUL. YOU.</p>
-                <h2 class="text-white text-[64px] font-black tracking-tighter leading-none mb-4">Women</h2>
-                <a href="{{ route('pelanggan.shop') }}" class="text-white text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                    SHOP COLLECTION <i class="ph ph-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-        <div class="relative h-[600px] overflow-hidden group">
-            <img src="https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?q=80&w=2070" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" alt="Men">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-12">
-                <p class="text-white/80 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">PRECISION. MOVEMENT. STYLE.</p>
-                <h2 class="text-white text-[64px] font-black tracking-tighter leading-none mb-4">Men</h2>
-                <a href="{{ route('pelanggan.shop') }}" class="text-white text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
-                    SHOP COLLECTION <i class="ph ph-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-    </section>
+    /* Product card */
+    .product-card {
+        cursor: pointer;
+    }
+    .product-img-wrap {
+        overflow: hidden;
+        background: #f0efed;
+        aspect-ratio: 3/4;
+    }
+    .product-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.45s ease;
+    }
+    .product-card:hover .product-img-wrap img {
+        transform: scale(1.05);
+    }
 
-    <section class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
-        <div class="flex justify-between items-end mb-12">
-            <div>
-                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-[0.2em] mb-2">NEW IN</p>
-                <h2 class="text-[40px] font-black tracking-tighter leading-none">Featured Pieces</h2>
-            </div>
-            <a href="{{ route('pelanggan.shop') }}" class="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 border-b border-black pb-1 hover:text-gray-500 hover:border-gray-500 transition-colors">
-                VIEW ALL <i class="ph ph-arrow-right"></i>
-            </a>
-        </div>
+    /* Stars */
+    .star-filled { color: #f5a623; }
+    .star-empty  { color: #ddd; }
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <div class="group cursor-pointer">
-                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Outdoor Nylon Taslan Olive">
-                </div>
-                <h3 class="font-bold text-[14px] text-black">Outdoor Nylon Taslan Olive</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">OUTDOOR</p>
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 159.000</span>
-                    <div class="flex items-center gap-1 text-[12px] font-bold">
-                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.8
-                    </div>
-                </div>
-            </div>
+    /* Stat card */
+    .stat-number {
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: clamp(2rem, 4vw, 2.8rem);
+        letter-spacing: -0.02em;
+        color: #111;
+    }
 
-            <div class="group cursor-pointer">
-                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1594938298596-eb5fd3f510fd?q=80&w=1964" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Nylon Crinkle Shortpants Sora">
-                </div>
-                <h3 class="font-bold text-[14px] text-black">Nylon Crinkle Shortpants Sora</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CASUAL</p>
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 89.000</span>
-                    <div class="flex items-center gap-1 text-[12px] font-bold">
-                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.9
-                    </div>
-                </div>
-            </div>
+    /* Voucher card */
+    .voucher-card {
+        border: 1.5px dashed #d0d0d0;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+    }
+    .voucher-card::before {
+        content: '';
+        position: absolute;
+        left: -1px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #f5f5f5;
+        border: 1.5px dashed #d0d0d0;
+    }
+    .voucher-card::after {
+        content: '';
+        position: absolute;
+        right: -1px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #f5f5f5;
+        border: 1.5px dashed #d0d0d0;
+    }
+    .voucher-discount {
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: 1.8rem;
+        letter-spacing: -0.02em;
+        line-height: 1;
+    }
+    .code-box {
+        background: #f0f0f0;
+        border: 1px dashed #bbb;
+        border-radius: 4px;
+        padding: 6px 10px;
+        font-family: 'Inter', monospace;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.1em;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .copy-btn {
+        cursor: pointer;
+        background: #111;
+        color: #fff;
+        border: none;
+        border-radius: 3px;
+        padding: 3px 8px;
+        font-size: 0.65rem;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        transition: background 0.2s;
+    }
+    .copy-btn:hover { background: #333; }
+    .copy-btn:active { transform: scale(0.95); }
 
-            <div class="group cursor-pointer">
-                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1506629082955-511b1aa562c8?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Cargo Shortpants Meru Petrol">
-                </div>
-                <h3 class="font-bold text-[14px] text-black">Cargo Shortpants Meru Petrol</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CARGO</p>
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 159.000</span>
-                    <div class="flex items-center gap-1 text-[12px] font-bold">
-                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.7
-                    </div>
-                </div>
-            </div>
+    /* Spring collection dark section */
+    .spring-section {
+        position: relative;
+        overflow: hidden;
+        background: #0a0a0a;
+        min-height: 480px;
+        display: flex;
+        align-items: center;
+    }
+    .spring-bg {
+        position: absolute;
+        inset: 0;
+        opacity: 0.25;
+        background-image: url('{{ asset("images/men-home3.jpg") }}');
+        background-size: cover;
+        background-position: center;
+    }
+    .spring-heading {
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: clamp(3rem, 7vw, 5.5rem);
+        line-height: 0.9;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+        color: #fff;
+        text-align: left;
+    }
 
-            <div class="group cursor-pointer">
-                <div class="bg-[#F6F6F6] aspect-[3/4] mb-4 overflow-hidden rounded-sm relative">
-                    <img src="https://images.unsplash.com/photo-1624378439575-d1ead6bb17f0?q=80&w=1974" class="w-full h-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-105" alt="Cargo Shortpants Yama black">
-                </div>
-                <h3 class="font-bold text-[14px] text-black">Cargo Shortpants Yama black</h3>
-                <p class="text-[11px] text-tanken-text uppercase tracking-wider mb-3">CARGO</p>
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-[15px]">Rp 159.000</span>
-                    <div class="flex items-center gap-1 text-[12px] font-bold">
-                        <i class="ph-fill ph-star text-[#F5B000]"></i> 4.6
-                    </div>
-                </div>
-            </div>
+    /* Why section icon */
+    .why-icon {
+        width: 44px;
+        height: 44px;
+        border: 1.5px solid #ddd;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
 
-        </div>
-    </section>
+    /* Scroll reveal */
+    .reveal {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+@endpush
 
-    <section class="border-y border-tanken-border py-16">
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-tanken-border">
-            <div>
-                <h3 class="text-[40px] font-black tracking-tighter mb-1">50K+</h3>
-                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">HAPPY CUSTOMERS</p>
-            </div>
-            <div>
-                <h3 class="text-[40px] font-black tracking-tighter mb-1">4.9</h3>
-                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">AVERAGE RATING</p>
-            </div>
-            <div>
-                <h3 class="text-[40px] font-black tracking-tighter mb-1">100%</h3>
-                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">PREMIUM QUALITY</p>
-            </div>
-            <div>
-                <h3 class="text-[40px] font-black tracking-tighter mb-1">24/7</h3>
-                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest">CUSTOMER SUPPORT</p>
-            </div>
-        </div>
-    </section>
+@section('content')
 
-    <section class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24 bg-white">
-        <div class="flex justify-between items-end mb-12">
-            <div>
-                <p class="text-[10px] font-bold text-tanken-text uppercase tracking-[0.2em] mb-2">LIMITED OFFERS</p>
-                <h2 class="text-[40px] font-black tracking-tighter leading-none">Exclusive Vouchers</h2>
-            </div>
-            <p class="text-[12px] text-tanken-text">Apply at checkout for instant savings</p>
-        </div>
+{{-- ===== 1. HERO ===== --}}
+<section class="hero-section">
+    <div class="hero-bg"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="voucher-card p-8 flex flex-col h-full">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest mb-1">WELCOME OFFER</p>
-                        <h3 class="text-[40px] font-black tracking-tighter leading-none">20% OFF</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-black rounded-full flex justify-center items-center text-white">
-                        <i class="ph ph-arrow-down-right text-lg"></i>
-                    </div>
-                </div>
-                <p class="text-[13px] text-tanken-text mb-8 w-5/6">For new customers on their first order above $50.</p>
-                
-                <div class="border-t border-dashed border-tanken-border w-full absolute left-0 top-[55%]"></div>
-                
-                <div class="mt-auto pt-6">
-                    <p class="text-[9px] font-bold text-tanken-text uppercase tracking-widest mb-2">VOUCHER CODE</p>
-                    <div class="bg-[#F9F9F9] border border-tanken-border rounded flex justify-between items-center p-3 mb-3">
-                        <span class="font-bold text-[14px] tracking-[0.2em]">WELCOME20</span>
-                        <button class="text-[11px] font-bold uppercase flex items-center gap-1 hover:text-gray-500"><i class="ph ph-copy"></i> COPY</button>
-                    </div>
-                    <p class="text-[10px] text-tanken-text">Valid for first-time purchases only. Min. order $50.</p>
-                </div>
-            </div>
+    {{-- Overlay gradient bottom --}}
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30 pointer-events-none"></div>
 
-            <div class="voucher-card p-8 flex flex-col h-full">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest mb-1">FREE DELIVERY</p>
-                        <h3 class="text-[40px] font-black tracking-tighter leading-none">FREE SHIP</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-black rounded-full flex justify-center items-center text-white">
-                        <i class="ph ph-arrow-down-right text-lg"></i>
-                    </div>
-                </div>
-                <p class="text-[13px] text-tanken-text mb-8 w-5/6">Free shipping on all orders over $100, nationwide.</p>
-                
-                <div class="border-t border-dashed border-tanken-border w-full absolute left-0 top-[55%]"></div>
-                
-                <div class="mt-auto pt-6">
-                    <p class="text-[9px] font-bold text-tanken-text uppercase tracking-widest mb-2">VOUCHER CODE</p>
-                    <div class="bg-[#F9F9F9] border border-tanken-border rounded flex justify-between items-center p-3 mb-3">
-                        <span class="font-bold text-[14px] tracking-[0.2em]">FREESHIP100</span>
-                        <button class="text-[11px] font-bold uppercase flex items-center gap-1 hover:text-gray-500"><i class="ph ph-copy"></i> COPY</button>
-                    </div>
-                    <p class="text-[10px] text-tanken-text">Valid on all delivery zones. No expiry date.</p>
-                </div>
-            </div>
-
-            <div class="voucher-card p-8 flex flex-col h-full">
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <p class="text-[10px] font-bold text-tanken-text uppercase tracking-widest mb-1">SPRING SALE</p>
-                        <h3 class="text-[40px] font-black tracking-tighter leading-none">30% OFF</h3>
-                    </div>
-                    <div class="w-10 h-10 bg-black rounded-full flex justify-center items-center text-white">
-                        <i class="ph ph-arrow-down-right text-lg"></i>
-                    </div>
-                </div>
-                <p class="text-[13px] text-tanken-text mb-8 w-5/6">Valid on selected Spring Collection 2026 items.</p>
-                
-                <div class="border-t border-dashed border-tanken-border w-full absolute left-0 top-[55%]"></div>
-                
-                <div class="mt-auto pt-6">
-                    <p class="text-[9px] font-bold text-tanken-text uppercase tracking-widest mb-2">VOUCHER CODE</p>
-                    <div class="bg-[#F9F9F9] border border-tanken-border rounded flex justify-between items-center p-3 mb-3">
-                        <span class="font-bold text-[14px] tracking-[0.2em]">SPRING30</span>
-                        <button class="text-[11px] font-bold uppercase flex items-center gap-1 hover:text-gray-500"><i class="ph ph-copy"></i> COPY</button>
-                    </div>
-                    <p class="text-[10px] text-tanken-text">Applies to selected items only. Limited time offer.</p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <section class="relative h-[600px] flex items-center">
-        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070');">
-            <div class="absolute inset-0 bg-[#111111]/80"></div>
-        </div>
-        <div class="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-12 w-full">
-            <p class="text-white/60 text-[10px] font-bold uppercase tracking-[0.2em] mb-4">LIMITED EDITION</p>
-            <h2 class="text-white text-[64px] font-black tracking-tighter leading-[1] mb-6">
-                Spring<br>Collection<br>2026
-            </h2>
-            <p class="text-white/70 text-[14px] max-w-sm mb-10 leading-relaxed">
-                New styles, same premium quality. Up to 30% off select pieces for a limited time.
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 w-full">
+        <div class="max-w-2xl">
+            <p class="text-xs font-heading font-semibold tracking-widest uppercase text-white/60 mb-5">
+                Spring Collection 2026
             </p>
-            <a href="{{ route('pelanggan.shop') }}" class="bg-white text-black px-8 py-3.5 text-[11px] font-black uppercase tracking-widest inline-flex items-center gap-3 hover:bg-gray-200 transition">
-                SHOP COLLECTION <i class="ph ph-arrow-right text-sm"></i>
-            </a>
-        </div>
-    </section>
-
-    <section class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
-        <div class="mb-16">
-            <p class="text-[10px] font-bold text-tanken-text uppercase tracking-[0.2em] mb-2">OUR PROMISE</p>
-            <h2 class="text-[40px] font-black tracking-tighter leading-none">Why TANKEN</h2>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div>
-                <div class="w-12 h-12 bg-tanken-black text-white flex items-center justify-center rounded mb-6">
-                    <i class="ph ph-sparkle text-[24px]"></i>
-                </div>
-                <h3 class="text-[16px] font-bold mb-3">Premium Materials</h3>
-                <p class="text-[13px] text-tanken-text leading-relaxed">Carefully selected fabrics engineered for durability and comfort, crafted from the finest materials available.</p>
-            </div>
-            <div>
-                <div class="w-12 h-12 bg-tanken-black text-white flex items-center justify-center rounded mb-6">
-                    <i class="ph ph-lightning text-[24px]"></i>
-                </div>
-                <h3 class="text-[16px] font-bold mb-3">Engineered Comfort</h3>
-                <p class="text-[13px] text-tanken-text leading-relaxed">Advanced construction techniques for maximum mobility. Move freely without restrictions, all day long.</p>
-            </div>
-            <div>
-                <div class="w-12 h-12 bg-tanken-black text-white flex items-center justify-center rounded mb-6">
-                    <i class="ph ph-shield-check text-[24px]"></i>
-                </div>
-                <h3 class="text-[16px] font-bold mb-3">Modern Fit Technology</h3>
-                <p class="text-[13px] text-tanken-text leading-relaxed">Precision-tailored designs that adapt to your movement. Perfect fit that looks great and feels even better.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="bg-[#1A1A1A] py-24 border-t border-[#2A2A2A]">
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
-            <div class="text-white">
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em] mb-4">GROW WITH US</p>
-                <h2 class="text-[48px] font-black tracking-tighter leading-[1.1] mb-6">Join the<br>TANKEN<br>Community</h2>
-                <p class="text-[14px] text-white/70 leading-relaxed mb-10 max-w-md">
-                    We're always looking for passionate partners to grow together. Whether you're a retailer, influencer, distributor, or creative collaborator — let's build something amazing.
-                </p>
-                
-                <div class="grid grid-cols-2 gap-y-6 gap-x-4 mb-10">
-                    <div>
-                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Premium Quality</h4>
-                        <p class="text-[11px] text-white/50 pl-3">Industry-leading products</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Fast Growth</h4>
-                        <p class="text-[11px] text-white/50 pl-3">Rapid market expansion</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Competitive Terms</h4>
-                        <p class="text-[11px] text-white/50 pl-3">Attractive margins</p>
-                    </div>
-                    <div>
-                        <h4 class="text-[13px] font-bold mb-1 flex items-center gap-2"><div class="w-1 h-1 bg-white rounded-full"></div> Full Support</h4>
-                        <p class="text-[11px] text-white/50 pl-3">Dedicated team assistance</p>
-                    </div>
-                </div>
-
-                <a href="{{ route('pelanggan.mitra.pengajuan') }}" class="bg-white text-black px-8 py-3.5 text-[11px] font-black uppercase tracking-widest inline-flex items-center gap-3 hover:bg-gray-200 transition">
-                    APPLY FOR PARTNERSHIP <i class="ph ph-arrow-right text-sm"></i>
+            <h1 class="hero-heading mb-8">
+                Define<br>Your<br>Motion.
+            </h1>
+            <div class="flex flex-wrap items-center gap-3">
+                {{-- Shop Now --}}
+                <a href="#"
+                   class="inline-flex items-center gap-2 bg-white text-black px-6 py-3 text-xs font-heading font-bold tracking-widest uppercase hover:bg-gray-100 transition-colors">
+                    Shop Now
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                {{-- Women --}}
+                <a href="#"
+                   class="inline-flex items-center gap-1.5 text-white text-xs font-bold tracking-widest uppercase hover:text-white/70 transition-colors">
+                    Women
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                        <path d="M7 17L17 7M17 7H7M17 7v10"/>
+                    </svg>
+                </a>
+                {{-- Men --}}
+                <a href="#"
+                   class="inline-flex items-center gap-1.5 text-white text-xs font-bold tracking-widest uppercase hover:text-white/70 transition-colors">
+                    Men
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                        <path d="M7 17L17 7M17 7H7M17 7v10"/>
+                    </svg>
                 </a>
             </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="border border-white/10 p-10 flex flex-col justify-center">
-                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">100+</h3>
-                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">ACTIVE PARTNERS</p>
-                </div>
-                <div class="border border-white/10 p-10 flex flex-col justify-center">
-                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">50+</h3>
-                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">COUNTRIES WORLDWIDE</p>
-                </div>
-                <div class="border border-white/10 p-10 flex flex-col justify-center">
-                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">$5M+</h3>
-                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">REVENUE GENERATED</p>
-                </div>
-                <div class="border border-white/10 p-10 flex flex-col justify-center">
-                    <h3 class="text-[40px] font-black text-white tracking-tighter mb-2">98%</h3>
-                    <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.2em]">PARTNER SATISFACTION</p>
-                </div>
-            </div>
-
         </div>
-    </section>
+    </div>
+</section>
 
-    <footer class="bg-tanken-black text-white pt-24 pb-8">
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">
-                
-                <div class="md:col-span-1">
-                    <a href="{{ route('pelanggan.beranda') }}" class="flex items-center gap-2 mb-6">
-                        <i class="ph-fill ph-triangle text-[28px]"></i>
-                        <span class="text-[24px] font-black tracking-tighter">TANKEN</span>
-                    </a>
-                    <p class="text-[13px] text-white/60 leading-relaxed mb-8 max-w-[280px]">
-                        Move with style. Premium athletic and casual pants designed for the modern lifestyle. Quality you can feel, style you can see.
-                    </p>
-                    <div class="flex flex-col gap-3 text-[13px] text-white/60">
-                        <div class="flex items-center gap-3"><i class="ph ph-map-pin text-lg"></i> 123 Fashion Street, New York, NY 10001</div>
-                        <div class="flex items-center gap-3"><i class="ph ph-phone text-lg"></i> 1-800-TANKEN (826536)</div>
-                        <div class="flex items-center gap-3"><i class="ph ph-envelope-simple text-lg"></i> support@tanken.com</div>
+{{-- ===== 2. TICKER ===== --}}
+<div class="ticker-wrap">
+    <div class="ticker-content">
+        @php
+            $tickers = ['Free Shipping Over Rp500K', 'Premium Quality', 'Move With Style', 'Engineered Comfort', 'New Collection', 'Spring 2026', 'Free Shipping Over Rp500K', 'Premium Quality', 'Move With Style', 'Engineered Comfort', 'New Collection', 'Spring 2026'];
+        @endphp
+        @foreach($tickers as $item)
+            <span>{{ $item }}</span><span class="dot">·</span>
+        @endforeach
+        @foreach($tickers as $item)
+            <span>{{ $item }}</span><span class="dot">·</span>
+        @endforeach
+    </div>
+</div>
+
+{{-- ===== 3. COLLECTION SPLIT ===== --}}
+<section class="collection-grid">
+    {{-- Women --}}
+    <div class="collection-card h-[520px] md:h-[620px]">
+        <img src="{{ asset('images/women-home.jpg') }}"
+             alt="Women Collection"
+             class="collection-img w-full h-full object-cover object-center">
+        <div class="collection-overlay"></div>
+        <div class="absolute bottom-0 left-0 p-8 md:p-10">
+            <h2 class="font-heading font-bold text-white uppercase tracking-wide"
+                style="font-size:clamp(2rem,4vw,3rem); line-height:1;">
+                Women
+            </h2>
+            <a href="#"
+               class="btn-arrow mt-3 text-white/80 hover:text-white">
+                Shop Collection
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    {{-- Men --}}
+    <div class="collection-card h-[520px] md:h-[620px]">
+        <img src="{{ asset('images/men-home.jpg') }}"
+             alt="Men Collection"
+             class="collection-img w-full h-full object-cover object-center">
+        <div class="collection-overlay"></div>
+        <div class="absolute bottom-0 left-0 p-8 md:p-10">
+            <h2 class="font-heading font-bold text-white uppercase tracking-wide"
+                style="font-size:clamp(2rem,4vw,3rem); line-height:1;">
+                Men
+            </h2>
+            <a href="#"
+               class="btn-arrow mt-3 text-white/80 hover:text-white">
+                Shop Collection
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+{{-- ===== 4. FEATURED PIECES ===== --}}
+<section class="bg-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+        {{-- Header --}}
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <p class="text-xs font-heading font-semibold tracking-widest uppercase text-gray-400 mb-1">New In</p>
+                <h2 class="font-heading font-bold text-3xl md:text-4xl tracking-tight text-gray-900">Featured Pieces</h2>
+            </div>
+            <a href="#" class="btn-arrow text-gray-500 hover:text-black hidden md:flex">
+                View All
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+
+        {{-- Products grid --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+
+            @php
+            $products = [
+                [
+                    'img'   => 'women-home2.jpg',
+                    'name'  => 'Classic Cargo Pants',
+                    'cat'   => 'Women',
+                    'price' => 'Rp 85.000',
+                    'rating'=> 4.8,
+                ],
+                [
+                    'img'   => 'men-home2.jpg',
+                    'name'  => 'Sport Active Joggers',
+                    'cat'   => 'Men',
+                    'price' => 'Rp 129.000',
+                    'rating'=> 4.9,
+                ],
+                [
+                    'img'   => 'women-home3.jpg',
+                    'name'  => 'Formal Office Trousers',
+                    'cat'   => 'Women',
+                    'price' => 'Rp 85.000',
+                    'rating'=> 4.7,
+                ],
+                [
+                    'img'   => 'men-home3.jpg',
+                    'name'  => 'Casual Everyday Pants',
+                    'cat'   => 'Men',
+                    'price' => 'Rp 129.000',
+                    'rating'=> 4.8,
+                ],
+            ];
+            @endphp
+
+            @foreach($products as $product)
+            <div class="product-card reveal">
+                <div class="product-img-wrap rounded-sm mb-3">
+                    <img src="{{ asset('images/' . $product['img']) }}"
+                         alt="{{ $product['name'] }}"
+                         loading="lazy">
+                </div>
+                <div class="px-0.5">
+                    <p class="text-[0.68rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-0.5">{{ $product['cat'] }}</p>
+                    <h3 class="text-sm font-body font-medium text-gray-900 leading-snug mb-1">{{ $product['name'] }}</h3>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-body font-semibold text-gray-900">{{ $product['price'] }}</span>
+                        <div class="flex items-center gap-0.5">
+                            <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="11" height="11">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            <span class="text-xs font-body font-medium text-gray-600 ml-0.5">{{ $product['rating'] }}</span>
+                        </div>
                     </div>
                 </div>
-
-                <div>
-                    <h4 class="font-bold text-[14px] mb-6">Shop</h4>
-                    <ul class="flex flex-col gap-4 text-[13px] text-white/60">
-                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">All Products</a></li>
-                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">Women</a></li>
-                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">Men</a></li>
-                        <li><a href="{{ route('pelanggan.shop') }}" class="hover:text-white transition-colors">Unisex</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-[14px] mb-6">Help</h4>
-                    <ul class="flex flex-col gap-4 text-[13px] text-white/60">
-                        <li><a href="#" class="hover:text-white transition-colors">My Orders</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Shipping Info</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Size Guide</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 class="font-bold text-[14px] mb-6">Company</h4>
-                    <ul class="flex flex-col gap-4 text-[13px] text-white/60">
-                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Sustainability</a></li>
-                    </ul>
-                </div>
-
             </div>
-
-            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[12px] text-white/40">
-                <p>© 2026 TANKEN. All rights reserved.</p>
-                <div class="flex gap-6">
-                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
-                    <a href="#" class="hover:text-white transition-colors">Cookie Policy</a>
-                </div>
-            </div>
+            @endforeach
         </div>
-    </footer>
 
-</body>
-</html>
+        {{-- Mobile view all --}}
+        <div class="flex justify-center mt-8 md:hidden">
+            <a href="#" class="btn-arrow text-gray-600 hover:text-black border border-gray-300 px-6 py-2.5 rounded-sm">
+                View All
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+{{-- ===== 5. STATS BAR ===== --}}
+<section class="bg-white border-y border-gray-100 py-10">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            @php
+            $stats = [
+                ['num'=>'50K+',  'label'=>'Happy Customers'],
+                ['num'=>'4.9',   'label'=>'Average Rating'],
+                ['num'=>'100%',  'label'=>'Premium Quality'],
+                ['num'=>'24/7',  'label'=>'Customer Support'],
+            ];
+            @endphp
+            @foreach($stats as $stat)
+            <div class="text-center py-4 md:py-0 reveal">
+                <div class="stat-number">{{ $stat['num'] }}</div>
+                <p class="text-xs font-heading font-semibold tracking-widest uppercase text-gray-400 mt-1">{{ $stat['label'] }}</p>
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+{{-- ===== 6. EXCLUSIVE VOUCHERS ===== --}}
+<section class="bg-gray-50 py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <p class="text-xs font-heading font-semibold tracking-widest uppercase text-gray-400 mb-1">Save More</p>
+                <h2 class="font-heading font-bold text-3xl md:text-4xl tracking-tight text-gray-900">Exclusive Vouchers</h2>
+            </div>
+            <p class="text-xs text-gray-400 font-body hidden md:block">Apply at checkout for instant savings</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            {{-- Voucher 1: 20% Off --}}
+            <div class="voucher-card bg-white p-7 reveal">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="voucher-discount">20% OFF</span>
+                        <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
+                            For new customers on their first order above Rp500K
+                        </p>
+                    </div>
+                    <div class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+                        </svg>
+                    </div>
+                </div>
+                <hr class="border-dashed border-gray-200 my-4">
+                <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
+                <div class="code-box">
+                    <span>WELCOME20</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'WELCOME20')">COPY</button>
+                </div>
+                <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Dec 31, 2026. T&C apply.</p>
+            </div>
+
+            {{-- Voucher 2: Free Ship --}}
+            <div class="voucher-card bg-white p-7 reveal">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="voucher-discount">FREE SHIP</span>
+                        <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
+                            Free shipping on all orders over Rp500K, no minimum
+                        </p>
+                    </div>
+                    <div class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
+                            <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                        </svg>
+                    </div>
+                </div>
+                <hr class="border-dashed border-gray-200 my-4">
+                <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
+                <div class="code-box">
+                    <span>FREESHIP100</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'FREESHIP100')">COPY</button>
+                </div>
+                <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Dec 31, 2026. T&C apply.</p>
+            </div>
+
+            {{-- Voucher 3: 30% Off --}}
+            <div class="voucher-card bg-white p-7 reveal">
+                <div class="flex items-start justify-between mb-3">
+                    <div>
+                        <span class="voucher-discount">30% OFF</span>
+                        <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
+                            Valid on selected Spring Collection 2026 items
+                        </p>
+                    </div>
+                    <div class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                    </div>
+                </div>
+                <hr class="border-dashed border-gray-200 my-4">
+                <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
+                <div class="code-box">
+                    <span>SPRING30</span>
+                    <button class="copy-btn" onclick="copyCode(this, 'SPRING30')">COPY</button>
+                </div>
+                <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Jun 30, 2026. T&C apply.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{{-- ===== 7. SPRING COLLECTION 2026 DARK BANNER ===== --}}
+<section class="spring-section">
+    <div class="spring-bg"></div>
+    <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 py-20 w-full">
+        <p class="text-xs font-semibold tracking-widest uppercase text-white/40 mb-4">Limited Edition</p>
+        <h2 class="spring-heading mb-4 text-left">
+            Spring<br>Collection<br>2026
+        </h2>
+        <p class="text-sm text-white/60 max-w-sm leading-relaxed mb-8">
+            New styles, same premium quality. Up to 30% off select pieces for a limited time.
+        </p>
+        <a href="#"
+           class="inline-flex items-center gap-2 border border-white text-white px-7 py-3 text-xs font-heading font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-colors">
+            Shop Collection
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="12" height="12">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+</section>
+
+{{-- ===== 8. WHY TANKEN ===== --}}
+<section class="bg-white py-16 md:py-20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+
+        <div class="mb-12 reveal">
+            <p class="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2">Our Promise</p>
+            <h2 class="font-extrabold text-3xl md:text-4xl text-gray-900">Why TANKEN</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+
+            {{-- Feature 1 --}}
+            <div class="reveal pb-8 md:pb-0 md:pr-10">
+                <div class="why-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="20" height="20" class="text-gray-700">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-sm text-gray-900 mb-2">Premium Materials</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Carefully selected fabrics engineered for durability and comfort, crafted from the finest materials available.
+                </p>
+            </div>
+
+            {{-- Feature 2 --}}
+            <div class="reveal pt-8 pb-8 md:pt-0 md:pb-0 md:px-10">
+                <div class="why-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="20" height="20" class="text-gray-700">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-sm text-gray-900 mb-2">Engineered Comfort</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Advanced construction techniques for maximum mobility. Move freely without restrictions, all day long.
+                </p>
+            </div>
+
+            {{-- Feature 3 --}}
+            <div class="reveal pt-8 md:pt-0 md:pl-10">
+                <div class="why-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="20" height="20" class="text-gray-700">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-sm text-gray-900 mb-2">Modern Fit Technology</h3>
+                <p class="text-sm text-gray-500 leading-relaxed">
+                    Precision-tailored designs that adapt to your movement. Perfect fit that looks great and feels even better.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+@endsection
+
+@push('scripts')
+<script>
+    // Copy voucher code
+    function copyCode(btn, code) {
+        navigator.clipboard.writeText(code).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'COPIED!';
+            btn.style.background = '#2d7a3a';
+            setTimeout(() => {
+                btn.textContent = orig;
+                btn.style.background = '';
+            }, 1800);
+        }).catch(() => {
+            // Fallback
+            const el = document.createElement('textarea');
+            el.value = code;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            const orig = btn.textContent;
+            btn.textContent = 'COPIED!';
+            btn.style.background = '#2d7a3a';
+            setTimeout(() => {
+                btn.textContent = orig;
+                btn.style.background = '';
+            }, 1800);
+        });
+    }
+
+    // Scroll reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('visible');
+                }, i * 80);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    revealEls.forEach(el => observer.observe(el));
+</script>
+@endpush

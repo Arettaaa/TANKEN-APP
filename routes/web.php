@@ -3,22 +3,41 @@
 use Illuminate\Support\Facades\Route;
 
 
-// ==========================================
-// RUTE PELANGGAN 
-// ==========================================
+/*
+|--------------------------------------------------------------------------
+| Web Routes — PELANGGAN
+|--------------------------------------------------------------------------
+*/
 
-// Otomatis arahkan (redirect) dari tanken.com/ ke tanken.com/beranda
-Route::redirect('/', '/beranda');
+// ---- Homepage ----
+Route::get('/beranda', function () {
+    return view('pelanggan.homepage');
+})->name('home');
 
-Route::get('/beranda', function () {return view('pelanggan.homepage');})->name('pelanggan.beranda');
-Route::get('/shop', function () { return view('pelanggan.shop'); })->name('pelanggan.shop');
-Route::get('/wishlist', function () { return view('pelanggan.wishlist'); })->name('pelanggan.wishlist');
-Route::get('/keranjang', function () { return view('pelanggan.keranjang'); })->name('pelanggan.keranjang');
-Route::get('/profil', function () { return view('pelanggan.profil'); })->name('pelanggan.profil');
-Route::get('/checkout', function () { return view('pelanggan.checkout'); })->name('pelanggan.checkout');
+// Shop / Catalog
+Route::get('/katalog', function () {
+    return view('pelanggan.homepage'); // ganti dengan view katalog nanti
+})->name('katalog');
 
-// Fitur Khusus Mitra Kolaborasi
-Route::get('/mitra/kolaborasi', function () { return view('pelanggan.mitra-form'); })->name('pelanggan.mitra.pengajuan');
+// Women collection
+Route::get('/women', function () {
+    return view('pelanggan.homepage'); // ganti dengan view women nanti
+})->name('women');
+
+// Men collection
+Route::get('/men', function () {
+    return view('pelanggan.homepage'); // ganti dengan view men nanti
+})->name('men');
+
+// Help
+Route::get('/help', function () {
+    return view('pelanggan.homepage'); // ganti dengan view help nanti
+})->name('help');
+
+// Product detail (placeholder)
+Route::get('/produk/{slug}', function ($slug) {
+    return view('pelanggan.homepage'); // ganti dengan view detail produk nanti
+})->name('produk.detail');
 
 // ==========================================
 // RUTE ADMIN (DASHBOARD & MANAJEMEN)
