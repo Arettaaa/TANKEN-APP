@@ -9,6 +9,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    {{-- FontAwesome untuk ikon gembok --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     {{-- Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
@@ -32,19 +36,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: #f4f4f5; }
 
-        /* Sidebar active link */
-        .sidebar-link.active {
-            background: #ffffff14;
-            color: #ffffff !important;
-            font-weight: 600;
-        }
+        .sidebar-link.active { background: #ffffff14; color: #ffffff !important; font-weight: 600; }
         .sidebar-link:hover { background: #ffffff0d; }
 
-        /* Scrollbar slim */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
 
-        /* Badge colors */
         .badge-green  { @apply inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700; }
         .badge-yellow { @apply inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700; }
         .badge-blue   { @apply inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-700; }
@@ -52,127 +49,147 @@
         .badge-purple { @apply inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-700; }
         .badge-gray   { @apply inline-flex px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-100 text-gray-600; }
 
-        /* Mobile sidebar overlay */
         #sidebar-overlay { display: none; }
         #sidebar-overlay.show { display: block; }
 
         @media (max-width: 768px) {
-            #admin-sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                position: fixed;
-                z-index: 40;
-                height: 100vh;
-            }
+            #admin-sidebar { transform: translateX(-100%); transition: transform 0.3s ease; position: fixed; z-index: 40; height: 100vh; }
             #admin-sidebar.open { transform: translateX(0); }
         }
     </style>
-
     @stack('styles')
 </head>
 <body class="flex h-screen overflow-hidden">
 
-{{-- ====== SIDEBAR ====== --}}
-<aside id="admin-sidebar"
-       class="w-52 flex-shrink-0 bg-admin-sidebar text-white flex flex-col h-screen overflow-y-auto">
+{{-- ====== LOGIKA ROLE ====== --}}
+@php
+    $role = auth()->check() ? auth()->user()->role : 'super_admin';
+    $isGudang = ($role === 'admin_gudang');
+@endphp
 
-    {{-- Brand --}}
+{{-- ====== SIDEBAR ====== --}}
+<aside id="admin-sidebar" class="w-52 flex-shrink-0 bg-admin-sidebar text-white flex flex-col h-screen overflow-y-auto">
+
     <div class="px-5 py-5 border-b border-white/10">
         <p class="text-base font-extrabold tracking-widest uppercase">TANKEN</p>
         <p class="text-xs text-gray-400 mt-0.5">Admin Panel</p>
     </div>
 
-    {{-- Nav --}}
     <nav class="flex-1 px-3 py-4 space-y-0.5 text-sm">
 
+        {{-- BISA DIAKSES OLEH SEMUA (Gudang & Owner) --}}
+        
         {{-- Dashboard --}}
-        <a href="{{ route('admin.dashboard') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
-            </svg>
+        <a href="{{ route('admin.dashboard') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
             Dashboard
         </a>
 
         {{-- Products --}}
-        <a href="{{ route('admin.products.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                <circle cx="7" cy="7" r="1.5" fill="currentColor"/>
-            </svg>
+        <a href="{{ route('admin.products.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.products*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
             Products
         </a>
 
-        {{-- Reviews sub-item --}}
-        <a href="{{ route('admin.products.index', ['tab' => 'reviews']) }}"
-           class="sidebar-link flex items-center gap-3 pl-9 pr-3 py-2 rounded-lg text-gray-400 text-xs transition-colors {{ request()->routeIs('admin.reviews*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="14" height="14">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-            </svg>
+        {{-- Reviews --}}
+        <a href="{{ route('admin.products.index', ['tab' => 'reviews']) }}" class="sidebar-link flex items-center gap-3 pl-9 pr-3 py-2 rounded-lg text-gray-400 text-xs transition-colors {{ request()->routeIs('admin.reviews*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="14" height="14"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             Reviews
         </a>
 
         {{-- Stock --}}
-        <a href="{{ route('admin.stock.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.stock*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
+        <a href="{{ route('admin.stock.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.stock*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Stock
         </a>
 
         {{-- Orders --}}
-        <a href="{{ route('admin.orders.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-            </svg>
+        <a href="{{ route('admin.orders.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.orders*') ? 'active' : '' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
             Orders
         </a>
 
+        {{-- TERKUNCI (Hanya bisa diakses Owner/Super Admin) --}}
+
         {{-- Payments --}}
-        <a href="{{ route('admin.reports.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.payments*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-            </svg>
-            Payments
-        </a>
+        @if($isGudang)
+            <div class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-500 opacity-60 cursor-not-allowed select-none" title="Akses Dibatasi">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    Payments
+                </div>
+                <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
+            </div>
+        @else
+            <a href="{{ route('admin.reports.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.payments*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Payments
+            </a>
+        @endif
 
         {{-- Reports --}}
-        <a href="{{ route('admin.reports.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-            Reports
-        </a>
+        @if($isGudang)
+            <div class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-500 opacity-60 cursor-not-allowed select-none" title="Akses Dibatasi">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    Reports
+                </div>
+                <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
+            </div>
+        @else
+            <a href="{{ route('admin.reports.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.reports*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Reports
+            </a>
+        @endif
 
         {{-- Users --}}
-        <a href="{{ route('admin.users.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            Users
-        </a>
+        @if($isGudang)
+            <div class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-500 opacity-60 cursor-not-allowed select-none" title="Akses Dibatasi">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Users
+                </div>
+                <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
+            </div>
+        @else
+            <a href="{{ route('admin.users.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Users
+            </a>
+        @endif
 
         {{-- Promo & Voucher --}}
-        <a href="{{ route('admin.promo.index') }}"
-           class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.promo*') ? 'active' : '' }}">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-                <line x1="7" y1="7" x2="7.01" y2="7"/>
-            </svg>
-            Promo & Voucher
-        </a>
+        @if($isGudang)
+            <div class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-500 opacity-60 cursor-not-allowed select-none" title="Akses Dibatasi">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    Promo & Voucher
+                </div>
+                <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
+            </div>
+        @else
+            <a href="{{ route('admin.promo.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.promo*') ? 'active' : '' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                Promo & Voucher
+            </a>
+        @endif
+
+        {{-- Partnerships --}}
+        @if($isGudang)
+            <div class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-500 opacity-60 cursor-not-allowed select-none" title="Akses Dibatasi">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    Partnerships
+                </div>
+                <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
+            </div>
+        @else
+            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Partnerships
+            </a>
+        @endif
     </nav>
 
     {{-- Bottom: back to store --}}
@@ -235,7 +252,9 @@
                     </div>
                     <div class="text-left hidden sm:block">
                         <p class="text-xs font-semibold text-gray-900 leading-tight">{{ auth()->user()->name ?? 'Admin User' }}</p>
-                        <p class="text-[10px] text-gray-400 leading-tight capitalize">{{ auth()->user()->role ?? 'Administrator' }}</p>
+                        <p class="text-[10px] text-gray-400 leading-tight capitalize">
+                            {{ str_replace('_', ' ', auth()->user()->role ?? 'Administrator') }}
+                        </p>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14" class="text-gray-400">
                         <path d="M6 9l6 6 6-6"/>
@@ -249,29 +268,17 @@
                         <p class="text-xs font-semibold text-gray-900">{{ auth()->user()->name ?? 'Admin User' }}</p>
                         <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email ?? 'admin@tanken.com' }}</p>
                     </div>
-                    <a href="{{ route('admin.profile.edit') }}"
+                    <a href="#"
                        class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="15" height="15">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                         </svg>
                         Edit Profil
                     </a>
-                    <a href="{{ route('admin.profile.edit') }}#password"
-                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="15" height="15">
-                            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                        Ubah Password
-                    </a>
-                    <a href="{{ route('admin.reports.index') }}"
-                       class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="15" height="15">
-                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-                        </svg>
-                        Laporan
-                    </a>
+                    
+                    {{-- TOMBOL LOGOUT --}}
                     <div class="border-t border-gray-100 mt-1">
-                        <form method="POST" action="">
+                        <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
                                 class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
@@ -283,6 +290,7 @@
                             </button>
                         </form>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -315,7 +323,6 @@
 </div>
 
 <script>
-    // Sidebar toggle mobile
     function toggleSidebar() {
         const sidebar  = document.getElementById('admin-sidebar');
         const overlay  = document.getElementById('sidebar-overlay');
@@ -323,15 +330,13 @@
         overlay.classList.toggle('show');
     }
 
-    // User dropdown
     function toggleUserMenu() {
         document.getElementById('user-dropdown').classList.toggle('hidden');
     }
 
-    // Close dropdown on outside click
     document.addEventListener('click', function(e) {
         const menu = document.getElementById('admin-user-menu');
-        if (!menu.contains(e.target)) {
+        if (menu && !menu.contains(e.target)) {
             document.getElementById('user-dropdown').classList.add('hidden');
         }
     });

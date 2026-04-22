@@ -12,11 +12,17 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
             
-            // Kolom ini yang tadi dicari oleh sistem tapi tidak ada
-            $table->string('role')->default('customer'); 
+            // TAMBAHAN 1: Kolom google_id (Boleh kosong/nullable kalau daftarnya manual)
+            $table->string('google_id')->nullable(); 
+            
+            $table->timestamp('email_verified_at')->nullable();
+            
+            // TETAP ADA: Password untuk login manual biasa
+            $table->string('password'); 
+            
+            // TAMBAHAN 2: Diubah jadi enum agar lebih ketat dan aman
+            $table->enum('role', ['super_admin', 'admin_gudang', 'customer'])->default('customer'); 
             
             $table->rememberToken();
             $table->timestamps();

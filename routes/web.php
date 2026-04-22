@@ -11,7 +11,31 @@ use App\Http\Controllers\Admin\StockController;
 use App\Http\Controllers\Admin\PromoController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\AuthController;
 
+
+// ==========================================
+// AUTENTIKASI (LOGIN & REGISTER)
+// ==========================================
+// 1. Rute Manual (Email & Password)
+// Menampilkan halaman (GET)
+Route::get('/masuk', function () {
+    return view('auth.login');
+})->name('login');
+
+Route::get('/daftar', function () {
+    return view('auth.register');
+})->name('register');
+
+// Memproses form (POST)
+Route::post('/masuk', [AuthController::class, 'login']);
+Route::post('/daftar', [AuthController::class, 'register']);
+Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
+
+// 2. Rute Google OAuth (Socialite)
+Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
+Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 
 /*
 |--------------------------------------------------------------------------
