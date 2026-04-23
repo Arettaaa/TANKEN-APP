@@ -95,10 +95,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus'])->name('reviews.updateStatus');
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
+    // ---- Stock Management ----
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
+    Route::patch('/stock/{id}', [StockController::class, 'update'])->name('stock.update');
+
     // Orders
     Route::resource('orders', OrderController::class)->only(['index', 'show']);
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
-         ->name('orders.updateStatus');
+        ->name('orders.updateStatus');
 
     // Stock
     Route::get('stock', [StockController::class, 'index'])->name('stock.index');

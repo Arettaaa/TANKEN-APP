@@ -14,7 +14,7 @@ class Product extends Model
     protected $fillable = [
         'category_id', 'name', 'slug', 'description', 'type',
         'price', 'original_price', 'sku', 'is_active', 'is_featured',
-        'main_image', 'gallery', 'colors', 'sizes', 'rating', 'review_count',
+        'main_image', 'size_chart_image', 'gallery', 'colors', 'sizes', 'rating', 'review_count',
     ];
 
     protected $casts = [

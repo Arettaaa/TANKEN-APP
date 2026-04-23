@@ -4,16 +4,15 @@
 @section('page-title', 'Product Management')
 @section('breadcrumb', 'Home / Products')
 
-{{-- ====== CUSTOM STYLES ====== --}}
 @push('styles')
 <style>
-    /* Toggle switch */
-    .toggle-switch { position: relative; width: 40px; height: 22px; cursor: pointer; }
+    /* Toggle switch Merah/Hijau */
+    .toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; display: inline-block; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider { position: absolute; inset: 0; background: #e5e7eb; border-radius: 20px; transition: .3s; }
-    .toggle-slider:before { content: ''; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    input:checked + .toggle-slider { background: #16a34a; }
-    input:checked + .toggle-slider:before { transform: translateX(18px); }
+    .toggle-slider { position: absolute; inset: 0; background: #ef4444; border-radius: 24px; transition: .3s; } /* Merah Default (Hidden) */
+    .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    input:checked + .toggle-slider { background: #16a34a; } /* Hijau Active (Visible) */
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
 
     /* Badges */
     .cat-pendek  { background: #eff6ff; color: #2563eb; }
@@ -30,62 +29,96 @@
     .modal-body { max-height: 70vh; overflow-y: auto; }
     .modal-body::-webkit-scrollbar { width: 6px; }
     .modal-body::-webkit-scrollbar-thumb { background-color: #e5e7eb; border-radius: 4px; }
+
+    /* Custom Dropdown Filter */
+    .dropdown-item:hover { background-color: #f9fafb; }
+    .custom-dropdown-btn { appearance: none; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 14px; font-size: 0.875rem; color: #4b5563; display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; transition: border-color 0.2s; }
+    .custom-dropdown-btn:focus { border-color: #111; outline: none; }
 </style>
 @endpush
 
 @section('content')
 
-{{-- Flash message --}}
-@if(session('success'))
-<div class="mb-4 bg-green-50 border border-green-200 text-green-800 text-sm rounded px-4 py-3 flex items-center gap-2">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg>
-    {{ session('success') }}
-</div>
-@endif
-
 <div class="flex items-center justify-between mb-5">
     <p class="text-sm text-gray-500">{{ $products->total() }} products</p>
-    <button onclick="openModal('modal-add')" class="flex items-center gap-2 bg-[#111111] text-white text-sm font-semibold px-4 py-2.5 rounded-md hover:bg-black transition-colors">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="15" height="15"><path d="M12 5v14M5 12h14"/></svg>
-        Add Product
+    <button onclick="openModal('modal-add')" class="flex items-center gap-2 bg-[#111111] text-white text-sm font-semibold px-4 py-2.5 rounded-md hover:bg-black transition-colors shadow-sm">
+        <i class="fa-solid fa-plus"></i> Add Product
     </button>
 </div>
 
-<form method="GET" action="{{ route('admin.products.index') }}" class="bg-white rounded-md border border-gray-200 p-4 mb-5 flex flex-wrap items-center gap-3 shadow-sm">
-    @csrf
-    {{-- Revisi: Kategori Pria / Wanita Statis --}}
-    <select name="category" onchange="this.form.submit()" class="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-gray-400 bg-white min-w-[130px]">
-        <option value="">Semua Kategori</option>
-        <option value="1" {{ request('category') == '1' ? 'selected' : '' }}>Pria</option>
-        <option value="2" {{ request('category') == '2' ? 'selected' : '' }}>Wanita</option>
-    </select>
+{{-- ===== FILTER & SEARCH ===== --}}
+<form id="filterForm" method="GET" action="{{ route('admin.products.index') }}" class="bg-white rounded-md border border-gray-100 p-4 mb-5 flex flex-wrap items-center gap-3 shadow-sm">
     
-    <select name="type" onchange="this.form.submit()" class="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-gray-400 bg-white min-w-[130px]">
-        <option value="">Semua Tipe</option>
-        <option value="pendek" {{ request('type') === 'pendek' ? 'selected' : '' }}>Pendek</option>
-        <option value="panjang" {{ request('type') === 'panjang' ? 'selected' : '' }}>Panjang</option>
-    </select>
-    
-    <select name="sort" onchange="this.form.submit()" class="border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 focus:outline-none focus:border-gray-400 bg-white min-w-[140px]">
-        <option value="">Urutkan</option>
-        <option value="price-asc"   {{ request('sort') === 'price-asc'   ? 'selected' : '' }}>Harga: Rendah ke Tinggi</option>
-        <option value="price-desc"  {{ request('sort') === 'price-desc'  ? 'selected' : '' }}>Harga: Tinggi ke Rendah</option>
-        <option value="stock-asc"   {{ request('sort') === 'stock-asc'   ? 'selected' : '' }}>Stok: Sedikit</option>
-        <option value="stock-desc"  {{ request('sort') === 'stock-desc'  ? 'selected' : '' }}>Stok: Terbanyak</option>
-    </select>
-    
-    <div class="flex-1 relative min-w-[180px]">
-        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-gray-400">
+    {{-- Custom Dropdown: Kategori --}}
+    <div class="relative custom-dropdown">
+        <button type="button" onclick="toggleFilterMenu('categoryMenu')" class="custom-dropdown-btn min-w-[140px]">
+            <span id="label-category">{{ request('category') == '1' ? 'Pria' : (request('category') == '2' ? 'Wanita' : 'Semua Kategori') }}</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+        </button>
+        <div id="categoryMenu" class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+            <ul class="text-sm text-gray-700">
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('category', '', 'Semua Kategori')">Semua Kategori</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('category', '1', 'Pria')">Pria</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('category', '2', 'Wanita')">Wanita</li>
+            </ul>
+        </div>
+        <input type="hidden" name="category" id="input-category" value="{{ request('category') }}">
+    </div>
+
+    {{-- Custom Dropdown: Tipe --}}
+    <div class="relative custom-dropdown">
+        <button type="button" onclick="toggleFilterMenu('typeMenu')" class="custom-dropdown-btn min-w-[130px]">
+            <span id="label-type">{{ request('type') == 'pendek' ? 'Pendek' : (request('type') == 'panjang' ? 'Panjang' : 'Semua Tipe') }}</span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+        </button>
+        <div id="typeMenu" class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+            <ul class="text-sm text-gray-700">
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('type', '', 'Semua Tipe')">Semua Tipe</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('type', 'pendek', 'Pendek')">Pendek</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('type', 'panjang', 'Panjang')">Panjang</li>
+            </ul>
+        </div>
+        <input type="hidden" name="type" id="input-type" value="{{ request('type') }}">
+    </div>
+
+    {{-- Custom Dropdown: Sort --}}
+    <div class="relative custom-dropdown">
+        <button type="button" onclick="toggleFilterMenu('sortMenu')" class="custom-dropdown-btn min-w-[150px]">
+            <span id="label-sort">
+                @if(request('sort') == 'price-asc') Harga Terendah
+                @elseif(request('sort') == 'price-desc') Harga Tertinggi
+                @elseif(request('sort') == 'stock-asc') Stok Sedikit
+                @elseif(request('sort') == 'stock-desc') Stok Terbanyak
+                @else Urutkan @endif
+            </span>
+            <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+        </button>
+        <div id="sortMenu" class="drop-menu absolute left-0 w-48 mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+            <ul class="text-sm text-gray-700">
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('sort', '', 'Urutkan')">Default</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('sort', 'price-asc', 'Harga Terendah')">Harga: Rendah ke Tinggi</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('sort', 'price-desc', 'Harga Tertinggi')">Harga: Tinggi ke Rendah</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('sort', 'stock-asc', 'Stok Sedikit')">Stok: Paling Sedikit</li>
+                <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('sort', 'stock-desc', 'Stok Terbanyak')">Stok: Paling Banyak</li>
+            </ul>
+        </div>
+        <input type="hidden" name="sort" id="input-sort" value="{{ request('sort') }}">
     </div>
     
-    <button type="button" class="flex items-center gap-2 border border-gray-200 rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="15" height="15"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export Excel
+    <div class="flex-1 relative min-w-[180px]">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau SKU..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-gray-900 transition-colors">
+        {{-- Tombol submit tersembunyi untuk input search (tekan enter) --}}
+        <button type="submit" class="hidden"></button> 
+    </div>
+    
+    <button type="button" class="flex items-center gap-2 border border-gray-200 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+        <i class="fa-solid fa-download"></i> Export Excel
     </button>
 </form>
 
-<div class="bg-white rounded-md border border-gray-200 overflow-hidden shadow-sm">
+{{-- ===== TABLE PRODUK ===== --}}
+<div class="bg-white rounded-md border border-gray-100 overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
             <thead>
@@ -115,7 +148,7 @@
                                 <img src="{{ Storage::url($product->main_image) }}" class="w-12 h-12 rounded object-cover border border-gray-100" alt="{{ $product->name }}">
                             @else
                                 <div class="w-12 h-12 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                    <svg fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.5" width="20" height="20"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9l4-4 4 4 4-4 4 4"/><circle cx="8.5" cy="15" r="1.5"/></svg>
+                                    <i class="fa-solid fa-image text-gray-300 text-lg"></i>
                                 </div>
                             @endif
                             <span class="font-semibold text-gray-900 text-sm">{{ $product->name }}</span>
@@ -130,7 +163,7 @@
                     <td class="px-4 py-4">
                         @if($reviewCount > 0)
                             <span class="rating-badge">
-                                <svg fill="#f59e0b" viewBox="0 0 24 24" width="12" height="12"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                <i class="fa-solid fa-star text-[10px]" style="color: #f59e0b;"></i>
                                 {{ number_format($avgRating, 1) }}
                             </span>
                         @else
@@ -138,7 +171,7 @@
                         @endif
                     </td>
                     <td class="px-4 py-4">
-                        <label class="toggle-switch">
+                        <label class="toggle-switch" title="{{ $product->is_active ? 'Terlihat Pelanggan' : 'Disembunyikan' }}">
                             <input type="checkbox" {{ $product->is_active ? 'checked' : '' }} onchange="toggleStatus({{ $product->id }}, this.checked)">
                             <span class="toggle-slider"></span>
                         </label>
@@ -146,13 +179,13 @@
                     <td class="px-4 py-4">
                         <div class="flex items-center gap-3">
                             <button type="button" onclick="openModal('modal-view-{{ $product->id }}')" class="text-gray-400 hover:text-black transition-colors" title="Lihat detail">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <i class="fa-regular fa-eye text-[15px]"></i>
                             </button>
                             <button type="button" onclick="openModal('modal-edit-{{ $product->id }}')" class="text-gray-400 hover:text-black transition-colors" title="Edit">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <i class="fa-regular fa-pen-to-square text-[15px]"></i>
                             </button>
                             <button type="button" onclick="openModal('modal-delete-{{ $product->id }}')" class="text-gray-400 hover:text-red-600 transition-colors" title="Hapus">
-                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                                <i class="fa-regular fa-trash-can text-[15px]"></i>
                             </button>
                         </div>
                     </td>
@@ -161,7 +194,9 @@
                 <tr>
                     <td colspan="8">
                         <div class="py-16 text-center text-gray-400">
-                            <svg class="mx-auto mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-50 mb-3">
+                                <i class="fa-solid fa-box-open text-xl text-gray-300"></i>
+                            </div>
                             <p class="text-sm font-medium">Tidak ada produk ditemukan</p>
                         </div>
                     </td>
@@ -191,7 +226,7 @@
         <div class="px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
             <h2 class="text-lg font-bold text-gray-900">Detail Produk</h2>
             <button type="button" onclick="closeModal('modal-view-{{ $product->id }}')" class="text-gray-400 hover:text-gray-700">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
         <div class="modal-body px-6 py-5">
@@ -218,7 +253,7 @@
                     <span class="text-sm font-bold text-gray-900">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stok</span>
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Stok Total</span>
                     <span class="text-sm font-semibold {{ $stockClass }}">{{ $totalStock }} pcs</span>
                 </div>
                 <div class="flex justify-between items-center py-2 border-b border-gray-100">
@@ -254,17 +289,16 @@
             <div class="modal-body px-6 py-5 space-y-5">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Produk <span class="text-red-500">*</span></label>
-                    <input type="text" name="name" value="{{ old('name', $product->name) }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors" required>
+                    <input type="text" name="name" value="{{ old('name', $product->name) }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors" required>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">SKU</label>
-                        <input type="text" name="sku" value="{{ old('sku', $product->sku) }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm font-mono focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors" required>
+                        <input type="text" name="sku" value="{{ old('sku', $product->sku) }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm font-mono focus:border-black outline-none transition-colors" required>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kategori</label>
-                        <select name="category_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors bg-white">
-                            {{-- Revisi: Kategori Edit Statis Pria / Wanita --}}
+                        <select name="category_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors bg-white">
                             <option value="1" {{ $product->category_id == 1 ? 'selected' : '' }}>Pria</option>
                             <option value="2" {{ $product->category_id == 2 ? 'selected' : '' }}>Wanita</option>
                         </select>
@@ -273,11 +307,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Harga (Rp)</label>
-                        <input type="number" name="price" value="{{ old('price', $product->price) }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors">
+                        <input type="number" name="price" value="{{ old('price', $product->price) }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors">
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tipe</label>
-                        <select name="type" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors bg-white">
+                        <select name="type" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors bg-white">
                             <option value="pendek"  {{ $product->type === 'pendek'  ? 'selected' : '' }}>Pendek</option>
                             <option value="panjang" {{ $product->type === 'panjang' ? 'selected' : '' }}>Panjang</option>
                         </select>
@@ -285,7 +319,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Deskripsi</label>
-                    <textarea name="description" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors resize-y" rows="3">{{ old('description', $product->description) }}</textarea>
+                    <textarea name="description" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors resize-y" rows="3">{{ old('description', $product->description) }}</textarea>
                 </div>
                 
                 {{-- Edit Ukuran (Chips) --}}
@@ -297,7 +331,7 @@
                             <button type="button" data-value="{{ $size }}" onclick="toggleChip(this, 'edit-sizes-{{ $product->id }}')" class="px-4 py-1.5 border border-gray-200 rounded-md text-sm transition-colors {{ $sel ? 'bg-[#111111] text-white border-[#111111]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100' }}">{{ $size }}</button>
                         @endforeach
                     </div>
-                    <input type="hidden" name="sizes" id="hidden-edit-sizes-{{ $product->id }}" value="{{ json_encode($sizesArray) }}">
+                    <input type="hidden" name="sizes" id="hidden-edit-sizes-{{ $product->id }}" value="{{ implode(',', $sizesArray) }}">
                 </div>
                 
                 {{-- Edit Warna (Chips) --}}
@@ -309,24 +343,36 @@
                             <button type="button" data-value="{{ $color }}" onclick="toggleChip(this, 'edit-colors-{{ $product->id }}')" class="px-4 py-1.5 border border-gray-200 rounded-md text-sm transition-colors {{ $sel ? 'bg-[#111111] text-white border-[#111111]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100' }}">{{ $color }}</button>
                         @endforeach
                     </div>
-                    <input type="hidden" name="colors" id="hidden-edit-colors-{{ $product->id }}" value="{{ json_encode($colorsArray) }}">
+                    <input type="hidden" name="colors" id="hidden-edit-colors-{{ $product->id }}" value="{{ implode(',', $colorsArray) }}">
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Ganti Foto Produk</label>
-                    @if($product->main_image)
-                        <div class="mb-2">
-                            <img src="{{ Storage::url($product->main_image) }}" class="w-16 h-16 rounded object-cover border border-gray-200" alt="">
+                {{-- Uploads --}}
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Foto Produk Utama</label>
+                        @if($product->main_image)
+                            <img src="{{ Storage::url($product->main_image) }}" class="w-12 h-12 mb-2 rounded object-cover border border-gray-200" alt="">
+                        @endif
+                        <div class="w-full border-2 border-dashed border-gray-200 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors" onclick="document.getElementById('edit-image-input-{{ $product->id }}').click()">
+                            <div id="edit-upload-preview-{{ $product->id }}" class="flex flex-wrap justify-center w-full"></div>
+                            <div id="edit-upload-placeholder-{{ $product->id }}" class="text-center">
+                                <i class="fa-solid fa-image text-gray-300 text-xl block mb-1"></i>
+                                <span class="text-[10px] font-medium text-gray-400">Ganti Foto</span>
+                            </div>
+                            <input type="file" id="edit-image-input-{{ $product->id }}" name="main_image" accept="image/*" class="hidden" onchange="previewImages(this,'edit-upload-preview-{{ $product->id }}','edit-upload-placeholder-{{ $product->id }}')">
                         </div>
-                    @endif
-                    <div class="w-full border-2 border-dashed border-gray-200 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors" onclick="document.getElementById('edit-image-input-{{ $product->id }}').click()">
-                        <div id="edit-upload-preview-{{ $product->id }}" class="flex flex-wrap gap-2 justify-center w-full"></div>
-                        <div id="edit-upload-placeholder-{{ $product->id }}" class="text-center">
-                            <span class="text-3xl text-gray-300 block mb-1">+</span>
-                            <span class="text-xs font-medium text-gray-400">Klik untuk upload foto baru</span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Size Chart <span class="text-xs font-normal text-gray-400">(Opsional)</span></label>
+                        {{-- Ini asumsi nanti kamu ada kolom size_chart_image di DB --}}
+                        <div class="w-full border-2 border-dashed border-gray-200 rounded-md p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors" onclick="document.getElementById('edit-sizechart-input-{{ $product->id }}').click()">
+                            <div id="edit-sz-preview-{{ $product->id }}" class="flex flex-wrap justify-center w-full"></div>
+                            <div id="edit-sz-placeholder-{{ $product->id }}" class="text-center">
+                                <i class="fa-solid fa-ruler-combined text-gray-300 text-xl block mb-1"></i>
+                                <span class="text-[10px] font-medium text-gray-400">Upload Size Guide</span>
+                            </div>
+                            <input type="file" id="edit-sizechart-input-{{ $product->id }}" name="size_chart_image" accept="image/*" class="hidden" onchange="previewImages(this,'edit-sz-preview-{{ $product->id }}','edit-sz-placeholder-{{ $product->id }}')">
                         </div>
-                        <input type="file" id="edit-image-input-{{ $product->id }}" name="main_image" accept="image/*" class="hidden"
-                            onchange="previewImages(this,'edit-upload-preview-{{ $product->id }}','edit-upload-placeholder-{{ $product->id }}')">
                     </div>
                 </div>
             </div>
@@ -342,7 +388,7 @@
 <div id="modal-delete-{{ $product->id }}" class="fixed inset-0 z-[60] hidden items-center justify-center opacity-0 transition-opacity duration-300 bg-black/60 backdrop-blur-sm" onclick="closeOnBackdrop(event,'modal-delete-{{ $product->id }}')">
     <div class="bg-white rounded-md w-full max-w-sm mx-4 p-6 text-center shadow-2xl transform scale-95 transition-transform duration-300">
         <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-            <svg fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="1.8" width="26" height="26"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl"></i>
         </div>
         <h3 class="text-base font-bold text-gray-900 mb-1">Hapus Produk?</h3>
         <p class="text-sm font-semibold text-gray-800 mb-1">"{{ $product->name }}"</p>
@@ -361,25 +407,35 @@
 {{-- ===================== MODAL: ADD PRODUCT ===================== --}}
 <div id="modal-add" class="fixed inset-0 z-[60] hidden items-center justify-center opacity-0 transition-opacity duration-300 bg-black/60 backdrop-blur-sm" onclick="closeOnBackdrop(event,'modal-add')">
     <div class="bg-white rounded-md shadow-2xl w-full max-w-lg mx-4 transform scale-95 transition-transform duration-300">
-        <div class="px-6 py-5 border-b border-gray-100">
+        <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-900 tracking-tight">Tambah Produk Baru</h2>
+            <button type="button" onclick="closeModal('modal-add')" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-xmark text-lg"></i></button>
         </div>
         <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="modal-body px-6 py-5 space-y-5">
+                
+                {{-- Area Error Validasi (jika ada) --}}
+                @if ($errors->any())
+                <div class="bg-red-50 text-red-600 text-xs p-3 rounded-md border border-red-100 mb-2">
+                    <ul class="list-disc pl-4 space-y-1">
+                        @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Produk <span class="text-red-500">*</span></label>
-                    <input type="text" name="name" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors" placeholder="Masukkan nama produk" required>
+                    <input type="text" name="name" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors" placeholder="Masukkan nama produk" required>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">SKU <span class="text-red-500">*</span></label>
-                        <input type="text" name="sku" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm font-mono focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors" placeholder="mis. TNK-PDK-001" required>
+                        <input type="text" name="sku" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm font-mono focus:border-black outline-none transition-colors" placeholder="mis. TNK-PDK-001" required>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kategori <span class="text-red-500">*</span></label>
-                        <select name="category_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors bg-white" required>
-                            {{-- Revisi: Kategori Tambah Statis Pria / Wanita --}}
+                        <select name="category_id" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors bg-white" required>
                             <option value="" disabled selected>Pilih kategori</option>
                             <option value="1">Pria</option>
                             <option value="2">Wanita</option>
@@ -389,23 +445,23 @@
                 <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Harga (Rp) <span class="text-red-500">*</span></label>
-                        <input type="number" name="price" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors" placeholder="0" min="0" required>
+                        <input type="number" name="price" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors" placeholder="0" min="0" required>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Tipe <span class="text-red-500">*</span></label>
-                        <select name="type" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors bg-white" required>
+                        <select name="type" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors bg-white" required>
                             <option value="pendek">Pendek</option>
                             <option value="panjang">Panjang</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Stok <span class="text-red-500">*</span></label>
-                        <input type="number" name="stock" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors" placeholder="0" min="0" required>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Stok Awal <span class="text-red-500">*</span></label>
+                        <input type="number" name="initial_stock" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors" placeholder="20" min="0" required>
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Deskripsi</label>
-                    <textarea name="description" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:ring-1 focus:ring-black focus:border-black outline-none transition-colors resize-y" rows="3" placeholder="Masukkan deskripsi produk"></textarea>
+                    <textarea name="description" class="w-full px-4 py-2.5 border border-gray-200 rounded-md text-sm focus:border-black outline-none transition-colors resize-y" rows="3" placeholder="Masukkan deskripsi produk"></textarea>
                 </div>
                 
                 {{-- Ukuran (Chips) --}}
@@ -416,7 +472,7 @@
                             <button type="button" data-value="{{ $size }}" onclick="toggleChip(this, 'add-sizes')" class="px-4 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-100 transition-colors">{{ $size }}</button>
                         @endforeach
                     </div>
-                    <input type="hidden" name="sizes" id="hidden-add-sizes" value="[]">
+                    <input type="hidden" name="sizes" id="hidden-add-sizes" value="">
                 </div>
                 
                 {{-- Warna (Chips) --}}
@@ -427,21 +483,35 @@
                             <button type="button" data-value="{{ $color }}" onclick="toggleChip(this, 'add-colors')" class="px-4 py-1.5 bg-gray-50 border border-gray-200 rounded-md text-sm text-gray-600 hover:bg-gray-100 transition-colors">{{ $color }}</button>
                         @endforeach
                     </div>
-                    <input type="hidden" name="colors" id="hidden-add-colors" value="[]">
+                    <input type="hidden" name="colors" id="hidden-add-colors" value="">
                 </div>
                 
-                {{-- Upload Foto --}}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Foto Produk</label>
-                    <div class="w-full border-2 border-dashed border-gray-200 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors" onclick="document.getElementById('add-image-input').click()">
-                        <div id="add-upload-preview" class="flex flex-wrap gap-2 justify-center w-full"></div>
-                        <div id="add-upload-placeholder" class="text-center">
-                            <span class="text-3xl text-gray-300 block mb-1">+</span>
-                            <span class="text-xs font-medium text-gray-400">Klik untuk upload foto</span>
+                {{-- Uploads (Foto Utama & Size Chart) --}}
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Foto Utama <span class="text-red-500">*</span></label>
+                        <div class="w-full border-2 border-dashed border-gray-200 rounded-md p-5 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors" onclick="document.getElementById('add-image-input').click()">
+                            <div id="add-upload-preview" class="flex flex-wrap justify-center w-full"></div>
+                            <div id="add-upload-placeholder" class="text-center">
+                                <i class="fa-solid fa-image text-gray-300 text-2xl block mb-2"></i>
+                                <span class="text-xs font-medium text-gray-400">Upload Foto</span>
+                            </div>
+                            <input type="file" id="add-image-input" name="main_image" accept="image/*" class="hidden" onchange="previewImages(this,'add-upload-preview','add-upload-placeholder')">
                         </div>
-                        <input type="file" id="add-image-input" name="main_image" accept="image/*" class="hidden" onchange="previewImages(this,'add-upload-preview','add-upload-placeholder')">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Size Chart <span class="text-xs font-normal text-gray-400">(Opsional)</span></label>
+                        <div class="w-full border-2 border-dashed border-gray-200 rounded-md p-5 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors" onclick="document.getElementById('add-sizechart-input').click()">
+                            <div id="add-sz-preview" class="flex flex-wrap justify-center w-full"></div>
+                            <div id="add-sz-placeholder" class="text-center">
+                                <i class="fa-solid fa-ruler-combined text-gray-300 text-2xl block mb-2"></i>
+                                <span class="text-xs font-medium text-gray-400">Upload Guide</span>
+                            </div>
+                            <input type="file" id="add-sizechart-input" name="size_chart_image" accept="image/*" class="hidden" onchange="previewImages(this,'add-sz-preview','add-sz-placeholder')">
+                        </div>
                     </div>
                 </div>
+
             </div>
             <div class="px-6 py-5 border-t border-gray-100 flex gap-3">
                 <button type="button" onclick="closeModal('modal-add')" class="flex-1 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-md text-sm font-bold hover:bg-gray-50 transition-colors shadow-sm">Batal</button>
@@ -451,17 +521,125 @@
     </div>
 </div>
 
-{{-- TOAST NOTIFICATION --}}
-<div id="toast" class="fixed bottom-6 right-6 z-[100] hidden items-center gap-3 bg-gray-900 text-white text-sm px-5 py-3 rounded-md shadow-lg transition-opacity">
-    <svg fill="none" viewBox="0 0 24 24" stroke="#4ade80" stroke-width="2.5" width="16" height="16"><path d="M20 6L9 17l-5-5"/></svg>
-    <span id="toast-msg"></span>
+{{-- FLOATING TOAST NOTIFICATION --}}
+<div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden transform transition-all duration-300 ease-out translate-y-[-20px] opacity-0">
+    <div id="toast-box" class="flex items-center gap-3 bg-white border border-gray-100 text-gray-800 text-sm font-semibold px-5 py-3.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+        <div id="toast-icon" class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"></div>
+        <span id="toast-msg"></span>
+    </div>
 </div>
 
 @endsection
 
 @push('scripts')
 <script>
-// 1. Preview Gambar
+// ==== 1. FLOATING TOAST SYSTEM ====
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toast-container');
+    const box = document.getElementById('toast-box');
+    const icon = document.getElementById('toast-icon');
+    const msgEl = document.getElementById('toast-msg');
+
+    msgEl.textContent = msg;
+
+    if(type === 'success') {
+        icon.className = 'flex-shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center';
+        icon.innerHTML = '<i class="fa-solid fa-check text-green-600 text-[10px]"></i>';
+    } else {
+        icon.className = 'flex-shrink-0 w-6 h-6 rounded-full bg-red-100 flex items-center justify-center';
+        icon.innerHTML = '<i class="fa-solid fa-xmark text-red-600 text-[10px]"></i>';
+    }
+
+    container.classList.remove('hidden');
+    // Animasi masuk
+    setTimeout(() => {
+        container.classList.remove('translate-y-[-20px]', 'opacity-0');
+        container.classList.add('translate-y-0', 'opacity-100');
+    }, 10);
+
+    // Animasi keluar setelah 2.5 detik (lebih cepat)
+    setTimeout(() => {
+        container.classList.remove('translate-y-0', 'opacity-100');
+        container.classList.add('translate-y-[-20px]', 'opacity-0');
+        setTimeout(() => { container.classList.add('hidden'); }, 300);
+    }, 2500);
+}
+
+// Trigger Toast dari session Laravel
+@if(session('success')) showToast("{{ session('success') }}", 'success'); @endif
+@if(session('error')) showToast("{{ session('error') }}", 'error'); @endif
+
+// ==== 2. CUSTOM DROPDOWN FILTER ====
+function toggleFilterMenu(id) {
+    document.querySelectorAll('.drop-menu').forEach(menu => {
+        if(menu.id !== id) menu.classList.add('hidden');
+    });
+    document.getElementById(id).classList.toggle('hidden');
+}
+
+function selectFilterItem(type, value, labelHtml) {
+    document.getElementById('input-' + type).value = value;
+    document.getElementById('label-' + type).innerHTML = labelHtml;
+    document.getElementById(type + 'Menu').classList.add('hidden');
+    
+    // Otomatis submit form setelah dipilih
+    document.getElementById('filterForm').submit();
+}
+
+// Tutup dropdown kalau klik di luar
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.custom-dropdown')) {
+        document.querySelectorAll('.drop-menu').forEach(menu => menu.classList.add('hidden'));
+    }
+});
+
+// ==== 3. TOGGLE STATUS ====
+function toggleStatus(id, val) {
+    fetch(`/admin/products/${id}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ is_active: val })
+    })
+    .then(res => {
+        showToast(val ? 'Produk aktif & terlihat' : 'Produk disembunyikan', 'success');
+    })
+    .catch(() => showToast('Gagal mengubah status', 'error'));
+}
+
+// ==== 4. MODAL ENGINE ====
+function openModal(id) {
+    const modal = document.getElementById(id);
+    const box = modal.children[0]; 
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        if(box) box.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    const box = modal.children[0];
+    modal.classList.add('opacity-0');
+    if(box) box.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+function closeOnBackdrop(e, id) {
+    if (e.target.classList.contains('backdrop-blur-sm')) closeModal(id);
+}
+
+// Auto-open modal saat error validasi
+@if($errors->any()) openModal('modal-add'); @endif
+
+// ==== 5. IMAGE PREVIEW ====
 function previewImages(input, previewId, placeholderId) {
     const preview = document.getElementById(previewId);
     const placeholder = document.getElementById(placeholderId);
@@ -481,7 +659,7 @@ function previewImages(input, previewId, placeholderId) {
     });
 }
 
-// 2. Interactive Chips
+// ==== 6. CHIPS (SIZE & WARNA) ====
 function toggleChip(button, inputId) {
     button.classList.toggle('bg-[#111111]');
     button.classList.toggle('text-white');
@@ -492,71 +670,7 @@ function toggleChip(button, inputId) {
     const container = button.parentElement;
     const activeButtons = Array.from(container.querySelectorAll('.bg-\\[\\#111111\\]'));
     const selectedValues = activeButtons.map(btn => btn.getAttribute('data-value'));
-    document.getElementById('hidden-' + inputId).value = JSON.stringify(selectedValues);
+    document.getElementById('hidden-' + inputId).value = selectedValues.join(',');
 }
-
-// 3. Status Toggle
-function toggleStatus(id, val) {
-    fetch(`/admin/products/${id}/toggle-status`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ is_active: val })
-    })
-    .then(res => {
-        showToast(val ? 'Produk ditampilkan di katalog' : 'Produk disembunyikan');
-    })
-    .catch(() => showToast('Gagal mengubah status produk'));
-}
-
-// 4. Modal Engine (100% Tailwind Fix)
-function openModal(id) {
-    const modal = document.getElementById(id);
-    const box = modal.children[0]; 
-    
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    
-    setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        if(box) box.classList.remove('scale-95');
-    }, 10);
-}
-
-function closeModal(id) {
-    const modal = document.getElementById(id);
-    const box = modal.children[0];
-    
-    modal.classList.add('opacity-0');
-    if(box) box.classList.add('scale-95');
-    
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }, 300);
-}
-
-function closeOnBackdrop(e, id) {
-    if (e.target.classList.contains('modal-backdrop')) {
-        closeModal(id);
-    }
-}
-
-// 5. Toast System
-function showToast(msg) {
-    const t = document.getElementById('toast');
-    document.getElementById('toast-msg').textContent = msg;
-    t.classList.remove('hidden');
-    t.classList.add('flex');
-    setTimeout(() => {
-        t.classList.add('hidden');
-        t.classList.remove('flex');
-    }, 3000);
-}
-
-// Auto-open modal saat error validasi Laravel
-@if($errors->any()) openModal('modal-add'); @endif
 </script>
 @endpush
