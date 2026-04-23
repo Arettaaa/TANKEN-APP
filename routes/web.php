@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\ReviewController;
 
 
 // ==========================================
@@ -88,6 +89,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('products', ProductController::class);
     Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
          ->name('products.updateStock');
+
+    // ---- Review Management ----
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus'])->name('reviews.updateStatus');
+    Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // Orders
     Route::resource('orders', OrderController::class)->only(['index', 'show']);

@@ -10,8 +10,8 @@
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
 
     {{-- Total Sales --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:#d1fae5">
+    <div class="bg-white rounded-md p-5 shadow-sm border border-gray-100">
+        <div class="w-11 h-11 rounded flex items-center justify-center mb-4" style="background:#d1fae5">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2" width="22" height="22">
                 <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
             </svg>
@@ -23,8 +23,8 @@
     </div>
 
     {{-- Total Orders --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:#dbeafe">
+    <div class="bg-white rounded-md p-5 shadow-sm border border-gray-100">
+        <div class="w-11 h-11 rounded flex items-center justify-center mb-4" style="background:#dbeafe">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2" width="22" height="22">
                 <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
@@ -37,8 +37,8 @@
     </div>
 
     {{-- Total Users --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:#ede9fe">
+    <div class="bg-white rounded-md p-5 shadow-sm border border-gray-100">
+        <div class="w-11 h-11 rounded flex items-center justify-center mb-4" style="background:#ede9fe">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#8b5cf6" stroke-width="2" width="22" height="22">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                 <circle cx="9" cy="7" r="4"/>
@@ -52,8 +52,8 @@
     </div>
 
     {{-- Low Stock --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:#fee2e2">
+    <div class="bg-white rounded-md p-5 shadow-sm border border-gray-100">
+        <div class="w-11 h-11 rounded flex items-center justify-center mb-4" style="background:#fee2e2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ef4444" stroke-width="2" width="22" height="22">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                 <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -70,7 +70,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
 
     {{-- Sales Overview Chart --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div class="bg-white rounded-md p-5 shadow-sm border border-gray-100">
         <h2 class="text-base font-bold text-gray-900 mb-4">Sales Overview</h2>
         <div class="relative h-52">
             <canvas id="salesChart"></canvas>
@@ -78,7 +78,7 @@
     </div>
 
     {{-- Best Selling Products Chart --}}
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+    <div class="bg-white rounded-md p-5 shadow-sm border border-gray-100">
         <h2 class="text-base font-bold text-gray-900 mb-4">Best Selling Products</h2>
         <div class="relative h-52">
             <canvas id="bestSellingChart"></canvas>
@@ -87,7 +87,7 @@
 </div>
 
 {{-- ====== RECENT ACTIVITY ====== --}}
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+<div class="bg-white rounded-md shadow-sm border border-gray-100">
     <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <h2 class="text-base font-bold text-gray-900">Recent Activity</h2>
         <a href="{{ route('admin.orders.index') }}" class="text-xs text-gray-400 hover:text-black transition-colors">View all →</a>
@@ -106,7 +106,7 @@
         @empty
         {{-- Dummy data fallback saat belum ada log --}}
         @foreach([
-            ['subject' => 'New order received',    'desc' => 'ORD-001 — Rp1.850.000',           'time' => '5 mins ago'],
+            ['subject' => 'New order received',    'desc' => 'ORD-001 — Rp1.850.000',            'time' => '5 mins ago'],
             ['subject' => 'Stok diupdate',          'desc' => 'Athletic Flow Joggers — 45 unit', 'time' => '1 jam lalu'],
             ['subject' => 'User baru terdaftar',    'desc' => 'jane@example.com',                'time' => '2 jam lalu'],
             ['subject' => 'Pembayaran dikonfirmasi','desc' => 'ORD-002 — Rp2.350.000',           'time' => '3 jam lalu'],
@@ -183,7 +183,7 @@
             datasets: [{
                 data: bsData,
                 backgroundColor: '#111111',
-                borderRadius: 6,
+                borderRadius: 3, // Diubah jadi 3 biar ujung bar chart-nya sedikit lebih kotak
                 borderSkipped: false,
             }]
         },
