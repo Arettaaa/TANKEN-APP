@@ -106,7 +106,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
-
     // Stock
     Route::get('stock', [StockController::class, 'index'])->name('stock.index');
     Route::patch('stock/{stock}', [StockController::class, 'update'])->name('stock.update');
@@ -126,9 +125,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
 
     // Promo & Voucher
-    Route::get('promo', [PromoController::class, 'index'])->name('promo.index');
-    Route::post('promo', [PromoController::class, 'store'])->name('promo.store');
-    Route::delete('promo/{voucher}', [PromoController::class, 'destroy'])->name('promo.destroy');
+    Route::resource('promos', PromoController::class)->except(['create', 'show', 'edit']);
+    Route::post('promos/{promo}/toggle-status', [PromoController::class, 'toggleStatus']);
 
     // Profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -169,7 +169,7 @@
                 <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
             </div>
         @else
-            <a href="{{ route('admin.promo.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.promo*') ? 'active' : '' }}">
+            <a href="{{ route('admin.promos.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.promo*') ? 'active' : '' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                 Promo & Voucher
             </a>

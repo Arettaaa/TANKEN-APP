@@ -21,12 +21,12 @@
     /* Avatar circle */
     .user-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; flex-shrink: 0; color: #fff; letter-spacing: 0.03em; }
 
-    /* Toggle switch */
-    .toggle-wrap { position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    /* Toggle switch (Direvisi agar tidak tabrakan) */
+    .toggle-wrap { position: relative; display: block; width: 36px; height: 20px; cursor: pointer; flex-shrink: 0; }
     .toggle-input { display: none; }
-    .toggle-track { width: 34px; height: 18px; border-radius: 99px; background: #d1d5db; position: relative; transition: background 0.2s; flex-shrink: 0; }
+    .toggle-track { position: absolute; inset: 0; border-radius: 99px; background: #d1d5db; transition: background 0.2s; }
     .toggle-input:checked + .toggle-track { background: #111; }
-    .toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .toggle-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
     .toggle-input:checked + .toggle-track::after { transform: translateX(16px); }
 
     /* Role badge */
@@ -46,16 +46,17 @@
 @endpush
 
 @section('content')
+
 {{-- ===== STAT CARDS ===== --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-white border border-gray-100 rounded-md p-5 shadow-sm">
         <div class="stat-icon bg-blue-50 text-blue-500"><i class="fa-solid fa-users text-lg"></i></div>
-        <div class="text-2xl font-extrabold text-gray-900">{{ number_format($totalUsers) }}</div>
+        <div class="text-2xl font-extrabold text-gray-900" id="totalUsersCount">{{ number_format($totalUsers) }}</div>
         <div class="text-xs text-gray-400 mt-0.5 font-medium uppercase tracking-wider">Total Users</div>
     </div>
     <div class="bg-white border border-gray-100 rounded-md p-5 shadow-sm">
         <div class="stat-icon bg-green-50 text-green-500"><i class="fa-solid fa-user-check text-lg"></i></div>
-        <div class="text-2xl font-extrabold text-gray-900">{{ number_format($activeUsers) }}</div>
+        <div class="text-2xl font-extrabold text-gray-900" id="activeUsersCount">{{ number_format($activeUsers) }}</div>
         <div class="text-xs text-gray-400 mt-0.5 font-medium uppercase tracking-wider">Active Users</div>
     </div>
     <div class="bg-white border border-gray-100 rounded-md p-5 shadow-sm">
@@ -73,6 +74,7 @@
 {{-- ===== FILTER BAR ===== --}}
 <form id="filterForm" method="GET" action="{{ route('admin.users.index') }}" class="bg-white border border-gray-100 rounded-md p-4 mb-4 shadow-sm flex flex-wrap items-center gap-3">
     
+    {{-- Custom Dropdown: Role --}}
     <div class="relative custom-dropdown">
         <button type="button" onclick="toggleFilterMenu('roleMenu')" class="custom-dropdown-btn min-w-[120px]">
             <span id="label-role">
@@ -94,6 +96,7 @@
         <input type="hidden" name="role" id="input-role" value="{{ request('role') }}">
     </div>
 
+    {{-- Custom Dropdown: Status --}}
     <div class="relative custom-dropdown">
         <button type="button" onclick="toggleFilterMenu('statusMenu')" class="custom-dropdown-btn min-w-[110px]">
             <span id="label-status">{{ request('status') ? ucfirst(request('status')) : 'Status' }}</span>
@@ -109,6 +112,7 @@
         <input type="hidden" name="status" id="input-status" value="{{ request('status') }}">
     </div>
 
+    {{-- Custom Dropdown: Orders --}}
     <div class="relative custom-dropdown">
         <button type="button" onclick="toggleFilterMenu('ordersMenu')" class="custom-dropdown-btn min-w-[130px]">
             <span id="label-orders">
@@ -132,18 +136,19 @@
         <input type="hidden" name="orders" id="input-orders" value="{{ request('orders') }}">
     </div>
 
+    {{-- Custom Dropdown: Sort --}}
     <div class="relative custom-dropdown">
         <button type="button" onclick="toggleFilterMenu('sortMenu')" class="custom-dropdown-btn min-w-[120px]">
             <span id="label-sort">
                 @if(request('sort') == 'az') A-Z
                 @elseif(request('sort') == 'orders_desc') Order Terbanyak
-                @elseif(request('sort') == 'spent_desc') Paling Boros
+                @elseif(request('sort') == 'spent_desc') Pengeluaran Terbesar
                 @elseif(request('sort') == 'newest') Terbaru
                 @else Urutkan @endif
             </span>
             <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
         </button>
-        <div id="sortMenu" class="drop-menu absolute left-0 w-48 mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+        <div id="sortMenu" class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
             <ul class="text-sm text-gray-700">
                 <li class="dropdown-item px-4 py-2 cursor-pointer font-bold" onclick="selectFilterItem('sort', '', 'Default')">Default</li>
                 <li class="dropdown-item px-4 py-2 cursor-pointer" onclick="selectFilterItem('sort', 'az', 'A-Z')">Nama: A → Z</li>
@@ -157,17 +162,24 @@
 
     <div class="flex-1"></div>
 
+    {{-- Search --}}
     <div class="search-box">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, email, ID...">
         <button type="submit" class="hidden"></button>
     </div>
 
+    {{-- Reset --}}
     @if(request()->anyFilled(['role','status','orders','sort','search']))
     <a href="{{ route('admin.users.index') }}" class="flex items-center gap-1.5 px-3 py-2 border border-gray-200 text-gray-500 text-sm rounded-md hover:bg-gray-50 transition-colors">
         <i class="fa-solid fa-rotate-left"></i>
     </a>
     @endif
+
+    {{-- Add User Button --}}
+    <button type="button" onclick="openAddModal()" class="flex items-center gap-2 bg-[#111111] text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-black transition-colors shadow-sm ml-1">
+        <i class="fa-solid fa-plus text-xs"></i> Add User
+    </button>
 </form>
 
 {{-- ===== TABLE ===== --}}
@@ -223,12 +235,15 @@
                         <span class="inline-flex px-2.5 py-1 text-xs font-bold rounded-md {{ $roleClass }}">{{ $roleLabel }}</span>
                     </td>
 
+                    {{-- Toggle Status (Sudah diperbaiki agar tidak tabrakan) --}}
                     <td class="px-5 py-4">
-                        <label class="toggle-wrap">
-                            <input type="checkbox" class="toggle-input" {{ $user->is_active ? 'checked' : '' }} onchange="toggleStatus({{ $user->id }}, this)">
-                            <span class="toggle-track"></span>
+                        <div class="flex items-center gap-2.5">
+                            <label class="toggle-wrap mb-0" title="Aktif/Nonaktifkan">
+                                <input type="checkbox" class="toggle-input" {{ $user->is_active ? 'checked' : '' }} onchange="toggleStatus({{ $user->id }}, this)">
+                                <span class="toggle-track"></span>
+                            </label>
                             <span class="text-xs text-gray-600 font-bold status-label">{{ $user->is_active ? 'Active' : 'Inactive' }}</span>
-                        </label>
+                        </div>
                     </td>
 
                     <td class="px-5 py-4 font-bold text-gray-800">{{ $user->orders_count }}</td>
@@ -384,9 +399,9 @@
         if (!e.target.closest('.custom-dropdown')) document.querySelectorAll('.drop-menu').forEach(m => m.classList.add('hidden'));
     });
 
-    // ==== 3. Toggle Status (AJAX) ====
+    // ==== 3. Toggle Status (AJAX) dengan Real-Time Counter Update ====
     function toggleStatus(id, checkbox) {
-        const label = checkbox.parentElement.querySelector('.status-label');
+        const label = checkbox.closest('.flex').querySelector('.status-label');
         fetch(`/admin/users/${id}/toggle-status`, {
             method: 'POST',
             headers: {
@@ -398,8 +413,16 @@
         .then(data => {
             label.textContent = data.is_active ? 'Active' : 'Inactive';
             showToast('Status user diperbarui');
+
+            // Update Stat Card "Active Users" secara langsung
+            const activeCountEl = document.getElementById('activeUsersCount');
+            if (activeCountEl) {
+                let currentCount = parseInt(activeCountEl.textContent.replace(/,/g, ''));
+                currentCount = data.is_active ? currentCount + 1 : currentCount - 1;
+                activeCountEl.textContent = currentCount.toLocaleString('id-ID');
+            }
         })
-        .catch(() => showToast('Gagal merubah status', 'error'));
+        .catch(() => { showToast('Gagal merubah status', 'error'); checkbox.checked = !checkbox.checked; });
     }
 
     // ==== 4. Add & Edit Modal Engine ====
