@@ -115,16 +115,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
 
+    // ---- Reports & Analytics ----
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
+    Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+
     // Users
-    Route::resource('users', UserController::class)->only(['index', 'show']);
+    // Route::resource('users', UserController::class)->only(['index', 'show']);
+    Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
+    Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
 
     // Promo & Voucher
     Route::get('promo', [PromoController::class, 'index'])->name('promo.index');
     Route::post('promo', [PromoController::class, 'store'])->name('promo.store');
     Route::delete('promo/{voucher}', [PromoController::class, 'destroy'])->name('promo.destroy');
-
-    // Reports
-    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
     // Profile
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
