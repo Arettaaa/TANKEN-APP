@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\PaymentController;
 
 
 // ==========================================
@@ -109,6 +110,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Stock
     Route::get('stock', [StockController::class, 'index'])->name('stock.index');
     Route::patch('stock/{stock}', [StockController::class, 'update'])->name('stock.update');
+
+    // ---- Payment Management ----
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
 
     // Users
     Route::resource('users', UserController::class)->only(['index', 'show']);

@@ -121,7 +121,7 @@
                 <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
             </div>
         @else
-            <a href="{{ route('admin.reports.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.payments*') ? 'active' : '' }}">
+            <a href="{{ route('admin.payments.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors {{ request()->routeIs('admin.payments*') ? 'active' : '' }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 Payments
             </a>
