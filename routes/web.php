@@ -100,9 +100,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('/stock/{id}', [StockController::class, 'update'])->name('stock.update');
 
     // Orders
-    Route::resource('orders', OrderController::class)->only(['index', 'show']);
-    Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
-        ->name('orders.updateStatus');
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export'); 
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
 
     // Stock
     Route::get('stock', [StockController::class, 'index'])->name('stock.index');

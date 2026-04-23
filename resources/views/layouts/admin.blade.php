@@ -174,22 +174,6 @@
                 Promo & Voucher
             </a>
         @endif
-
-        {{-- Partnerships --}}
-        @if($isGudang)
-            <div class="flex items-center justify-between px-3 py-2.5 rounded-lg text-gray-500 opacity-60 cursor-not-allowed select-none" title="Akses Dibatasi">
-                <div class="flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    Partnerships
-                </div>
-                <i class="fa-solid fa-lock text-[12px]" style="color: rgb(203, 203, 203);"></i>
-            </div>
-        @else
-            <a href="#" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Partnerships
-            </a>
-        @endif
     </nav>
 
     {{-- Bottom: back to store --}}
