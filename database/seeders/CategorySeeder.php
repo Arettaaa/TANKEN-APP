@@ -10,7 +10,7 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         // Masukkan data statis agar ID-nya tetap 1 dan 2
-        Category::create(['name' => 'Pria', 'slug' => 'pria']);
-        Category::create(['name' => 'Wanita', 'slug' => 'wanita']);
+        Category::create(['name' => 'Men', 'slug' => 'men']);
+        Category::create(['name' => 'Women', 'slug' => 'women']);
     }
 }

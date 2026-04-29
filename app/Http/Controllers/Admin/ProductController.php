@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductStock;
 use App\Models\ActivityLog;
+use App\Models\ProductGallery; // TAMBAHAN: Import model ProductGallery
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -56,10 +57,11 @@ class ProductController extends Controller
             'sku'              => 'required|string|unique:products,sku',
             'description'      => 'nullable|string',
             'main_image'       => 'nullable|image|max:2048',
-            'size_chart_image' => 'nullable|image|max:2048', // Tambahan validasi
+            'size_chart_image' => 'nullable|image|max:2048',
             'colors'           => 'nullable|array',
             'sizes'            => 'nullable|array',
             'initial_stock'    => 'nullable|integer|min:0',
+            'additional_images.*' => 'nullable|image|max:2048', // TAMBAHAN: Validasi foto multiple
         ]);
 
         // Upload Foto Utama
@@ -81,6 +83,17 @@ class ProductController extends Controller
         $validated['sizes'] = $sizes;
 
         $product = Product::create($validated);
+
+        // TAMBAHAN: Logic untuk menyimpan multiple images ke tabel product_galleries
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $image) {
+                $path = $image->store('products/galleries', 'public');
+                ProductGallery::create([
+                    'product_id' => $product->id,
+                    'image'      => $path
+                ]);
+            }
+        }
 
         $stockData = [];
         foreach ($colors as $color) {
@@ -142,6 +155,7 @@ class ProductController extends Controller
             'size_chart_image' => 'nullable|image|max:2048',
             'colors'           => 'nullable|array',
             'sizes'            => 'nullable|array',
+            'additional_images.*' => 'nullable|image|max:2048', // TAMBAHAN: Validasi foto multiple
         ]);
 
         // Replace Foto Utama jika ada yang baru
@@ -163,6 +177,18 @@ class ProductController extends Controller
 
         // 1. Update data produk di tabel products
         $product->update($validated);
+
+        // TAMBAHAN: Logic untuk menyimpan tambahan multiple images saat proses Edit
+        // (Sistemnya menambahkan foto baru ke galeri yang sudah ada)
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $image) {
+                $path = $image->store('products/galleries', 'public');
+                ProductGallery::create([
+                    'product_id' => $product->id,
+                    'image'      => $path
+                ]);
+            }
+        }
 
         // 2. LOGIKA UPDATE VARIASI STOK
         // Hapus variasi yang warnanya/ukurannya sudah tidak dicentang lagi
@@ -197,6 +223,14 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $name = $product->name;
+        
+        // TAMBAHAN: Hapus file fisik galeri dari storage sebelum datanya dihapus dari DB
+        if ($product->galleries) {
+            foreach ($product->galleries as $gallery) {
+                Storage::disk('public')->delete($gallery->image);
+            }
+        }
+
         // Ini otomatis akan menghapus stoknya juga karena di migration pakai ->onDelete('cascade')
         $product->delete(); 
         ActivityLog::log('Produk dihapus', $name, 'danger');

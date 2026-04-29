@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Models\Product;
+
 // Import Controller Admin
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController;
@@ -53,12 +55,22 @@ Route::name('pelanggan.')->group(function () {
     })->name('home');
 
     // Nama rute jadi: pelanggan.katalog
+    // Route::get('/katalog', function () {
+    //     return view('pelanggan.katalog');
+    // })->name('katalog');
+
+    // Route::get('/produk/{slug}', function ($slug) {
+    //     return view('pelanggan.produk-detail');
+    // })->name('produk.detail');
+
     Route::get('/katalog', function () {
-        return view('pelanggan.katalog');
+        $products = Product::all();
+        return view('pelanggan.katalog', compact('products'));
     })->name('katalog');
 
     Route::get('/produk/{slug}', function ($slug) {
-        return view('pelanggan.produk-detail');
+        $product = Product::where('slug', $slug)->firstOrFail();
+        return view('pelanggan.produk-detail', compact('product'));
     })->name('produk.detail');
 });
 
@@ -89,7 +101,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Products
     Route::resource('products', ProductController::class);
     Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
-         ->name('products.updateStock');
+        ->name('products.updateStock');
 
     // ---- Review Management ----
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -102,7 +114,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Orders
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export'); 
+    Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
@@ -132,5 +144,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])
-         ->name('profile.password');
+        ->name('profile.password');
 });

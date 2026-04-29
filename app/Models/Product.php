@@ -12,9 +12,23 @@ class Product extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description', 'type',
-        'price', 'original_price', 'sku', 'is_active', 'is_featured',
-        'main_image', 'size_chart_image', 'gallery', 'colors', 'sizes', 'rating', 'review_count',
+        'category_id',
+        'name',
+        'slug',
+        'description',
+        'type',
+        'price',
+        'original_price',
+        'sku',
+        'is_active',
+        'is_featured',
+        'main_image',
+        'size_chart_image',
+        'gallery',
+        'colors',
+        'sizes',
+        'rating',
+        'review_count',
     ];
 
     protected $casts = [
@@ -55,6 +69,11 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function galleries()
+    {
+        return $this->hasMany(ProductGallery::class);
     }
 
     // ---- Helpers ----
