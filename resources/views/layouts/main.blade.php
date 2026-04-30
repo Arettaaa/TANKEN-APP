@@ -141,8 +141,8 @@
                             {{-- Dropdown Akun Saya (Desktop) --}}
                             <div class="absolute right-0 top-[100%] pt-2 w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div class="bg-white border border-gray-100 rounded-md shadow-lg py-1 overflow-hidden">
-                                    <a href="{{ route('pelanggan.profil') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Akun Saya</a>
-                                    <a href="{{ route('pelanggan.pesanan') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Pesanan Saya</a>
+                                    <a href="{{ route('pelanggan.profil-edit') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Akun Saya</a>
+                                    <a href="{{ route('pelanggan.profil-order') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Pesanan Saya</a>
                                     <hr class="border-gray-100 my-1">
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
@@ -159,7 +159,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </a>
                     @else
-                        <a href="{{ route('pelanggan.profil') }}" class="nav-icon md:hidden" aria-label="Akun Saya">
+                        <a href="{{ route('pelanggan.profil-edit') }}" class="nav-icon md:hidden" aria-label="Akun Saya">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </a>
                     @endguest
@@ -188,7 +188,7 @@
                     <hr class="border-gray-100">
                     
                     {{-- Wishlist Khusus Mobile --}}
-                    <a href="{{ route('pelanggan.wishlist') }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
+                    <a href="{{ route('pelanggan.profil-wishlist') }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         Wishlist
                     </a>
@@ -200,7 +200,7 @@
                             Masuk / Daftar
                         </a>
                     @else
-                        <a href="{{ route('pelanggan.profil') }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
+                        <a href="{{ route('pelanggan.profil-edit') }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             Pengaturan Akun
                         </a>

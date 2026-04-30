@@ -64,36 +64,39 @@ Route::name('pelanggan.')->group(function () {
         return view('pelanggan.produk-detail', compact('product'));
     })->name('produk.detail');
 
-    // 👇 RUTE AKUN & PROFIL 👇
+    // PROFIL PELANGGAN
+    //sidebaredit akun
     Route::get('/profil', function () {
         return view('pelanggan.profil-edit');
-    })->name('profil');
+    })->name('profil-edit');
 
     Route::put('/profil', function () {
         return back()->with('success', 'Profil berhasil diperbarui!');
     })->name('profil.simpan');
 
-    // 👇 RUTE GANTI PASSWORD 👇
+    // sidebar password
     Route::get('/ganti-password', function () {
         return view('pelanggan.profil-password'); 
-    })->name('ganti-password');
+    })->name('profil-password');
 
     Route::put('/ganti-password', function () {
         return back()->with('success', 'Password berhasil diubah!');
     })->name('ganti-password.simpan');
 
-    // 👇 PLACEHOLDER SIDEBAR LAINNYA (Supaya gak error 'Route not defined') 👇
-    Route::get('/pesanan', function () {
-        return view('pelanggan.pesanan'); // Tinggal kamu buat view pesanan.blade.php nanti
-    })->name('pesanan');
+    //sidebar pesanan
+    Route::get('/profil-order', function () {
+        return view('pelanggan.profil-order'); 
+    })->name('profil-order');
 
+    //sidebar wishlist
     Route::get('/wishlist', function () {
         return view('pelanggan.wishlist'); // Tinggal kamu buat view wishlist.blade.php nanti
-    })->name('wishlist');
+    })->name('profil-wishlist');
 
+    //sidebar alamat
     Route::get('/alamat', function () {
         return view('pelanggan.alamat'); // Tinggal kamu buat view alamat.blade.php nanti
-    })->name('alamat');
+    })->name('profil-alamat');
 });
 
 // Women collection
