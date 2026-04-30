@@ -54,24 +54,46 @@ Route::name('pelanggan.')->group(function () {
         return view('pelanggan.homepage');
     })->name('home');
 
-    // Nama rute jadi: pelanggan.katalog
-    // Route::get('/katalog', function () {
-    //     return view('pelanggan.katalog');
-    // })->name('katalog');
-
-    // Route::get('/produk/{slug}', function ($slug) {
-    //     return view('pelanggan.produk-detail');
-    // })->name('produk.detail');
-
     Route::get('/katalog', function () {
-        $products = Product::all();
+        $products = \App\Models\Product::all();
         return view('pelanggan.katalog', compact('products'));
     })->name('katalog');
 
     Route::get('/produk/{slug}', function ($slug) {
-        $product = Product::where('slug', $slug)->firstOrFail();
+        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
         return view('pelanggan.produk-detail', compact('product'));
     })->name('produk.detail');
+
+    // 👇 RUTE AKUN & PROFIL 👇
+    Route::get('/profil', function () {
+        return view('pelanggan.profil-edit');
+    })->name('profil');
+
+    Route::put('/profil', function () {
+        return back()->with('success', 'Profil berhasil diperbarui!');
+    })->name('profil.simpan');
+
+    // 👇 RUTE GANTI PASSWORD 👇
+    Route::get('/ganti-password', function () {
+        return view('pelanggan.profil-password'); 
+    })->name('ganti-password');
+
+    Route::put('/ganti-password', function () {
+        return back()->with('success', 'Password berhasil diubah!');
+    })->name('ganti-password.simpan');
+
+    // 👇 PLACEHOLDER SIDEBAR LAINNYA (Supaya gak error 'Route not defined') 👇
+    Route::get('/pesanan', function () {
+        return view('pelanggan.pesanan'); // Tinggal kamu buat view pesanan.blade.php nanti
+    })->name('pesanan');
+
+    Route::get('/wishlist', function () {
+        return view('pelanggan.wishlist'); // Tinggal kamu buat view wishlist.blade.php nanti
+    })->name('wishlist');
+
+    Route::get('/alamat', function () {
+        return view('pelanggan.alamat'); // Tinggal kamu buat view alamat.blade.php nanti
+    })->name('alamat');
 });
 
 // Women collection
