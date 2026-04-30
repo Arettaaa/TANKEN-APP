@@ -49,55 +49,71 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 Route::redirect('/', '/beranda');
 
 Route::name('pelanggan.')->group(function () {
+    
     // Nama rute jadi: pelanggan.home
     Route::get('/beranda', function () {
         return view('pelanggan.homepage');
     })->name('home');
 
+    // Nama rute jadi: pelanggan.katalog
     Route::get('/katalog', function () {
         $products = \App\Models\Product::all();
         return view('pelanggan.katalog', compact('products'));
     })->name('katalog');
 
+    // Nama rute jadi: pelanggan.produk.detail
     Route::get('/produk/{slug}', function ($slug) {
         $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
         return view('pelanggan.produk-detail', compact('product'));
     })->name('produk.detail');
 
-    // PROFIL PELANGGAN
-    //sidebaredit akun
-    Route::get('/profil', function () {
-        return view('pelanggan.profil-edit');
-    })->name('profil-edit');
 
-    Route::put('/profil', function () {
-        return back()->with('success', 'Profil berhasil diperbarui!');
-    })->name('profil.simpan');
+    // ==========================================
+    // ROUTE AKUN PELANGGAN (DIBUNGKUS PREFIX 'akun')
+    // ==========================================
+    Route::prefix('akun')->group(function () {
+        
+        // 1. Edit Profil (URL: /akun/profil | Nama Rute: pelanggan.profil-edit)
+        Route::get('/profil', function () {
+            return view('pelanggan.profil-edit');
+        })->name('profil-edit');
+        
+        // 👇 TAMBAHKAN RUTE INI UNTUK MENANGANI FORM SUBMIT PROFIL 👇
+        Route::post('/profil/simpan', function (\Illuminate\Http\Request $request) {
+            // Nanti di sini tempat menaruh logika update ke database
+            // Untuk sekarang, kita return kembali ke halaman sebelumnya (dummy sukses)
+            return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
+        })->name('profil.simpan');
 
-    // sidebar password
-    Route::get('/ganti-password', function () {
-        return view('pelanggan.profil-password'); 
-    })->name('profil-password');
+        // 2. Ganti Password (URL: /akun/password | Nama Rute: pelanggan.profil-password)
+        Route::get('/password', function () {
+            return view('pelanggan.profil-password');
+        })->name('profil-password');
 
-    Route::put('/ganti-password', function () {
-        return back()->with('success', 'Password berhasil diubah!');
-    })->name('ganti-password.simpan');
+        // 👇 TAMBAHKAN RUTE POST INI UNTUK MENYIMPAN PASSWORD 👇
+        Route::post('/password/simpan', function (\Illuminate\Http\Request $request) {
+            // Nanti logika validasi password lama & update password baru ditaruh di sini
+            return redirect()->back()->with('success', 'Password berhasil diubah!');
+        })->name('ganti-password.simpan');
 
-    //sidebar pesanan
-    Route::get('/profil-order', function () {
-        return view('pelanggan.profil-order'); 
-    })->name('profil-order');
+        // 3. Riwayat Pesanan (URL: /akun/pesanan | Nama Rute: pelanggan.profil-order)
+        Route::get('/pesanan', function () {
+            return view('pelanggan.profil-order');
+        })->name('profil-order');
 
-    //sidebar wishlist
-    Route::get('/profil-wishlist', function () {
-        return view('pelanggan.profil-wishlist'); 
-    })->name('profil-wishlist');
+        // 4. Wishlist (URL: /akun/wishlist | Nama Rute: pelanggan.profil-wishlist)
+        Route::get('/wishlist', function () {
+            return view('pelanggan.profil-wishlist');
+        })->name('profil-wishlist');
 
-    //sidebar alamat
-    Route::get('/alamat', function () {
-        return view('pelanggan.alamat'); // Tinggal kamu buat view alamat.blade.php nanti
-    })->name('profil-alamat');
-});
+        // 5. Alamat Saya (URL: /akun/alamat | Nama Rute: pelanggan.profil-alamat)
+        Route::get('/alamat', function () {
+            return view('pelanggan.profil-alamat');
+        })->name('profil-alamat');
+
+    }); // <-- Penutup dari Route::prefix('akun')
+
+}); // <-- Penutup dari Route::name('pelanggan.')
 
 // Women collection
 Route::get('/women', function () {
