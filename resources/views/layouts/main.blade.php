@@ -13,6 +13,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
+    {{-- Bootstrap Icons CDN (Untuk ikon Keranjang Troli) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    {{-- FontAwesome CDN (Global) --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script>
         tailwind.config = {
             theme: {
@@ -115,14 +121,15 @@
                         </button>
                     </div>
 
-                    {{-- Wishlist --}}
-                    <a href="#" class="nav-icon hidden md:inline-flex" aria-label="Wishlist">
+                    {{-- Wishlist (Dengan Notif Badge) --}}
+                    <a href="{{ route('pelanggan.profil-wishlist') ?? '#' }}" class="nav-icon relative hidden md:inline-flex" aria-label="Wishlist">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <span id="wishlist-badge-desktop" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
                     </a>
 
-                    {{-- Cart --}}
+                    {{-- Cart (Diubah jadi Bootstrap Icon Troli + Badge Fix) --}}
                     <a href="#" class="nav-icon relative" aria-label="Keranjang" id="cart-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        <i class="bi bi-cart" style="font-size: 1.15rem;"></i>
                         <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
                     </a>
 
@@ -141,8 +148,8 @@
                             {{-- Dropdown Akun Saya (Desktop) --}}
                             <div class="absolute right-0 top-[100%] pt-2 w-44 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div class="bg-white border border-gray-100 rounded-md shadow-lg py-1 overflow-hidden">
-                                    <a href="{{ route('pelanggan.profil-edit') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Akun Saya</a>
-                                    <a href="{{ route('pelanggan.profil-order') }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Pesanan Saya</a>
+                                    <a href="{{ route('pelanggan.profil-edit') ?? '#' }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Akun Saya</a>
+                                    <a href="{{ route('pelanggan.profil-order') ?? '#' }}" class="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-black transition-colors">Pesanan Saya</a>
                                     <hr class="border-gray-100 my-1">
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
@@ -159,7 +166,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </a>
                     @else
-                        <a href="{{ route('pelanggan.profil-edit') }}" class="nav-icon md:hidden" aria-label="Akun Saya">
+                        <a href="{{ route('pelanggan.profil-edit') ?? '#' }}" class="nav-icon md:hidden" aria-label="Akun Saya">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="18" height="18"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </a>
                     @endguest
@@ -187,10 +194,13 @@
                     <a href="#" class="text-sm font-medium text-gray-800 hover:text-black py-1">Help</a>
                     <hr class="border-gray-100">
                     
-                    {{-- Wishlist Khusus Mobile --}}
-                    <a href="{{ route('pelanggan.profil-wishlist') }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                        Wishlist
+                    {{-- Wishlist Khusus Mobile (Dengan Badge) --}}
+                    <a href="{{ route('pelanggan.profil-wishlist') ?? '#' }}" class="flex items-center justify-between text-sm font-medium text-gray-800 hover:text-black py-1">
+                        <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            Wishlist
+                        </div>
+                        <span id="wishlist-badge-mobile" class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
                     </a>
 
                     {{-- ===== LOGIKA AUTENTIKASI: MOBILE MENU ===== --}}
@@ -200,7 +210,7 @@
                             Masuk / Daftar
                         </a>
                     @else
-                        <a href="{{ route('pelanggan.profil-edit') }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
+                        <a href="{{ route('pelanggan.profil-edit') ?? '#' }}" class="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-black py-1">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             Pengaturan Akun
                         </a>
@@ -219,7 +229,6 @@
     </nav>
 
     {{-- ====== MAIN CONTENT ====== --}}
-    {{-- padding-top diganti agar aman dari navbar yang melayang (fixed) --}}
     <main class="pt-[56px] md:pt-[64px] flex-grow">
         @yield('content')
     </main>
@@ -286,10 +295,8 @@
                 </div>
             </div>
 
-            {{-- Social Media & Newsletter (Responsive Stack) --}}
+            {{-- Social Media & Newsletter --}}
             <div class="mt-10 pt-8 border-t border-gray-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-8 md:gap-6">
-
-                {{-- Follow us on social media --}}
                 <div class="w-full md:w-auto">
                     <p class="text-xs text-gray-400 mb-3 uppercase tracking-widest font-semibold">Follow us</p>
                     <div class="flex items-center gap-3">
@@ -329,13 +336,11 @@
 
     {{-- Script Navigasi --}}
     <script>
-        // Navbar scroll effect
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             navbar.classList.toggle('scrolled', window.scrollY > 10);
         });
 
-        // Mobile menu toggle
         const hamburger = document.getElementById('hamburger');
         const mobileMenu = document.getElementById('mobile-menu');
         if(hamburger && mobileMenu) {
@@ -344,7 +349,6 @@
             });
         }
 
-        // Search expand toggle
         const searchToggle = document.getElementById('searchToggle');
         const searchBox   = document.getElementById('searchBox');
         const searchInput = document.getElementById('searchInput');
@@ -362,7 +366,6 @@
                 }
             });
 
-            // Tutup search saat klik di luar
             document.addEventListener('click', (e) => {
                 if (searchOpen && !searchToggle.contains(e.target) && !searchBox.contains(e.target)) {
                     searchOpen = false;
@@ -371,7 +374,6 @@
                 }
             });
 
-            // Tutup search saat tekan Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && searchOpen) {
                     searchOpen = false;
@@ -382,22 +384,51 @@
         }
     </script>
 
-    {{-- Cart badge global script --}}
+    {{-- ==== BADGE KERANJANG DAN WISHLIST GLOBAL SCRIPT ==== --}}
     <script>
+        // Logika UPDATE BADGE KERANJANG
         function updateCartBadge() {
             const cart = JSON.parse(sessionStorage.getItem('tanken_cart') || '[]');
-            const total = cart.reduce((sum, item) => sum + item.qty, 0);
+            // Hitung macam varian yang berbeda, bukan total quantity-nya
+            const totalVarian = cart.length; 
             const badge = document.getElementById('cart-badge');
             if (!badge) return;
-            if (total > 0) {
-                badge.textContent = total > 99 ? '99+' : total;
+            
+            if (totalVarian > 0) {
+                badge.textContent = totalVarian > 99 ? '99+' : totalVarian;
                 badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
             }
         }
-        document.addEventListener('DOMContentLoaded', updateCartBadge);
+
+        // Logika UPDATE BADGE WISHLIST
+        function updateWishlistBadge() {
+            // Asumsi wishlist disimpan di sessionStorage/localStorage
+            const wishlist = JSON.parse(sessionStorage.getItem('tanken_wishlist') || '[]');
+            const totalItem = wishlist.length;
+            
+            const badgeDesktop = document.getElementById('wishlist-badge-desktop');
+            const badgeMobile = document.getElementById('wishlist-badge-mobile');
+            
+            if (totalItem > 0) {
+                if(badgeDesktop) { badgeDesktop.textContent = totalItem > 99 ? '99+' : totalItem; badgeDesktop.classList.remove('hidden'); }
+                if(badgeMobile) { badgeMobile.textContent = totalItem > 99 ? '99+' : totalItem; badgeMobile.classList.remove('hidden'); }
+            } else {
+                if(badgeDesktop) badgeDesktop.classList.add('hidden');
+                if(badgeMobile) badgeMobile.classList.add('hidden');
+            }
+        }
+
+        // Jalankan saat halamannya diload pertama kali
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartBadge();
+            updateWishlistBadge();
+        });
+
+        // Event listener biar langsung ke-update setiap kali ada barang baru ditambahkan
         window.addEventListener('cartUpdated', updateCartBadge);
+        window.addEventListener('wishlistUpdated', updateWishlistBadge);
     </script>
 
     @stack('scripts')

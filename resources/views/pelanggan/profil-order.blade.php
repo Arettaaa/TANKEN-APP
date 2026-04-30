@@ -2,35 +2,35 @@
 
 @section('title', 'Riwayat Pesanan — TANKEN')
 
-{{-- Panggil FontAwesome langsung ke head layout utama agar aman dari error CSS --}}
+{{-- Panggil FontAwesome menggunakan push ke 'styles' utama agar tidak tertelan tag <style> --}}
 @push('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 @endpush
 
-{{-- CSS khusus untuk halaman ini --}}
+{{-- CSS khusus untuk halaman ini (tanpa tag link) --}}
 @push('akun-styles')
-/* Menyembunyikan scrollbar untuk tab navigasi */
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Menyembunyikan scrollbar untuk tab navigasi */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Transisi untuk accordion icon */
-.accordion-icon { transition: transform 0.3s ease; }
-.accordion-icon.open { transform: rotate(180deg); }
+    /* Transisi untuk accordion icon */
+    .accordion-icon { transition: transform 0.3s ease; }
+    .accordion-icon.open { transform: rotate(180deg); }
 
-/* Timeline tracking line */
-.tracking-line {
-    position: absolute;
-    top: 50%;
-    left: 30px;
-    right: 30px;
-    height: 2px;
-    background-color: #e5e7eb;
-    transform: translateY(-50%);
-    z-index: 0;
-}
-@media (max-width: 640px) {
-    .tracking-line { left: 20px; right: 20px; }
-}
+    /* Timeline tracking line */
+    .tracking-line {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        right: 30px;
+        height: 2px;
+        background-color: #e5e7eb;
+        transform: translateY(-50%);
+        z-index: 0;
+    }
+    @media (max-width: 640px) {
+        .tracking-line { left: 20px; right: 20px; }
+    }
 @endpush
 
 @section('akun-content')
@@ -105,7 +105,7 @@ $orders = collect([
                 default      => strtoupper($order['status']),
             };
             
-            // Warna Badge Status yang baru (Delivered pakai hijau pastel/emerald)
+            // Warna Badge Status (Hijau Pastel untuk Selesai, sisanya standar TANKEN)
             $badgeClass = match($order['status']) {
                 'delivered'  => 'bg-emerald-100 text-emerald-800 border border-emerald-200',
                 'shipped'    => 'bg-gray-800 text-white',
@@ -115,7 +115,7 @@ $orders = collect([
             };
         @endphp
 
-        {{-- Wrapper Card Pesanan (Ada Atribut data-status untuk filter Javascript) --}}
+        {{-- Wrapper Card Pesanan --}}
         <div class="order-wrapper border border-gray-200 rounded-lg overflow-hidden bg-white" data-status="{{ $order['status'] }}">
             
             {{-- Bagian Header Kartu --}}
@@ -142,7 +142,7 @@ $orders = collect([
                 </div>
             </div>
 
-            {{-- Bagian Detail Body (Expand/Collapse) --}}
+            {{-- Bagian Detail Body --}}
             <div id="body-order-{{ $index }}" class="hidden border-t border-gray-100">
                 <div class="p-5 sm:p-6 bg-white">
                     
@@ -174,7 +174,7 @@ $orders = collect([
                                     <span class="text-[9px] font-bold uppercase mt-2 {{ in_array($order['status'], ['shipped', 'delivered']) ? 'text-black' : 'text-gray-400' }}">Dikirim</span>
                                 </div>
                                 
-                                {{-- Step 3: Selesai (Lingkaran Hitam, Teks Hitam) --}}
+                                {{-- Step 3: Selesai (Hitam & Ikon Kardus Putih) --}}
                                 <div class="flex flex-col items-center bg-white px-2">
                                     <div class="w-8 h-8 rounded-full {{ $order['status'] == 'delivered' ? 'bg-black' : 'bg-gray-100' }} flex items-center justify-center shadow-sm transition-colors">
                                         <i class="fa-solid fa-box-open text-sm" {!! $order['status'] == 'delivered' ? 'style="color: rgb(255, 255, 255);"' : 'style="color: #9ca3af;"' !!}></i>
@@ -198,7 +198,7 @@ $orders = collect([
                         <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase block mb-3">Daftar Produk</span>
                         <div class="flex items-center gap-4">
                             <div class="w-16 h-16 rounded-md bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200">
-                                <img src="https://ui-avatars.com/api/?name=Product&background=random" alt="Product" class="w-full h-full object-cover">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($order['product']['name']) }}&background=random" alt="Product" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm font-bold text-gray-900 truncate">{{ $order['product']['name'] }}</p>
@@ -229,14 +229,26 @@ $orders = collect([
                         </div>
                     </div>
 
-                    {{-- Tombol Aksi --}}
+                    {{-- Tombol Aksi Dinamis (Berubah sesuai status pesanan) --}}
                     <div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-gray-100">
                         <button class="w-full sm:w-1/2 bg-black text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-800 transition-colors">
                             Beli Lagi
                         </button>
-                        <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
-                            Bantuan Pesanan
-                        </button>
+                        
+                        {{-- Logika Tombol Ulasan ala Shopee --}}
+                        @if($order['status'] == 'delivered')
+                            <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
+                                Beri Ulasan
+                            </button>
+                        @elseif($order['status'] == 'cancelled')
+                            <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
+                                Rincian Batal
+                            </button>
+                        @else
+                            <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
+                                Lacak Paket
+                            </button>
+                        @endif
                     </div>
 
                 </div>
@@ -257,7 +269,7 @@ $orders = collect([
         </div>
         @endforelse
 
-        {{-- STATE KOSONG DARI HASIL FILTER TAB (DENGAN ICON X-MARK) --}}
+        {{-- STATE KOSONG DARI HASIL FILTER TAB --}}
         <div id="filter-empty-state" class="hidden flex-col items-center justify-center py-16 text-center bg-white border border-gray-200 rounded-lg">
             <i class="fa-regular fa-circle-xmark text-5xl mb-4" style="color: rgb(244, 86, 86);"></i>
             <p class="font-bold text-gray-900 text-base mb-1">Pesanan Tidak Ditemukan</p>
@@ -286,7 +298,6 @@ $orders = collect([
 
     // Fungsi Filter Kategori Tab
     function filterOrders(status, btnElement) {
-        // 1. Ubah styling tombol Tab agar kelihatan mana yang aktif
         const tabs = document.querySelectorAll('.tab-btn');
         tabs.forEach(tab => {
             tab.classList.remove('border-black', 'text-gray-900');
@@ -295,7 +306,6 @@ $orders = collect([
         btnElement.classList.remove('border-transparent', 'text-gray-400');
         btnElement.classList.add('border-black', 'text-gray-900');
 
-        // 2. Filter / Saring Card Pesanan
         const orders = document.querySelectorAll('.order-wrapper');
         let visibleCount = 0;
 
@@ -308,7 +318,6 @@ $orders = collect([
             }
         });
 
-        // 3. Tampilkan pesan kosong jika hasil filter 0 (Dengan icon X-Mark)
         const emptyState = document.getElementById('filter-empty-state');
         if (visibleCount === 0) {
             emptyState.classList.remove('hidden');

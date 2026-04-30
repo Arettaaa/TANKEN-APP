@@ -89,8 +89,8 @@ Route::name('pelanggan.')->group(function () {
     })->name('profil-order');
 
     //sidebar wishlist
-    Route::get('/wishlist', function () {
-        return view('pelanggan.wishlist'); // Tinggal kamu buat view wishlist.blade.php nanti
+    Route::get('/profil-wishlist', function () {
+        return view('pelanggan.profil-wishlist'); 
     })->name('profil-wishlist');
 
     //sidebar alamat
