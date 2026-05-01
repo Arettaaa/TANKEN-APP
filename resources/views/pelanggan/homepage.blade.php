@@ -229,16 +229,6 @@
         margin-bottom: 14px;
     }
 
-    /* Scroll reveal */
-    .reveal {
-        opacity: 0;
-        transform: translateY(24px);
-        transition: opacity 0.65s ease, transform 0.65s ease;
-    }
-    .reveal.visible {
-        opacity: 1;
-        transform: translateY(0);
-    }
 </style>
 @endpush
 

@@ -125,11 +125,33 @@ Route::get('/men', function () {
     return view('pelanggan.homepage'); // ganti dengan view men nanti
 })->name('men');
 
-// Help
+// =================================
+// Help & Support
+// =================================
+// help
 Route::get('/help', function () {
-    return view('pelanggan.homepage'); // ganti dengan view help nanti
+    return view('pelanggan.help'); // ← ganti dari homepage
 })->name('help');
 
+// shipping
+Route::get('/help/shipping', function () {
+    return view('pelanggan.shipping-information');
+})->name('help.shipping');
+
+// returns & exchanges
+Route::get('/help/returns', function () {
+    return view('pelanggan.returns-exchanges');
+})->name('help.returns');
+
+// size guide
+Route::get('/help/size-guide', function () {
+    return view('pelanggan.size-guide'); 
+})->name('help.size-guide');
+
+// faq
+Route::get('/help/faq', function () {
+    return view('pelanggan.faq'); 
+})->name('help.faq');
 
 
 // ==========================================
