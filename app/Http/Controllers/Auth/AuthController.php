@@ -37,8 +37,8 @@ class AuthController extends Controller
         // 3. Langsung login-kan
         Auth::login($user);
 
-        // 4. Lempar ke beranda
-        return redirect()->route('pelanggan.home');
+        // 4. Lempar ke login
+        return redirect()->route('login');
     }
 
     // PROSES MASUK (Login)
