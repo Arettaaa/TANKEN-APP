@@ -162,9 +162,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Products
+      Route::get('products/export', [ProductController::class, 'exportExcel'])
+        ->name('products.export');
     Route::resource('products', ProductController::class);
     Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
         ->name('products.updateStock');
+   
 
     // ---- Review Management ----
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');

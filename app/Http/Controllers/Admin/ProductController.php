@@ -17,19 +17,76 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with('category', 'stocks');
+        $query = Product::with(['category', 'stocks', 'galleries', 'reviews']);
 
+        // Search (sudah ada)
         if ($search = $request->search) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('sku', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%");
+            });
         }
 
-        $products = $query->latest()->paginate(10)->withQueryString();
+        // ✅ TAMBAH INI: Filter category
+        if ($request->category) {
+            $query->where('category_id', $request->category);
+        }
+
+        // ✅ TAMBAH INI: Filter type (pendek/panjang)
+        if ($request->type) {
+            $query->where('type', $request->type);
+        }
+
+        // ✅ TAMBAH INI: Sort
+        match ($request->sort) {
+            'price-asc'   => $query->orderBy('price', 'asc'),
+            'price-desc'  => $query->orderBy('price', 'desc'),
+            'stock-asc'  => $query->withSum('stocks', 'quantity')->orderBy('stocks_sum_quantity', 'asc'),
+            'stock-desc' => $query->withSum('stocks', 'quantity')->orderBy('stocks_sum_quantity', 'desc'),
+            default       => $query->latest(),
+        };
+
+        $products = $query->paginate(10)->withQueryString();
         $categories = Category::all();
 
         return view('admin.products', compact('products', 'categories'));
     }
 
+    public function exportExcel(Request $request)
+    {
+        $products = Product::with('stocks')
+            ->when($request->category, fn($q) => $q->where('category_id', $request->category))
+            ->when($request->type, fn($q) => $q->where('type', $request->type))
+            ->get();
+
+        $filename = "Tanken_Products_" . date('Y-m-d') . ".csv";
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $callback = function () use ($products) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['No', 'Nama', 'SKU', 'Tipe', 'Harga', 'Stok', 'Status']);
+            foreach ($products as $i => $p) {
+                fputcsv($file, [
+                    $i + 1,
+                    $p->name,
+                    $p->sku,
+                    $p->type,
+                    $p->price,
+                    $p->stocks->sum('quantity'),
+                    $p->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
     public function create()
     {
         $categories = Category::all();
@@ -40,7 +97,7 @@ class ProductController extends Controller
     {
         // ===== JALAN NINJA: CEGAT & UBAH DATA SEBELUM VALIDASI =====
         if ($request->has('colors') && is_string($request->colors)) {
-            $cleanColors = str_replace(['[', ']', '"'], '', $request->colors); 
+            $cleanColors = str_replace(['[', ']', '"'], '', $request->colors);
             $request->merge(['colors' => array_filter(array_map('trim', explode(',', $cleanColors)))]);
         }
         if ($request->has('sizes') && is_string($request->sizes)) {
@@ -110,7 +167,7 @@ class ProductController extends Controller
                 }
             }
         }
-        
+
         if (!empty($stockData)) {
             ProductStock::insert($stockData);
         }
@@ -136,7 +193,7 @@ class ProductController extends Controller
     {
         // ===== JALAN NINJA (Sama seperti store) =====
         if ($request->has('colors') && is_string($request->colors)) {
-            $cleanColors = str_replace(['[', ']', '"'], '', $request->colors); 
+            $cleanColors = str_replace(['[', ']', '"'], '', $request->colors);
             $request->merge(['colors' => array_filter(array_map('trim', explode(',', $cleanColors)))]);
         }
         if ($request->has('sizes') && is_string($request->sizes)) {
@@ -196,7 +253,7 @@ class ProductController extends Controller
             ProductStock::where('product_id', $product->id)
                 ->where(function ($query) use ($colors, $sizes) {
                     $query->whereNotIn('color', $colors)
-                          ->orWhereNotIn('size', $sizes);
+                        ->orWhereNotIn('size', $sizes);
                 })->delete();
         } else {
             ProductStock::where('product_id', $product->id)->delete();
@@ -209,7 +266,7 @@ class ProductController extends Controller
                     // firstOrCreate: Kalau datanya sudah ada, biarkan. Kalau belum ada, buat baru dengan stok 0
                     ProductStock::firstOrCreate(
                         ['product_id' => $product->id, 'color' => $color, 'size' => $size],
-                        ['quantity' => 0] 
+                        ['quantity' => 0]
                     );
                 }
             }
@@ -223,7 +280,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $name = $product->name;
-        
+
         // TAMBAHAN: Hapus file fisik galeri dari storage sebelum datanya dihapus dari DB
         if ($product->galleries) {
             foreach ($product->galleries as $gallery) {
@@ -232,7 +289,7 @@ class ProductController extends Controller
         }
 
         // Ini otomatis akan menghapus stoknya juga karena di migration pakai ->onDelete('cascade')
-        $product->delete(); 
+        $product->delete();
         ActivityLog::log('Produk dihapus', $name, 'danger');
         return redirect()->route('admin.products.index')->with('success', "Produk berhasil dihapus.");
     }

@@ -14,7 +14,6 @@ class AuthController extends Controller
     // PROSES DAFTAR (Register)
     public function register(Request $request)
     {
-        // 1. Cek apakah isiannya bener
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -22,23 +21,20 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            // Kalau gagal (misal email udah dipakai), balikin ke halaman daftar
             return back()->with('error', 'Gagal mendaftar. Pastikan email belum digunakan dan password minimal 8 karakter.');
         }
 
-        // 2. Buat akun baru di database
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Password wajib di-hash/enkripsi
-            'role' => 'customer', // Default role untuk yang daftar manual
+            'password' => Hash::make($request->password),
+            'role' => 'customer',
         ]);
 
-        // 3. Langsung login-kan
-        Auth::login($user);
+        // HAPUS Auth::login($user); DI SINI
 
-        // 4. Lempar ke login
-        return redirect()->route('login');
+        // Lempar ke login dengan pesan sukses
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
     // PROSES MASUK (Login)
@@ -72,7 +68,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect()->route('login');
     }
 }
