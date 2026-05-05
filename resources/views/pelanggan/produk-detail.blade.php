@@ -1,6 +1,8 @@
 @extends('layouts.main')
 
-@section('title', 'Yama Crinkle Nylon Boardshorts — TANKEN')
+{{-- DYNAMIC: title dari database --}}
+{{-- OLD: @section('title', 'Yama Crinkle Nylon Boardshorts — TANKEN') --}}
+@section('title', $product->name . ' — TANKEN')
 
 @section('content')
 
@@ -51,8 +53,10 @@
                  onclick="openZoom(document.getElementById('main-product-img').src)">
                 <img
                     id="main-product-img"
-                    src="{{ asset('images/men-home.jpg') }}"
-                    alt="Yama Crinkle Nylon Boardshorts"
+                    {{-- OLD: src="{{ asset('images/men-home.jpg') }}" --}}
+                    {{-- DYNAMIC: gunakan main_image dari DB, fallback ke placeholder --}}
+                    src="{{ $product->main_image ? asset('storage/' . $product->main_image) : asset('images/men-home.jpg') }}"
+                    alt="{{ $product->name }}"
                     class="w-full h-full object-cover object-top"
                 >
                 {{-- Hint label --}}
@@ -65,17 +69,36 @@
             </div>
 
             {{-- Thumbnails --}}
+            {{-- OLD:
             <div class="flex gap-3">
                 <button onclick="switchImage('{{ asset('images/men-home.jpg') }}', this)"
                     class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-black">
-                    <img src="{{ asset('images/men-home.jpg') }}" alt="Thumb 1"
+                    <img src="{{ asset('images/men-home.jpg') }}" ...>
+                </button>
+                <button onclick="switchImage('{{ asset('images/men-home2.jpg') }}', this)" ...>
+                    <img src="{{ asset('images/men-home2.jpg') }}" ...>
+                </button>
+            </div>
+            --}}
+            {{-- DYNAMIC: thumbnail dari main_image + galleries --}}
+            <div class="flex gap-3 overflow-x-auto pb-1">
+                {{-- Thumbnail main image --}}
+                @if($product->main_image)
+                <button onclick="switchImage('{{ asset('storage/' . $product->main_image) }}', this)"
+                    class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-black">
+                    <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}"
                          class="w-full h-full object-cover object-top">
                 </button>
-                <button onclick="switchImage('{{ asset('images/men-home2.jpg') }}', this)"
+                @endif
+
+                {{-- Thumbnail dari galleries --}}
+                @foreach($product->galleries as $gallery)
+                <button onclick="switchImage('{{ asset('storage/' . $gallery->image) }}', this)"
                     class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                    <img src="{{ asset('images/men-home2.jpg') }}" alt="Thumb 2"
+                    <img src="{{ asset('storage/' . $gallery->image) }}" alt="{{ $product->name }}"
                          class="w-full h-full object-cover object-top">
                 </button>
+                @endforeach
             </div>
         </div>
 
@@ -83,66 +106,108 @@
         <div class="flex flex-col">
 
             {{-- Category badge --}}
-            <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Celana Pendek</p>
+            {{-- OLD: <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Celana Pendek</p> --}}
+            {{-- DYNAMIC: tipe produk dari DB --}}
+            <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">
+                Celana {{ ucfirst($product->type) }}
+            </p>
 
             {{-- Title --}}
+            {{-- OLD: <h1 ...>Yama Crinkle Nylon Boardshorts</h1> --}}
+            {{-- DYNAMIC: nama produk dari DB --}}
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
-                Yama Crinkle Nylon Boardshorts
+                {{ $product->name }}
             </h1>
 
             {{-- Price --}}
+            {{-- OLD:
+            <div ...>
+                <span ...>Rp1.249.000</span>
+                <span ...>Rp1.499.000</span>
+                <span ...>17%</span>
+            </div>
+            --}}
+            {{-- DYNAMIC: harga dari DB, original_price & diskon jika ada --}}
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900">Rp1.249.000</span>
-                <span class="text-sm text-gray-400 line-through">Rp1.499.000</span>
-                <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded">17%</span>
+                <span class="text-xl sm:text-2xl font-bold text-gray-900">
+                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                </span>
+                @if($product->original_price && $product->original_price > $product->price)
+                <span class="text-sm text-gray-400 line-through">
+                    Rp {{ number_format($product->original_price, 0, ',', '.') }}
+                </span>
+                <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded">
+                    {{ $product->discount_percent }}%
+                </span>
+                @endif
             </div>
 
             {{-- Rating --}}
+            {{-- OLD: rating & review count hardcoded (4.7, 3 ulasan) --}}
+            {{-- DYNAMIC: dari relasi reviews --}}
+            @php
+                $avgRating = $product->reviews->avg('rating') ?? 0;
+                $reviewCount = $product->reviews->count();
+            @endphp
+            @if($reviewCount > 0)
             <div class="flex items-center gap-2 mb-3">
                 <div class="flex gap-0.5">
                     @for($i = 1; $i <= 5; $i++)
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                             fill="{{ $i <= 4 ? '#f5a623' : '#e5e7eb' }}"
+                             fill="{{ $i <= round($avgRating) ? '#f5a623' : '#e5e7eb' }}"
                              width="14" height="14">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                     @endfor
                 </div>
-                <span class="text-sm text-gray-600 font-medium">4.7</span>
-                <span class="text-sm text-gray-400">(3 ulasan)</span>
+                <span class="text-sm text-gray-600 font-medium">{{ number_format($avgRating, 1) }}</span>
+                <span class="text-sm text-gray-400">({{ $reviewCount }} ulasan)</span>
             </div>
+            @endif
 
             {{-- SKU & Stock --}}
+            {{-- OLD:
+            <span>SKU: TKN-YCB-001</span>
+            <span>✓ Stok tersedia (60 item)</span>
+            --}}
+            {{-- DYNAMIC: SKU & total stok dari DB --}}
+            @php $totalStock = $product->stocks->sum('quantity'); @endphp
             <div class="flex flex-col gap-0.5 mb-4 text-xs text-gray-500">
-                <span><span class="font-semibold text-gray-700">SKU:</span> TKN-YCB-001</span>
-                <span class="text-green-600 font-semibold">✓ Stok tersedia (60 item)</span>
+                <span><span class="font-semibold text-gray-700">SKU:</span> {{ $product->sku }}</span>
+                @if($totalStock > 0)
+                <span class="text-green-600 font-semibold">✓ Stok tersedia ({{ $totalStock }} item)</span>
+                @else
+                <span class="text-red-500 font-semibold">✗ Stok habis</span>
+                @endif
             </div>
 
             <hr class="border-gray-100 mb-5">
 
             {{-- COLOR --}}
+            {{-- OLD: warna hardcoded (Olive, Stone Grey, Indigo) --}}
+            {{-- DYNAMIC: dari $product->colors (JSON array) --}}
+            @php $colorsArray = is_array($product->colors) ? $product->colors : (json_decode($product->colors, true) ?? []); @endphp
+            @if(!empty($colorsArray))
             <div class="mb-5">
                 <p class="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">
                     Warna — <span id="selected-color-label" class="text-gray-900 normal-case font-semibold tracking-normal">Pilih warna</span>
                 </p>
                 <div class="flex flex-wrap gap-2" id="color-options">
-                    <button onclick="selectColor('Olive', this)"
+                    @foreach($colorsArray as $color)
+                    <button onclick="selectColor('{{ $color }}', this)"
                         class="color-btn px-4 py-2 rounded border-2 border-gray-200 text-sm font-medium text-gray-700 hover:border-gray-800 transition-colors">
-                        Olive
+                        {{ $color }}
                     </button>
-                    <button onclick="selectColor('Stone Grey', this)"
-                        class="color-btn px-4 py-2 rounded border-2 border-gray-200 text-sm font-medium text-gray-700 hover:border-gray-800 transition-colors">
-                        Stone Grey
-                    </button>
-                    <button onclick="selectColor('Indigo', this)"
-                        class="color-btn px-4 py-2 rounded border-2 border-gray-200 text-sm font-medium text-gray-700 hover:border-gray-800 transition-colors">
-                        Indigo
-                    </button>
+                    @endforeach
                 </div>
                 <p id="color-error" class="text-xs text-red-500 mt-1.5 hidden">⚠ Pilih warna terlebih dahulu.</p>
             </div>
+            @endif
 
             {{-- SIZE --}}
+            {{-- OLD: ukuran hardcoded (XS, S, M, L, XL, XXL) --}}
+            {{-- DYNAMIC: dari $product->sizes (JSON array) --}}
+            @php $sizesArray = is_array($product->sizes) ? $product->sizes : (json_decode($product->sizes, true) ?? []); @endphp
             <div class="mb-5">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-xs font-bold tracking-widest uppercase text-gray-500">
@@ -154,12 +219,20 @@
                     </button>
                 </div>
                 <div class="flex flex-wrap gap-2" id="size-options">
+                    @forelse($sizesArray as $sz)
+                    <button onclick="selectSize('{{ $sz }}', this)"
+                        class="size-btn w-11 h-11 rounded border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-800 transition-colors">
+                        {{ $sz }}
+                    </button>
+                    @empty
+                    {{-- Fallback kalau sizes kosong --}}
                     @foreach(['XS','S','M','L','XL','XXL'] as $sz)
                     <button onclick="selectSize('{{ $sz }}', this)"
                         class="size-btn w-11 h-11 rounded border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-800 transition-colors">
                         {{ $sz }}
                     </button>
                     @endforeach
+                    @endforelse
                 </div>
                 <p id="size-error" class="text-xs text-red-500 mt-1.5 hidden">⚠ Pilih ukuran terlebih dahulu.</p>
             </div>
@@ -179,13 +252,14 @@
             {{-- ADD TO CART + WISHLIST --}}
             <div class="flex gap-3 mb-6">
                 <button onclick="addToCart()"
-                    class="flex-1 bg-black text-white text-sm font-bold uppercase tracking-wider py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 active:scale-[0.98] transition-all">
+                    class="flex-1 bg-black text-white text-sm font-bold uppercase tracking-wider py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 active:scale-[0.98] transition-all"
+                    {{ $totalStock <= 0 ? 'disabled' : '' }}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
                         <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
                         <line x1="3" y1="6" x2="21" y2="6"/>
                         <path d="M16 10a4 4 0 0 1-8 0"/>
                     </svg>
-                    Tambah ke Keranjang
+                    {{ $totalStock <= 0 ? 'Stok Habis' : 'Tambah ke Keranjang' }}
                 </button>
                 <button
                     class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-400 transition-colors">
@@ -238,68 +312,52 @@
                 class="tab-btn whitespace-nowrap pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-black border-b-2 border-black -mb-px">
                 Deskripsi
             </button>
+            {{-- OLD: Ulasan (3) hardcoded --}}
+            {{-- DYNAMIC: jumlah ulasan dari DB --}}
             <button onclick="switchTab('reviews')" id="tab-reviews"
                 class="tab-btn whitespace-nowrap pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors -mb-px">
-                Ulasan (3)
+                Ulasan ({{ $reviewCount }})
             </button>
         </div>
 
         {{-- Description content --}}
+        {{-- OLD: deskripsi hardcoded --}}
+        {{-- DYNAMIC: dari $product->description --}}
         <div id="content-desc" class="tab-content max-w-2xl">
-            <p class="text-sm text-gray-700 leading-relaxed">
-                Yama Crinkle Nylon Boardshort hadir sebagai pilihan tepat untuk gaya hidup aktif — nyaman digunakan untuk aktivitas outdoor, traveling, maupun momen santai sehari-hari.
-            </p>
-            <p class="text-sm text-gray-700 leading-relaxed mt-3">
-                Dilengkapi lima kantong praktis: dua kantong depan berukuran besar, dua kantong mesh yang cepat kering, dan satu kantong belakang. Tali pinggang elastis adjustable memberikan kenyamanan maksimal.
-            </p>
-            <ul class="mt-5 space-y-2 text-sm text-gray-600">
-                <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
-                    100% Recycled Nylon Crinkle Fabric
-                </li>
-                <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
-                    Quick-dry mesh lining
-                </li>
-                <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
-                    4-way stretch untuk kebebasan gerak
-                </li>
-                <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
-                    UPF 30+ perlindungan dari sinar matahari
-                </li>
-                <li class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-400 flex-shrink-0"></span>
-                    Bisa dicuci mesin — air dingin dianjurkan
-                </li>
-            </ul>
+            @if($product->description)
+            <p class="text-sm text-gray-700 leading-relaxed">{{ $product->description }}</p>
+            @else
+            <p class="text-sm text-gray-400 italic">Belum ada deskripsi untuk produk ini.</p>
+            @endif
         </div>
 
         {{-- Reviews content --}}
+        {{-- OLD: reviews hardcoded array dummy --}}
+        {{-- DYNAMIC: dari relasi $product->reviews --}}
         <div id="content-reviews" class="tab-content hidden max-w-2xl space-y-6">
-            @foreach([
-                ['name' => 'Andi R.',  'rating' => 5, 'date' => '12 Apr 2026', 'text' => 'Kualitas bagus banget, bahannya adem dan cepet kering. Cocok banget buat aktivitas outdoor!'],
-                ['name' => 'Bima S.',  'rating' => 4, 'date' => '5 Mar 2026',  'text' => 'Desainnya simpel dan elegan. Ukurannya pas sesuai chart. Recommended!'],
-                ['name' => 'Dita K.',  'rating' => 5, 'date' => '20 Feb 2026', 'text' => 'Sudah beli 2x, gak kecewa. Jahitannya rapi dan kantongnya banyak.'],
-            ] as $review)
+            @forelse($product->reviews as $review)
             <div class="border-b border-gray-100 pb-5 last:border-0">
                 <div class="flex items-center justify-between mb-1">
-                    <span class="text-sm font-bold text-gray-900">{{ $review['name'] }}</span>
-                    <span class="text-xs text-gray-400">{{ $review['date'] }}</span>
+                    {{-- OLD: 'Andi R.' hardcoded --}}
+                    <span class="text-sm font-bold text-gray-900">{{ $review->user->name ?? 'Pengguna' }}</span>
+                    {{-- OLD: '12 Apr 2026' hardcoded --}}
+                    <span class="text-xs text-gray-400">{{ $review->created_at->format('d M Y') }}</span>
                 </div>
                 <div class="flex gap-0.5 mb-2">
                     @for($i = 1; $i <= 5; $i++)
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                             fill="{{ $i <= $review['rating'] ? '#f5a623' : '#e5e7eb' }}"
+                             fill="{{ $i <= $review->rating ? '#f5a623' : '#e5e7eb' }}"
                              width="13" height="13">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                     @endfor
                 </div>
-                <p class="text-sm text-gray-600 leading-relaxed">{{ $review['text'] }}</p>
+                {{-- OLD: teks review hardcoded --}}
+                <p class="text-sm text-gray-600 leading-relaxed">{{ $review->comment }}</p>
             </div>
-            @endforeach
+            @empty
+            <p class="text-sm text-gray-400 italic">Belum ada ulasan untuk produk ini.</p>
+            @endforelse
         </div>
     </div>
 </div>
@@ -364,22 +422,29 @@
     // ---- Add to Cart ----
     function addToCart() {
         let valid = true;
+
+        {{-- DYNAMIC: cek apakah produk punya pilihan warna --}}
+        @if(!empty($colorsArray))
         if (!selectedColor) {
             document.getElementById('color-error').classList.remove('hidden');
             valid = false;
         }
+        @endif
+
         if (!selectedSize) {
             document.getElementById('size-error').classList.remove('hidden');
             valid = false;
         }
         if (!valid) {
-            // Scroll to first error on mobile
             document.getElementById('color-error').closest('div')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
 
         const cart = JSON.parse(sessionStorage.getItem('tanken_cart') || '[]');
-        const key  = 'yama-crinkle-' + selectedColor + '-' + selectedSize;
+
+        {{-- OLD: key & data hardcoded --}}
+        {{-- DYNAMIC: pakai data dari DB --}}
+        const key  = '{{ $product->slug }}-' + (selectedColor || 'default') + '-' + selectedSize;
         const idx  = cart.findIndex(i => i.key === key);
 
         if (idx >= 0) {
@@ -387,12 +452,12 @@
         } else {
             cart.push({
                 key,
-                name:  'Yama Crinkle Nylon Boardshorts',
+                name:  '{{ $product->name }}',
                 color: selectedColor,
                 size:  selectedSize,
-                price: 1249000,
+                price: {{ $product->price }},
                 qty,
-                img:   '{{ asset('images/men-home.jpg') }}'
+                img:   '{{ $product->main_image ? asset("storage/" . $product->main_image) : asset("images/men-home.jpg") }}'
             });
         }
 
@@ -418,7 +483,7 @@
         btn.classList.add('active');
     }
 
-    // ---- POPUP ZOOM (click / tap to open) ----
+    // ---- POPUP ZOOM ----
     function openZoom(src) {
         const overlay = document.getElementById('zoom-overlay');
         const img     = document.getElementById('zoom-img');
@@ -431,7 +496,6 @@
     }
 
     function closeZoom(e) {
-        // Close only when clicking backdrop, not image
         if (e && e.target === document.getElementById('zoom-img')) return;
         document.getElementById('zoom-overlay').style.display = 'none';
         document.body.style.overflow = '';
@@ -453,7 +517,6 @@
         document.getElementById('zoom-level-label').textContent = Math.round(currentZoomScale * 100) + '%';
     }
 
-    // Scroll wheel zoom inside popup
     document.addEventListener('wheel', function(e) {
         if (document.getElementById('zoom-overlay').style.display === 'flex') {
             e.preventDefault();
@@ -461,7 +524,6 @@
         }
     }, { passive: false });
 
-    // Pinch-to-zoom (touch)
     let initDist = 0;
     let initScale = 1;
     document.getElementById('zoom-img')?.addEventListener('touchstart', e => {
@@ -479,7 +541,6 @@
         }
     }, { passive: false });
 
-    // ESC to close
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') closeZoom();
     });
