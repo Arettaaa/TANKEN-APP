@@ -16,23 +16,27 @@
         background: #fff;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
+
     .wishlist-card:hover {
         transform: translateY(-4px);
     }
+
     .wishlist-img-wrap {
         aspect-ratio: 3/4;
         overflow: hidden;
         background: #f3f4f6;
         position: relative;
     }
+
     .wishlist-img-wrap img {
-        width: 100%; 
+        width: 100%;
         height: 100%;
         object-fit: cover;
         transition: transform 0.5s ease;
     }
-    .wishlist-card:hover .wishlist-img-wrap img { 
-        transform: scale(1.05); 
+
+    .wishlist-card:hover .wishlist-img-wrap img {
+        transform: scale(1.05);
     }
 
     /* Color Swatches (Display only on card) */
@@ -51,6 +55,7 @@
         background: #fff;
         transition: all 0.2s;
     }
+
     .variant-btn.selected {
         border-color: #111;
         background: #111;
@@ -63,14 +68,17 @@
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
     }
+
     .modal-overlay.active {
         opacity: 1;
         visibility: visible;
     }
+
     .modal-content {
         transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     @media (min-width: 640px) {
         .modal-content {
             transform: scale(0.95);
@@ -78,10 +86,12 @@
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
     }
+
     .modal-overlay.active .modal-content {
         transform: translateY(0);
         opacity: 1;
     }
+
     @media (min-width: 640px) {
         .modal-overlay.active .modal-content {
             transform: scale(1);
@@ -89,40 +99,18 @@
     }
 
     /* Hide scrollbar */
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>
 @endpush
 
 @section('akun-content')
-
-@php
-// Data dummy — Kategori sudah PRIA & WANITA
-$wishlists = collect([
-    [
-        'id'        => 1,
-        'name'      => 'Classic Cargo Pants',
-        'slug'      => 'classic-cargo-pants',
-        'category'  => 'PRIA',
-        'price'     => 899000,
-        'old_price' => null,
-        'discount'  => null,
-        'colors'    => ['#78716c', '#000000'],
-        'image'     => 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-    ],
-    [
-        'id'        => 2,
-        'name'      => 'Flex Performance Jogger',
-        'slug'      => 'flex-performance-jogger',
-        'category'  => 'WANITA',
-        'price'     => 679900,
-        'old_price' => 799900,
-        'discount'  => '-15%',
-        'colors'    => ['#000000', '#4b5563', '#1d4ed8'],
-        'image'     => 'https://images.unsplash.com/photo-1512374382149-233c42b6a83b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-    ]
-]);
-@endphp
 
 <div>
     {{-- Header --}}
@@ -133,119 +121,130 @@ $wishlists = collect([
                 Wishlist Saya
             </h2>
             <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                {{ count($wishlists) }} item tersimpan
+                @if($wishlists->count() > 0)
+                {{ $wishlists->count() }} item tersimpan
+                @endif
             </p>
         </div>
-        
-        @if(count($wishlists) > 0)
-        <a href="{{ route('pelanggan.katalog') ?? '#' }}" class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-900 hover:text-gray-500 transition-colors flex items-center gap-1.5 pb-1">
+
+        @if($wishlists->count() > 0)
+        <a href="{{ route('pelanggan.katalog') ?? '#' }}"
+            class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-900 hover:text-gray-500 transition-colors flex items-center gap-1.5 pb-1">
             Lanjut Belanja
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2.5" width="12" height="12">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
         </a>
         @endif
     </div>
 
-    @if(count($wishlists) > 0)
-        {{-- Grid produk --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            @foreach($wishlists as $item)
-            @php
-                $wid       = is_array($item) ? $item['id']        : $item->product_id;
-                $wslug     = is_array($item) ? ($item['slug'] ?? '') : ($item->product->slug ?? '');
-                $wname     = is_array($item) ? $item['name']      : $item->product->name;
-                $wprice    = is_array($item) ? $item['price']     : $item->product->price;
-                $woldPrice = is_array($item) ? $item['old_price'] : ($item->product->old_price ?? null);
-                $wdiscount = is_array($item) ? $item['discount']  : ($item->product->discount ?? null);
-                $wimage    = is_array($item) ? $item['image']     : $item->product->image;
-                $wcategory = is_array($item) ? ($item['category'] ?? '') : '';
-                $wcolors   = is_array($item) ? ($item['colors'] ?? []) : [];
-                
-                $detailUrl = route('pelanggan.produk.detail', $wslug); 
-            @endphp
-            
-            <div class="wishlist-card group" id="wishlist-item-{{ $wid }}">
+    @if($wishlists->count() > 0)
+    {{-- Grid produk --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        @foreach($wishlists as $item)
+        @php
+        $wid = $item->product_id;
+        $wslug = $item->product->slug ?? '';
+        $wname = $item->product->name;
+        $wprice = $item->product->price;
+        $woldPrice = $item->product->original_price ?? null;
+        $wdiscount = $item->product->discount_percent ?? null;
+        $wimage = $item->product->main_image
+        ? asset('storage/' . $item->product->main_image)
+        : asset('images/men-home.jpg');
+        $wcategory = $item->product->category->name ?? '';
+        $wcolors = is_array($item->product->colors)
+        ? $item->product->colors
+        : (json_decode($item->product->colors, true) ?? []);
+        $detailUrl = route('pelanggan.produk.detail', $wslug);
+        @endphp
 
-                {{-- Gambar Produk --}}
-                <a href="{{ $detailUrl }}" class="block mb-4">
-                    <div class="wishlist-img-wrap rounded-md">
-                        @if($wimage)
-                            <img src="{{ $wimage }}" alt="{{ $wname }}" loading="lazy">
-                        @else
-                            <div class="w-full h-full bg-gray-100 flex items-center justify-center">
-                                <i class="fa-solid fa-image text-gray-300 text-3xl"></i>
-                            </div>
-                        @endif
+        <div class="wishlist-card group" id="wishlist-item-{{ $wid }}">
+
+            {{-- Gambar Produk --}}
+            <a href="{{ $detailUrl }}" class="block mb-4">
+                <div class="wishlist-img-wrap rounded-md">
+                    @if($wimage)
+                    <img src="{{ $wimage }}" alt="{{ $wname }}" loading="lazy">
+                    @else
+                    <div class="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <i class="fa-solid fa-image text-gray-300 text-3xl"></i>
                     </div>
+                    @endif
+                </div>
+            </a>
+
+            {{-- Info Produk --}}
+            <div class="flex-1 flex flex-col px-1">
+                @if($wcategory)
+                <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase mb-1">{{ $wcategory }}</p>
+                @endif
+
+                <a href="{{ $detailUrl }}"
+                    class="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors leading-snug block mb-2">
+                    {{ $wname }}
                 </a>
 
-                {{-- Info Produk --}}
-                <div class="flex-1 flex flex-col px-1">
-                    @if($wcategory)
-                        <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase mb-1">{{ $wcategory }}</p>
-                    @endif
-                    
-                    <a href="{{ $detailUrl }}" class="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors leading-snug block mb-2">
-                        {{ $wname }}
-                    </a>
-                    
-                    {{-- Area Harga & Diskon --}}
-                    <div class="flex flex-col mb-3">
-                        <span class="text-sm font-extrabold text-gray-900">
-                            Rp {{ number_format($wprice, 0, ',', '.') }}
+                {{-- Area Harga & Diskon --}}
+                <div class="flex flex-col mb-3">
+                    <span class="text-sm font-extrabold text-gray-900">
+                        Rp {{ number_format($wprice, 0, ',', '.') }}
+                    </span>
+
+                    @if($woldPrice && $wdiscount)
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-xs text-gray-400 font-medium line-through">
+                            Rp {{ number_format($woldPrice, 0, ',', '.') }}
                         </span>
-                        
-                        @if($woldPrice && $wdiscount)
-                            <div class="flex items-center gap-2 mt-0.5">
-                                <span class="text-xs text-gray-400 font-medium line-through">
-                                    Rp {{ number_format($woldPrice, 0, ',', '.') }}
-                                </span>
-                                <span class="bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wide">
-                                    {{ $wdiscount }}
-                                </span>
-                            </div>
-                        @endif
+                        <span class="bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wide">
+                            {{ $wdiscount }}
+                        </span>
                     </div>
-
-                    {{-- Varian Warna (Hanya display kecil) --}}
-                    @if(count($wcolors) > 0)
-                        <div class="flex items-center gap-1.5 mb-5 mt-auto">
-                            @foreach($wcolors as $color)
-                                <span class="color-swatch-display" style="background-color: {{ $color }};"></span>
-                            @endforeach
-                        </div>
-                    @else
-                        <div class="mb-5 mt-auto"></div>
                     @endif
-
-                    {{-- Tombol Aksi (Tinggi DIKUNCI h-[44px] agar sejajar sempurna rata bawah) --}}
-                    <div class="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
-                        {{-- Membuka Modal Varian --}}
-                        <button onclick="openVariantModal({{ $wid }}, '{{ $wname }}', {{ $wprice }})" class="flex-1 h-[44px] bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors">
-                            TAMBAH
-                        </button>
-                        
-                        {{-- Hapus dari Wishlist --}}
-                        <button onclick="removeWishlist({{ $wid }}, this)" title="Hapus" class="w-[44px] h-[44px] flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-colors">
-                            <i class="fa-regular fa-trash-can text-lg" style="color: rgb(38, 37, 37);"></i>
-                        </button>
-                    </div>
                 </div>
 
+                {{-- Varian Warna (Hanya display kecil) --}}
+                @if(count($wcolors) > 0)
+                <div class="flex items-center gap-1.5 mb-5 mt-auto">
+                    @foreach($wcolors as $color)
+                    <span class="color-swatch-display" style="background-color: {{ $color }};"></span>
+                    @endforeach
+                </div>
+                @else
+                <div class="mb-5 mt-auto"></div>
+                @endif
+
+                <div class="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
+                   <button onclick="openVariantModal({{ $wid }}, '{{ $wname }}', {{ $wprice }}, {{ json_encode($wcolors) }})"
+                        class="flex-1 h-[44px] bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors">
+                        TAMBAH
+                    </button>
+
+                    {{-- Hapus dari Wishlist --}}
+                    <button onclick="removeWishlist({{ $wid }}, this)" title="Hapus"
+                        class="w-[44px] h-[44px] flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                        <i class="fa-regular fa-trash-can text-lg" style="color: rgb(38, 37, 37);"></i>
+                    </button>
+                </div>
             </div>
-            @endforeach
+
         </div>
+        @endforeach
+    </div>
 
     @else
-        {{-- Empty state Mutlak --}}
-        <div class="empty-state border border-gray-200 rounded-lg">
-            <i class="fa-regular fa-heart text-5xl text-gray-300 mb-4"></i>
-            <p class="font-bold text-gray-900 text-base mb-1">Belum ada item tersimpan</p>
-            <p class="text-sm text-gray-500 mb-6">Tekan ikon hati pada produk untuk menyimpannya di sini.</p>
-            <a href="{{ route('pelanggan.katalog') ?? '#' }}" class="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-bold tracking-widest uppercase px-6 py-3.5 rounded-md hover:bg-gray-800 transition-colors shadow-sm">
-                Jelajahi Produk
-                <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </div>
+    {{-- Empty state Mutlak --}}
+    <div class="empty-state border border-gray-200 rounded-lg">
+        <i class="fa-regular fa-heart text-5xl text-gray-300 mb-4"></i>
+        <p class="font-bold text-gray-900 text-base mb-1">Belum ada item tersimpan</p>
+        <p class="text-sm text-gray-500 mb-6">Tekan ikon hati pada produk untuk menyimpannya di sini.</p>
+        <a href="{{ route('pelanggan.katalog') ?? '#' }}"
+            class="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-bold tracking-widest uppercase px-6 py-3.5 rounded-md hover:bg-gray-800 transition-colors shadow-sm">
+            Jelajahi Produk
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
     @endif
 
 </div>
@@ -253,11 +252,14 @@ $wishlists = collect([
 {{-- ========================================== --}}
 {{-- MODAL 1: PILIH VARIAN SEBELUM KE KERANJANG --}}
 {{-- ========================================== --}}
-<div id="variantModal" class="modal-overlay fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
-    <div class="modal-content w-full sm:w-[500px] bg-white rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
-        
+<div id="variantModal"
+    class="modal-overlay fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div
+        class="modal-content w-full sm:w-[500px] bg-white rounded-t-2xl sm:rounded-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+
         {{-- Close Button --}}
-        <button onclick="closeVariantModal()" class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-600">
+        <button onclick="closeVariantModal()"
+            class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-600">
             <i class="fa-solid fa-xmark text-lg"></i>
         </button>
 
@@ -276,9 +278,12 @@ $wishlists = collect([
                     Warna &mdash; <span id="selectedColorText" class="text-gray-900">Pilih warna</span>
                 </p>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="selectColor(this, 'Olive')" class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Olive</button>
-                    <button type="button" onclick="selectColor(this, 'Stone Grey')" class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Stone Grey</button>
-                    <button type="button" onclick="selectColor(this, 'Indigo')" class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Indigo</button>
+                    <button type="button" onclick="selectColor(this, 'Olive')"
+                        class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Olive</button>
+                    <button type="button" onclick="selectColor(this, 'Stone Grey')"
+                        class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Stone Grey</button>
+                    <button type="button" onclick="selectColor(this, 'Indigo')"
+                        class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Indigo</button>
                 </div>
                 {{-- INLINE ERROR WARNA --}}
                 <p id="errorColor" class="hidden text-xs text-red-500 mt-2 flex items-center gap-1.5 font-medium">
@@ -292,17 +297,24 @@ $wishlists = collect([
                     <p class="text-[10px] font-bold tracking-widest text-gray-500 uppercase">
                         Ukuran &mdash; <span id="selectedSizeText" class="text-gray-900">Pilih ukuran</span>
                     </p>
-                    <button type="button" onclick="openSizeGuide()" class="text-xs font-semibold text-gray-500 hover:text-black underline underline-offset-2">
+                    <button type="button" onclick="openSizeGuide()"
+                        class="text-xs font-semibold text-gray-500 hover:text-black underline underline-offset-2">
                         Size Guide
                     </button>
                 </div>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="selectSize(this, 'XS')" class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">XS</button>
-                    <button type="button" onclick="selectSize(this, 'S')" class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">S</button>
-                    <button type="button" onclick="selectSize(this, 'M')" class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">M</button>
-                    <button type="button" onclick="selectSize(this, 'L')" class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">L</button>
-                    <button type="button" onclick="selectSize(this, 'XL')" class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">XL</button>
-                    <button type="button" onclick="selectSize(this, 'XXL')" class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">XXL</button>
+                    <button type="button" onclick="selectSize(this, 'XS')"
+                        class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">XS</button>
+                    <button type="button" onclick="selectSize(this, 'S')"
+                        class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">S</button>
+                    <button type="button" onclick="selectSize(this, 'M')"
+                        class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">M</button>
+                    <button type="button" onclick="selectSize(this, 'L')"
+                        class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">L</button>
+                    <button type="button" onclick="selectSize(this, 'XL')"
+                        class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">XL</button>
+                    <button type="button" onclick="selectSize(this, 'XXL')"
+                        class="size-btn variant-btn w-11 h-11 rounded flex items-center justify-center text-xs font-semibold">XXL</button>
                 </div>
                 {{-- INLINE ERROR UKURAN --}}
                 <p id="errorSize" class="hidden text-xs text-red-500 mt-2 flex items-center gap-1.5 font-medium">
@@ -314,19 +326,27 @@ $wishlists = collect([
             <div class="mb-6">
                 <p class="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-3">Jumlah</p>
                 <div class="flex items-center border border-gray-200 rounded w-fit h-11">
-                    <button type="button" onclick="updateQty(-1)" class="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><i class="fa-solid fa-minus text-xs"></i></button>
-                    <input type="number" id="productQty" value="1" min="1" max="50" class="w-12 h-full text-center text-sm font-bold text-gray-900 bg-transparent border-none outline-none focus:ring-0 appearance-none" readonly>
-                    <button type="button" onclick="updateQty(1)" class="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><i class="fa-solid fa-plus text-xs"></i></button>
+                    <button type="button" onclick="updateQty(-1)"
+                        class="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><i
+                            class="fa-solid fa-minus text-xs"></i></button>
+                    <input type="number" id="productQty" value="1" min="1" max="50"
+                        class="w-12 h-full text-center text-sm font-bold text-gray-900 bg-transparent border-none outline-none focus:ring-0 appearance-none"
+                        readonly>
+                    <button type="button" onclick="updateQty(1)"
+                        class="w-10 h-full flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"><i
+                            class="fa-solid fa-plus text-xs"></i></button>
                 </div>
             </div>
 
             {{-- INLINE ERROR KERANJANG PENUH --}}
-            <p id="errorCartLimit" class="hidden text-xs text-red-500 mb-3 text-center flex items-center justify-center gap-1.5 font-medium">
+            <p id="errorCartLimit"
+                class="hidden text-xs text-red-500 mb-3 text-center flex items-center justify-center gap-1.5 font-medium">
                 <i class="fa-solid fa-triangle-exclamation"></i> Ups! Keranjang kamu penuh (Maksimal 50 barang).
             </p>
 
             {{-- Submit Keranjang --}}
-            <button type="submit" id="btnSubmitCart" class="w-full h-[48px] bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 mt-2">
+            <button type="submit" id="btnSubmitCart"
+                class="w-full h-[48px] bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 mt-2">
                 <i class="fa-solid fa-cart-shopping text-sm"></i>
                 TAMBAH KE KERANJANG
             </button>
@@ -337,16 +357,20 @@ $wishlists = collect([
 {{-- ========================================== --}}
 {{-- MODAL 2: SIZE GUIDE (BERUPA GAMBAR ADMIN) --}}
 {{-- ========================================== --}}
-<div id="sizeGuideModal" class="modal-overlay fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+<div id="sizeGuideModal"
+    class="modal-overlay fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm">
     <div class="modal-content w-full max-w-lg mx-4 bg-white rounded-xl p-6 sm:p-8 relative">
-        <button onclick="closeSizeGuide()" class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-black transition-colors">
+        <button onclick="closeSizeGuide()"
+            class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-black transition-colors">
             <i class="fa-solid fa-xmark text-lg"></i>
         </button>
-        
+
         <h3 class="text-lg font-bold text-gray-900 mb-4">Panduan Ukuran</h3>
-        
-        <div class="w-full flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
-            <img src="https://via.placeholder.com/600x400.png?text=Gambar+Size+Guide+(Di-upload+Admin)" alt="Panduan Ukuran TANKEN" class="max-w-full h-auto object-contain">
+
+        <div
+            class="w-full flex justify-center items-center bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
+            <img src="https://via.placeholder.com/600x400.png?text=Gambar+Size+Guide+(Di-upload+Admin)"
+                alt="Panduan Ukuran TANKEN" class="max-w-full h-auto object-contain">
         </div>
     </div>
 </div>
@@ -355,20 +379,27 @@ $wishlists = collect([
 
 @push('akun-scripts')
 <script>
-    // === LOGIKA HAPUS WISHLIST ===
     function removeWishlist(productId, btn) {
+    fetch(`/akun/wishlist/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: '_method=DELETE'
+    })
+    .then(r => r.json())
+    .then(() => {
         const card = document.getElementById('wishlist-item-' + productId);
         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         card.style.opacity = '0';
         card.style.transform = 'scale(0.9)';
         setTimeout(() => {
             card.remove();
-            const remainingItems = document.querySelectorAll('.wishlist-card');
-            if(remainingItems.length === 0) location.reload();
+            if (!document.querySelector('.wishlist-card')) location.reload();
         }, 300);
-    }
-
-    // === LOGIKA MODAL VARIAN ===
+    });
+}
     const variantModal = document.getElementById('variantModal');
     let selectedColor = null;
     let selectedSize = null;

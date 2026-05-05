@@ -267,10 +267,14 @@
                         <path d="M16 10a4 4 0 0 1-8 0" />
                     </svg>
                     {{ $totalStock <= 0 ? 'Stok Habis' : 'Tambah ke Keranjang' }} </button>
-                        <button
-                            class="w-12 h-12 border-2 border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-red-300 hover:text-red-400 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.8" width="18" height="18">
+                        <button id="btn-wishlist" onclick="toggleWishlist()" class="w-12 h-12 border-2 rounded-lg flex items-center justify-center transition-colors
+    {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists()
+        ? 'border-black text-black bg-black'
+        : 'border-gray-200 text-gray-400 hover:border-gray-800 hover:text-gray-800' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                fill="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'white' : 'none' }}"
+                                stroke="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'white' : 'currentColor' }}"
+                                viewBox="0 0 24 24" stroke-width="1.8" width="18" height="18">
                                 <path
                                     d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                             </svg>
@@ -515,6 +519,46 @@
         window.dispatchEvent(new Event('cartUpdated'));
         showToast();
     }
+
+    // ---- Wishlist Toggle ----
+    let isWishlisted = {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'true' : 'false' }};
+
+    function toggleWishlist() {
+        @auth
+            fetch('{{ route("pelanggan.wishlist.toggle") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ product_id: {{ $product->id }} })
+            })
+            .then(r => r.json())
+            .then(data => {
+                const btn = document.getElementById('btn-wishlist');
+                const svg = btn.querySelector('svg');
+
+                if (data.status === 'added') {
+                    isWishlisted = true;
+                    btn.classList.replace('border-gray-200', 'border-black');
+                    btn.classList.replace('text-gray-400', 'text-black');
+                    btn.classList.add('bg-black');
+                    svg.setAttribute('fill', 'white');
+                    svg.setAttribute('stroke', 'white');
+                } else {
+                    isWishlisted = false;
+                    btn.classList.replace('border-black', 'border-gray-200');
+                    btn.classList.replace('text-black', 'text-gray-400');
+                    btn.classList.remove('bg-black');
+                    svg.setAttribute('fill', 'none');
+                    svg.setAttribute('stroke', 'currentColor');
+                }
+            });
+        @else
+            window.location.href = '{{ route("login") }}';
+        @endauth
+    }
+    
 
     function showToast() {
         const toast = document.getElementById('cart-toast');

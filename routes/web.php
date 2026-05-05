@@ -19,6 +19,8 @@ use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Pelanggan\CustomerProfileController;
 use App\Http\Controllers\Pelanggan\AddressController;
+use App\Http\Controllers\Pelanggan\WishlistController;
+
 
 
 
@@ -97,18 +99,16 @@ Route::name('pelanggan.')->group(function () {
             return view('pelanggan.profil-order');
         })->name('profil-order');
 
-        // 4. Wishlist (URL: /akun/wishlist | Nama Rute: pelanggan.profil-wishlist)
-        Route::get('/wishlist', function () {
-            return view('pelanggan.profil-wishlist');
-        })->name('profil-wishlist');
+        Route::get('/wishlist', [WishlistController::class, 'index'])->name('profil-wishlist');
+        Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+        Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 
-    Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
-    Route::post('/alamat', [AddressController::class, 'store'])->name('alamat.store');
-    Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
-    Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
-    Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
-
-}); // <-- Penutup dari Route::name('pelanggan.')
+        Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
+        Route::post('/alamat', [AddressController::class, 'store'])->name('alamat.store');
+        Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
+        Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
+        Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
+    }); // <-- Penutup dari Route::name('pelanggan.')
 });
 
 // Women collection
