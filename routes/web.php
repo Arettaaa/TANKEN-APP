@@ -17,6 +17,10 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Pelanggan\CustomerProfileController;
+use App\Http\Controllers\Pelanggan\AddressController;
+
+
 
 
 // ==========================================
@@ -49,7 +53,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 Route::redirect('/', '/beranda');
 
 Route::name('pelanggan.')->group(function () {
-    
+
     // Nama rute jadi: pelanggan.home
     Route::get('/beranda', function () {
         return view('pelanggan.homepage');
@@ -72,29 +76,21 @@ Route::name('pelanggan.')->group(function () {
     // ROUTE AKUN PELANGGAN (DIBUNGKUS PREFIX 'akun')
     // ==========================================
     Route::prefix('akun')->group(function () {
-        
+
         // 1. Edit Profil (URL: /akun/profil | Nama Rute: pelanggan.profil-edit)
         Route::get('/profil', function () {
             return view('pelanggan.profil-edit');
         })->name('profil-edit');
-        
-        // 👇 TAMBAHKAN RUTE INI UNTUK MENANGANI FORM SUBMIT PROFIL 👇
-        Route::post('/profil/simpan', function (\Illuminate\Http\Request $request) {
-            // Nanti di sini tempat menaruh logika update ke database
-            // Untuk sekarang, kita return kembali ke halaman sebelumnya (dummy sukses)
-            return redirect()->back()->with('success', 'Profil berhasil diperbarui!');
-        })->name('profil.simpan');
+        Route::put('/profil/simpan', [CustomerProfileController::class, 'update'])->name('profil.simpan');
+
 
         // 2. Ganti Password (URL: /akun/password | Nama Rute: pelanggan.profil-password)
         Route::get('/password', function () {
             return view('pelanggan.profil-password');
         })->name('profil-password');
 
-        // 👇 TAMBAHKAN RUTE POST INI UNTUK MENYIMPAN PASSWORD 👇
-        Route::post('/password/simpan', function (\Illuminate\Http\Request $request) {
-            // Nanti logika validasi password lama & update password baru ditaruh di sini
-            return redirect()->back()->with('success', 'Password berhasil diubah!');
-        })->name('ganti-password.simpan');
+        Route::put('/password/simpan', [CustomerProfileController::class, 'updatePassword'])
+            ->name('ganti-password.simpan');
 
         // 3. Riwayat Pesanan (URL: /akun/pesanan | Nama Rute: pelanggan.profil-order)
         Route::get('/pesanan', function () {
@@ -106,14 +102,14 @@ Route::name('pelanggan.')->group(function () {
             return view('pelanggan.profil-wishlist');
         })->name('profil-wishlist');
 
-        // 5. Alamat Saya (URL: /akun/alamat | Nama Rute: pelanggan.profil-alamat)
-        Route::get('/alamat', function () {
-            return view('pelanggan.profil-alamat');
-        })->name('profil-alamat');
-
-    }); // <-- Penutup dari Route::prefix('akun')
+    Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
+    Route::post('/alamat', [AddressController::class, 'store'])->name('alamat.store');
+    Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
+    Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
+    Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
 
 }); // <-- Penutup dari Route::name('pelanggan.')
+});
 
 // Women collection
 Route::get('/women', function () {
@@ -145,12 +141,12 @@ Route::get('/help/returns', function () {
 
 // size guide
 Route::get('/help/size-guide', function () {
-    return view('pelanggan.size-guide'); 
+    return view('pelanggan.size-guide');
 })->name('help.size-guide');
 
 // faq
 Route::get('/help/faq', function () {
-    return view('pelanggan.faq'); 
+    return view('pelanggan.faq');
 })->name('help.faq');
 
 
@@ -162,12 +158,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Products
-      Route::get('products/export', [ProductController::class, 'exportExcel'])
+    Route::get('products/export', [ProductController::class, 'exportExcel'])
         ->name('products.export');
     Route::resource('products', ProductController::class);
     Route::post('products/{product}/stock', [ProductController::class, 'updateStock'])
         ->name('products.updateStock');
-   
+
 
     // ---- Review Management ----
     Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
@@ -212,3 +208,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])
         ->name('profile.password');
 });
+
+Route::get('/wilayah', [AddressController::class, 'getWilayah']);

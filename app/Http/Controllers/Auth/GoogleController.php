@@ -20,29 +20,36 @@ class GoogleController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->user();
+
+            // ✅ firstOrCreate + update google_id sekalian
             $user = User::where('email', $googleUser->email)->first();
 
-            if (!$user) {
+            if ($user) {
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $googleUser->id]);
+                }
+            } else {
+                // User baru
                 $user = User::create([
-                    'name' => $googleUser->name,
-                    'email' => $googleUser->email,
+                    'name'      => $googleUser->name,
+                    'email'     => $googleUser->email,
                     'google_id' => $googleUser->id,
-                    'password' => bcrypt(\Illuminate\Support\Str::random(24)),
-                    'role' => 'customer' 
+                    'password'  => bcrypt(Str::random(24)),
+                    'role'      => 'customer',
                 ]);
             }
 
-            Auth::login($user);
+            Auth::login($user, true); // ✅ true = remember, session lebih stabil
 
-            // LOGIKA REDIRECT BERDASARKAN ROLE
+            request()->session()->regenerate(); // ✅ TAMBAH INI
+
             if ($user->role === 'super_admin' || $user->role === 'admin_gudang') {
-                return redirect()->intended('/admin/products');
+                return redirect('/admin/products');
             }
 
             return redirect()->route('pelanggan.home');
-
         } catch (\Exception $e) {
-            return redirect()->route('login')->with('error', 'Gagal login.');
+            return redirect()->route('login')->with('error', 'Gagal login: ' . $e->getMessage());
         }
     }
 }
