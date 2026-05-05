@@ -421,52 +421,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ==========================================
-    // REGION DROPDOWN (data dummy lokal)
-    // ==========================================
-    const dummyLokasi = {
-        provinsi: [
-            { id: '11', name: 'JAWA BARAT' },
-            { id: '12', name: 'DKI JAKARTA' },
-            { id: '13', name: 'JAWA TENGAH' },
-            { id: '14', name: 'JAWA TIMUR' },
-            { id: '15', name: 'BANTEN' },
-            { id: '16', name: 'BALI' },
-            { id: '17', name: 'SUMATERA UTARA' },
-            { id: '18', name: 'SUMATERA SELATAN' },
-            { id: '19', name: 'KALIMANTAN TIMUR' },
-            { id: '20', name: 'SULAWESI SELATAN' },
-        ],
-        kota: {
-            '11': [{ id: '111', name: 'KOTA BOGOR' }, { id: '112', name: 'KABUPATEN BOGOR' }, { id: '113', name: 'KOTA BANDUNG' }, { id: '114', name: 'KOTA DEPOK' }, { id: '115', name: 'KOTA BEKASI' }],
-            '12': [{ id: '121', name: 'KOTA JAKARTA SELATAN' }, { id: '122', name: 'KOTA JAKARTA PUSAT' }, { id: '123', name: 'KOTA JAKARTA BARAT' }, { id: '124', name: 'KOTA JAKARTA UTARA' }, { id: '125', name: 'KOTA JAKARTA TIMUR' }],
-            '13': [{ id: '131', name: 'KOTA SEMARANG' }, { id: '132', name: 'KOTA SOLO' }],
-            '14': [{ id: '141', name: 'KOTA SURABAYA' }, { id: '142', name: 'KOTA MALANG' }],
-            '15': [{ id: '151', name: 'KOTA TANGERANG' }, { id: '152', name: 'KOTA TANGERANG SELATAN' }],
-        },
-        kecamatan: {
-            '111': [{ id: '1111', name: 'BOGOR TENGAH' }, { id: '1112', name: 'BOGOR SELATAN' }, { id: '1113', name: 'BOGOR UTARA' }],
-            '112': [{ id: '1121', name: 'CIAWI' }, { id: '1122', name: 'DRAMAGA' }, { id: '1123', name: 'CIBINONG' }, { id: '1124', name: 'GUNUNG PUTRI' }],
-            '113': [{ id: '1131', name: 'COBLONG' }, { id: '1132', name: 'BANDUNG WETAN' }],
-            '114': [{ id: '1141', name: 'BEJI' }, { id: '1142', name: 'PANCORAN MAS' }, { id: '1143', name: 'SUKMAJAYA' }],
-            '121': [{ id: '1211', name: 'TEBET' }, { id: '1212', name: 'PASAR MINGGU' }, { id: '1213', name: 'KEBAYORAN BARU' }],
-            '122': [{ id: '1221', name: 'GAMBIR' }, { id: '1222', name: 'MENTENG' }],
-            '151': [{ id: '1511', name: 'CILEDUG' }, { id: '1512', name: 'LARANGAN' }],
-            '152': [{ id: '1521', name: 'CIPUTAT' }, { id: '1522', name: 'PONDOK AREN' }],
-        },
-        kelurahan: {
-            '1121': [{ id: '11211', name: 'BANJAR WARU' }, { id: '11212', name: 'BENDUNGAN' }, { id: '11213', name: 'BOJONG MURNI' }],
-            '1122': [{ id: '11221', name: 'BABAKAN' }, { id: '11222', name: 'CIHERANG' }, { id: '11223', name: 'DRAMAGA' }],
-            '1111': [{ id: '11111', name: 'TEGALLEGA' }, { id: '11112', name: 'BABAKAN PASAR' }],
-            '1141': [{ id: '11411', name: 'BEJI' }, { id: '11412', name: 'BEJI TIMUR' }],
-            '1142': [{ id: '11421', name: 'PANCORAN MAS' }, { id: '11422', name: 'DEPOK' }],
-            '1211': [{ id: '12111', name: 'TEBET BARAT' }, { id: '12112', name: 'TEBET TIMUR' }],
-            '1212': [{ id: '12121', name: 'PASAR MINGGU' }, { id: '12122', name: 'RAGUNAN' }],
-            '1521': [{ id: '15211', name: 'CIPUTAT' }, { id: '15212', name: 'SERUA' }],
-            '1522': [{ id: '15221', name: 'PONDOK JAYA' }, { id: '15222', name: 'PARIGI' }],
-        }
-    };
-
     let currentStep = 0;
     let regionState = { prov: {id:'', name:''}, kota: {id:'', name:''}, kec: {id:'', name:''}, kel: {id:'', name:''} };
     let currentListData = [];
