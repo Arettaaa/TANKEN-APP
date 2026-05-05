@@ -216,12 +216,11 @@
                 @endif
 
                 <div class="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
-                   <button onclick="openVariantModal({{ $wid }}, '{{ $wname }}', {{ $wprice }}, {{ json_encode($wcolors) }})"
+                    <button
+                        onclick="openVariantModal({{ $wid }}, '{{ $wname }}', {{ $wprice }}, {{ json_encode($wcolors) }}, '{{ $item->product->size_chart_image ? asset('storage/' . $item->product->size_chart_image) : '' }}')"
                         class="flex-1 h-[44px] bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors">
                         TAMBAH
                     </button>
-
-                    {{-- Hapus dari Wishlist --}}
                     <button onclick="removeWishlist({{ $wid }}, this)" title="Hapus"
                         class="w-[44px] h-[44px] flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-colors">
                         <i class="fa-regular fa-trash-can text-lg" style="color: rgb(38, 37, 37);"></i>
@@ -403,30 +402,56 @@
     const variantModal = document.getElementById('variantModal');
     let selectedColor = null;
     let selectedSize = null;
+function openVariantModal(id, name, price, colors, sizeChartUrl) {
+    selectedColor = null;
+    selectedSize = null;
+    document.getElementById('selectedColorText').innerText = 'Pilih warna';
+    document.getElementById('selectedSizeText').innerText = 'Pilih ukuran';
+    document.getElementById('productQty').value = 1;
 
-    function openVariantModal(id, name, price) {
-        selectedColor = null;
-        selectedSize = null;
-        document.getElementById('selectedColorText').innerText = 'Pilih warna';
-        document.getElementById('selectedSizeText').innerText = 'Pilih ukuran';
-        document.getElementById('productQty').value = 1;
-        
-        document.querySelectorAll('.color-btn, .size-btn').forEach(btn => {
-            btn.classList.remove('selected');
+    document.querySelectorAll('.color-btn, .size-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+
+    document.getElementById('errorColor').classList.add('hidden');
+    document.getElementById('errorSize').classList.add('hidden');
+    document.getElementById('errorCartLimit').classList.add('hidden');
+
+    // Render warna dinamis
+    const colorContainer = document.querySelector('#addToCartForm .flex.flex-wrap.gap-2:first-of-type');
+    colorContainer.innerHTML = '';
+    if (colors && colors.length > 0) {
+        colors.forEach(color => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'color-btn variant-btn px-4 py-2 rounded text-xs font-semibold';
+            btn.innerText = color;
+            btn.onclick = function() { selectColor(this, color); };
+            colorContainer.appendChild(btn);
         });
-
-        // Sembunyikan semua error pas modal pertama kali dibuka
-        document.getElementById('errorColor').classList.add('hidden');
-        document.getElementById('errorSize').classList.add('hidden');
-        document.getElementById('errorCartLimit').classList.add('hidden');
-
-        document.getElementById('modalProductId').value = id;
-        document.getElementById('modalProductName').innerText = name;
-        document.getElementById('modalProductPrice').innerText = 'Rp ' + price.toLocaleString('id-ID');
-
-        variantModal.classList.add('active');
-        document.body.style.overflow = 'hidden'; 
+        colorContainer.closest('.mb-6').classList.remove('hidden');
+    } else {
+        colorContainer.closest('.mb-6').classList.add('hidden');
+        selectedColor = 'default';
     }
+
+    // Update size guide
+    const sizeGuideImg = document.querySelector('#sizeGuideModal img');
+    const sizeGuideBtn = document.querySelector('[onclick="openSizeGuide()"]');
+    if (sizeChartUrl) {
+        sizeGuideImg.src = sizeChartUrl;
+        sizeGuideBtn.classList.remove('hidden');
+    } else {
+        sizeGuideBtn.classList.add('hidden');
+    }
+
+    document.getElementById('modalProductId').value = id;
+    document.getElementById('modalProductName').innerText = name;
+    document.getElementById('modalProductPrice').innerText = 'Rp ' + price.toLocaleString('id-ID');
+
+    variantModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
 
     function closeVariantModal() {
         variantModal.classList.remove('active');
