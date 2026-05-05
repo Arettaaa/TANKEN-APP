@@ -11,7 +11,7 @@
     <div class="relative z-10 h-full flex flex-col justify-end px-8 md:px-12 pb-8">
         <p class="text-xs text-gray-300 uppercase tracking-widest mb-1 font-medium">All Collections</p>
         <h1 class="text-5xl md:text-6xl font-extrabold text-white leading-none tracking-tight">Shop</h1>
-        <p class="text-xs text-gray-400 mt-2" id="result-count">8 pieces found</p>
+        <p class="text-xs text-gray-400 mt-2" id="result-count">{{ $products->count() }} pieces found</p>
     </div>
 </section>
 
