@@ -21,6 +21,8 @@ use App\Http\Controllers\Pelanggan\CustomerProfileController;
 use App\Http\Controllers\Pelanggan\AddressController;
 use App\Http\Controllers\Pelanggan\WishlistController;
 use App\Http\Controllers\Pelanggan\CartController;
+use App\Http\Controllers\Pelanggan\CheckoutController;
+
 
 
 
@@ -74,8 +76,7 @@ Route::name('pelanggan.')->group(function () {
     })->name('produk.detail');
 
 
-    // ROUTE AKUN PELANGGAN (DIBUNGKUS PREFIX 'akun')
-    Route::prefix('akun')->group(function () {
+Route::prefix('akun')->group(function () {
 
         Route::get('/profil', function () {
             return view('pelanggan.profil-edit');
@@ -98,24 +99,28 @@ Route::name('pelanggan.')->group(function () {
         Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
         Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 
-        Route::get('/keranjang',        [CartController::class, 'index'])  ->name('keranjang.index');
-        Route::post('/keranjang',       [CartController::class, 'store'])  ->name('keranjang.store');
-        Route::patch('/keranjang/{id}', [CartController::class, 'update']) ->name('keranjang.update');
-        Route::delete('/keranjang/{id}',[CartController::class, 'destroy'])->name('keranjang.destroy');
-            
+        Route::get('/keranjang',        [CartController::class, 'index'])->name('keranjang.index');
+        Route::post('/keranjang',       [CartController::class, 'store'])->name('keranjang.store');
+        Route::patch('/keranjang/{id}', [CartController::class, 'update'])->name('keranjang.update');
+        Route::delete('/keranjang/{id}', [CartController::class, 'destroy'])->name('keranjang.destroy');
+
+        Route::post('/checkout/simpan-item', [CheckoutController::class, 'simpanItem'])->name('checkout.simpanItem');
+        Route::get('/checkout',             [CheckoutController::class, 'index'])->name('checkout.index');
+        Route::post('/checkout/proses',     [CheckoutController::class, 'proses'])->name('pelanggan.checkout.proses');
+
         Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
         Route::post('/alamat', [AddressController::class, 'store'])->name('alamat.store');
         Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
         Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
         Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
-    }); 
+    });
 
     // =================================
     // VOUCHER - FE ONLY (MOCKUP API)
     // =================================
     Route::post('/voucher/check', function (\Illuminate\Http\Request $request) {
         $code = strtoupper(trim($request->code));
-        
+
         if ($code === 'TANKEN50') {
             return response()->json([
                 'valid' => true,
@@ -137,17 +142,15 @@ Route::name('pelanggan.')->group(function () {
     
     // Step 1: Halaman Pengiriman
     Route::get('/checkout', function () {
-        return view('pelanggan.checkout'); 
+        return view('pelanggan.checkout');
     })->name('checkout.index');
 
-    // Menerima submit dari Step 1, memindahkan user ke Step 2
     Route::post('/checkout/proses', function () {
         return redirect()->route('checkout.payment');
     })->name('pelanggan.checkout.proses');
 
-    // Step 2: Halaman Pembayaran
     Route::get('/checkout/payment', function () {
-        return view('pelanggan.payment'); 
+        return view('pelanggan.payment');
     })->name('checkout.payment');
 
     // Menerima submit dari Step 2, memindahkan user ke Step 3 (Review)
@@ -173,44 +176,33 @@ Route::name('pelanggan.')->group(function () {
     })->name('checkout.failed');
 
 
+// =================================
+// Help & Support
+// =================================
+// help
+Route::get('/help', function () {
+    return view('pelanggan.help'); // ← ganti dari homepage
+})->name('help');
 
-    // Women collection
-    Route::get('/women', function () {
-        return view('pelanggan.homepage'); // ganti dengan view women nanti
-    })->name('women');
+// shipping
+Route::get('/help/shipping', function () {
+    return view('pelanggan.shipping-information');
+})->name('help.shipping');
 
-    // Men collection
-    Route::get('/men', function () {
-        return view('pelanggan.homepage'); // ganti dengan view men nanti
-    })->name('men');
+// returns & exchanges
+Route::get('/help/returns', function () {
+    return view('pelanggan.returns-exchanges');
+})->name('help.returns');
 
-    // =================================
-    // Help & Support
-    // =================================
-    // help
-    Route::get('/help', function () {
-        return view('pelanggan.help'); // ← ganti dari homepage
-    })->name('help');
+// size guide
+Route::get('/help/size-guide', function () {
+    return view('pelanggan.size-guide');
+})->name('help.size-guide');
 
-    // shipping
-    Route::get('/help/shipping', function () {
-        return view('pelanggan.shipping-information');
-    })->name('help.shipping');
-
-    // returns & exchanges
-    Route::get('/help/returns', function () {
-        return view('pelanggan.returns-exchanges');
-    })->name('help.returns');
-
-    // size guide
-    Route::get('/help/size-guide', function () {
-        return view('pelanggan.size-guide');
-    })->name('help.size-guide');
-
-    // faq
-    Route::get('/help/faq', function () {
-        return view('pelanggan.faq');
-    })->name('help.faq');
+// faq
+Route::get('/help/faq', function () {
+    return view('pelanggan.faq');
+})->name('help.faq');
 
 
 // ==========================================

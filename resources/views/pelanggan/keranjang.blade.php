@@ -544,12 +544,14 @@ $totalCartCount = collect($cartItems)->sum('qty');
                             </span>
                         </div>
 
-                        {{-- CTA Checkout --}}
-                        <a href="#" id="checkoutBtn"
-                            class="block w-full text-center bg-gray-900 text-white text-xs font-bold tracking-widest uppercase py-4 rounded-lg hover:bg-gray-700 transition-colors mb-3">
-                            Checkout (<span id="checkoutQty">{{ $totalQty }}</span> Item)
-                        </a>
-
+                        <form method="POST" action="{{ route('pelanggan.checkout.simpanItem') }}" id="checkoutForm">
+                            @csrf
+                            <div id="hiddenSelectedIds"></div>
+                            <button type="submit" id="checkoutBtn"
+                                class="block w-full text-center bg-gray-900 text-white text-xs font-bold tracking-widest uppercase py-4 rounded-lg hover:bg-gray-700 transition-colors mb-3">
+                                Checkout (<span id="checkoutQty">{{ $totalQty }}</span> Item)
+                            </button>
+                        </form>
                         {{-- Lanjut belanja --}}
                         <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
                             class="block w-full text-center border border-gray-300 text-gray-700 text-xs font-bold tracking-widest uppercase py-3.5 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
@@ -638,6 +640,25 @@ $totalCartCount = collect($cartItems)->sum('qty');
     function formatRp(val) {
         return 'Rp ' + Math.round(val).toLocaleString('id-ID');
     }
+
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    const checked = document.querySelectorAll('.item-check:checked');
+    if (checked.length === 0) {
+        e.preventDefault();
+        alert('Pilih minimal 1 produk untuk checkout.');
+        return;
+    }
+    const container = document.getElementById('hiddenSelectedIds');
+    container.innerHTML = '';
+    checked.forEach(chk => {
+        const id = chk.closest('.cart-item-card').dataset.id;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_ids[]';
+        input.value = id;
+        container.appendChild(input);
+    });
+});
 
    function updateSummary() {
     const checks = document.querySelectorAll('.item-check');
