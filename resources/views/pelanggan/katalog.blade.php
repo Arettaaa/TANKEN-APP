@@ -51,22 +51,24 @@
                 <div class="flex flex-col gap-2">
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" value="all" class="filter-gender accent-black w-3.5 h-3.5 cursor-pointer"
-                            checked onchange="filterProducts()">
+                            {{ !request('gender') ? 'checked' : '' }} onchange="filterProducts()">
                         <span class="text-sm text-gray-800 font-medium group-hover:text-black">Semua</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" value="women"
-                            class="filter-gender accent-black w-3.5 h-3.5 cursor-pointer" onchange="filterProducts()">
+                            class="filter-gender accent-black w-3.5 h-3.5 cursor-pointer" {{ request('gender')=='women'
+                            ? 'checked' : '' }} onchange="filterProducts()">
                         <span class="text-sm text-gray-600 group-hover:text-black">Wanita</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" value="men" class="filter-gender accent-black w-3.5 h-3.5 cursor-pointer"
-                            onchange="filterProducts()">
+                            {{ request('gender')=='men' ? 'checked' : '' }} onchange="filterProducts()">
                         <span class="text-sm text-gray-600 group-hover:text-black">Pria</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" value="unisex"
-                            class="filter-gender accent-black w-3.5 h-3.5 cursor-pointer" onchange="filterProducts()">
+                            class="filter-gender accent-black w-3.5 h-3.5 cursor-pointer" {{ request('gender')=='unisex'
+                            ? 'checked' : '' }} onchange="filterProducts()">
                         <span class="text-sm text-gray-600 group-hover:text-black">Unisex</span>
                     </label>
                 </div>
@@ -217,5 +219,11 @@
         document.getElementById('result-count').textContent = visible + ' pieces found';
         document.getElementById('empty-state').classList.toggle('hidden', visible > 0);
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+    @if(request('gender'))
+        filterProducts();
+    @endif
+});
 </script>
 @endpush

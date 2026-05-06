@@ -259,7 +259,7 @@
                     </svg>
                 </a>
                 {{-- Women --}}
-                <a href="#"
+               <a href="{{ route('pelanggan.katalog', ['gender' => 'women']) }}"
                    class="inline-flex items-center gap-1.5 text-white text-xs font-bold tracking-widest uppercase hover:text-white/70 transition-colors">
                     Women
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
@@ -267,7 +267,7 @@
                     </svg>
                 </a>
                 {{-- Men --}}
-                <a href="#"
+               <a href="{{ route('pelanggan.katalog', ['gender' => 'men']) }}" 
                    class="inline-flex items-center gap-1.5 text-white text-xs font-bold tracking-widest uppercase hover:text-white/70 transition-colors">
                     Men
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
@@ -307,7 +307,7 @@
                 style="font-size:clamp(2rem,4vw,3rem); line-height:1;">
                 Women
             </h2>
-            <a href="#"
+           <a href="{{ route('pelanggan.katalog', ['gender' => 'women']) }}"
                class="btn-arrow mt-3 text-white/80 hover:text-white">
                 Shop Collection
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">
@@ -328,7 +328,7 @@
                 style="font-size:clamp(2rem,4vw,3rem); line-height:1;">
                 Men
             </h2>
-            <a href="#"
+            <a href="{{ route('pelanggan.katalog', ['gender' => 'men']) }}"
                class="btn-arrow mt-3 text-white/80 hover:text-white">
                 Shop Collection
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="11" height="11">

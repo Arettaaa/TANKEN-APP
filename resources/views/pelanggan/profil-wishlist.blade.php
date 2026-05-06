@@ -231,17 +231,24 @@
         </div>
         @endforeach
     </div>
-
     @else
-    {{-- Empty state Mutlak --}}
-    <div class="empty-state border border-gray-200 rounded-lg">
-        <i class="fa-regular fa-heart text-5xl text-gray-300 mb-4"></i>
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="1.2" width="28" height="28" class="text-gray-300">
+                <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+        </div>
         <p class="font-bold text-gray-900 text-base mb-1">Belum ada item tersimpan</p>
-        <p class="text-sm text-gray-500 mb-6">Tekan ikon hati pada produk untuk menyimpannya di sini.</p>
+        <p class="text-sm text-gray-400 mb-8 max-w-xs">Tekan ikon hati pada produk untuk menyimpannya di sini.</p>
         <a href="{{ route('pelanggan.katalog') ?? '#' }}"
-            class="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-bold tracking-widest uppercase px-6 py-3.5 rounded-md hover:bg-gray-800 transition-colors shadow-sm">
+            class="inline-flex items-center gap-2 bg-gray-900 text-white text-[10px] font-bold tracking-widest uppercase px-7 py-3.5 rounded-md hover:bg-gray-700 transition-colors">
             Jelajahi Produk
-            <i class="fa-solid fa-arrow-right"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                stroke-width="2.5" width="12" height="12">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
         </a>
     </div>
     @endif
