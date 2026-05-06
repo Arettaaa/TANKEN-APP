@@ -225,5 +225,21 @@
         filterProducts();
     @endif
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Auto-isi search dari URL navbar
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchVal = urlParams.get('search');
+    if (searchVal) {
+        const searchBox = document.getElementById('search-input');
+        if (searchBox) {
+            searchBox.value = searchVal;
+        }
+    }
+
+    @if(request('gender') || request('search'))
+        filterProducts();
+    @endif
+});
 </script>
 @endpush

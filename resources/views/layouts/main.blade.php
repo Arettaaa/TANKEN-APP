@@ -376,7 +376,7 @@
                             <circle cx="11" cy="11" r="8" />
                             <path d="m21 21-4.35-4.35" />
                         </svg>
-                        <input type="text" placeholder="Cari produk..."
+                        <input type="text" id="searchInputMobile" placeholder="Cari produk..."
                             class="w-full bg-gray-50 border border-gray-200 rounded-full py-2.5 pl-9 pr-4 text-sm focus:outline-none focus:border-gray-400 transition-colors">
                     </div>
 
@@ -588,57 +588,72 @@
 
     {{-- Script Navigasi --}}
     <script>
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            navbar.classList.toggle('scrolled', window.scrollY > 10);
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+
+    const searchToggle = document.getElementById('searchToggle');
+    const searchBox    = document.getElementById('searchBox');
+    const searchInput  = document.getElementById('searchInput');
+
+    if (searchToggle && searchBox && searchInput) {
+        let searchOpen = false;
+
+        searchToggle.addEventListener('click', () => {
+            searchOpen = !searchOpen;
+            if (searchOpen) {
+                searchBox.classList.add('open');
+                setTimeout(() => searchInput.focus(), 50);
+            } else {
+                searchBox.classList.remove('open');
+                searchInput.value = '';
+            }
         });
 
-        const hamburger = document.getElementById('hamburger');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (hamburger && mobileMenu) {
-            hamburger.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-        }
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInput.value.trim() !== '') {
+                window.location.href = '{{ route("pelanggan.katalog") }}?search=' + encodeURIComponent(searchInput.value.trim());
+            }
+        });
 
-        const searchToggle = document.getElementById('searchToggle');
-        const searchBox = document.getElementById('searchBox');
-        const searchInput = document.getElementById('searchInput');
+        document.addEventListener('click', (e) => {
+            if (searchOpen && !searchToggle.contains(e.target) && !searchBox.contains(e.target)) {
+                searchOpen = false;
+                searchBox.classList.remove('open');
+                searchInput.value = '';
+            }
+        });
 
-        if (searchToggle && searchBox) {
-            let searchOpen = false;
-            searchToggle.addEventListener('click', () => {
-                searchOpen = !searchOpen;
-                if (searchOpen) {
-                    searchBox.classList.add('open');
-                    setTimeout(() => searchInput.focus(), 50);
-                } else {
-                    searchBox.classList.remove('open');
-                    searchInput.value = '';
-                }
-            });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && searchOpen) {
+                searchOpen = false;
+                searchBox.classList.remove('open');
+                searchInput.value = '';
+            }
+        });
+    }
 
-            document.addEventListener('click', (e) => {
-                if (searchOpen && !searchToggle.contains(e.target) && !searchBox.contains(e.target)) {
-                    searchOpen = false;
-                    searchBox.classList.remove('open');
-                    searchInput.value = '';
-                }
-            });
+    // Search Mobile
+    const searchInputMobile = document.getElementById('searchInputMobile');
+    if (searchInputMobile) {
+        searchInputMobile.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && searchInputMobile.value.trim() !== '') {
+                window.location.href = '{{ route("pelanggan.katalog") }}?search=' + encodeURIComponent(searchInputMobile.value.trim());
+            }
+        });
+    }
+</script>
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && searchOpen) {
-                    searchOpen = false;
-                    searchBox.classList.remove('open');
-                    searchInput.value = '';
-                }
-            });
-        }
-    </script>
-
-    {{-- ==== BADGE KERANJANG DAN WISHLIST GLOBAL SCRIPT ==== --}}
     <script>
-        // Logika UPDATE BADGE KERANJANG
         function updateCartBadge() {
             const cart = JSON.parse(sessionStorage.getItem('tanken_cart') || '[]');
             // Hitung macam varian yang berbeda, bukan total quantity-nya
@@ -688,6 +703,23 @@
         window.addEventListener('cartUpdated', updateCartBadge);
         window.addEventListener('wishlistUpdated', updateWishlistBadge);
     </script>
+    @auth
+    <script>
+        // Inject jumlah wishlist dari server supaya badge langsung muncul
+    document.addEventListener('DOMContentLoaded', () => {
+        const count = {{ auth()->user()->wishlists()->count() }};
+        const badgeDesktop = document.getElementById('wishlist-badge-desktop');
+        const badgeMobile  = document.getElementById('wishlist-badge-mobile');
+        [badgeDesktop, badgeMobile].forEach(badge => {
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.remove('hidden');
+            }
+        });
+    });
+    </script>
+    @endauth
 
     @stack('scripts')
 </body>

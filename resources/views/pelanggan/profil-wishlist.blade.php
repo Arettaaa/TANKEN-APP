@@ -221,7 +221,7 @@
                         class="flex-1 h-[44px] bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors">
                         TAMBAH
                     </button>
-                    <button onclick="removeWishlist({{ $wid }}, this)" title="Hapus"
+                    <button onclick="removeWishlist({{ $wid }}, '{{ addslashes($wname) }}')" title="Hapus"
                         class="w-[44px] h-[44px] flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-colors">
                         <i class="fa-regular fa-trash-can text-lg" style="color: rgb(38, 37, 37);"></i>
                     </button>
@@ -381,12 +381,64 @@
     </div>
 </div>
 
+{{-- MODAL: KONFIRMASI HAPUS WISHLIST --}}
+<div id="modal-delete-wishlist" class="fixed inset-0 z-[200] hidden items-center justify-center opacity-0 transition-opacity duration-300 bg-black/60 backdrop-blur-sm">
+    <div id="modal-delete-wishlist-box" class="bg-white rounded-md w-full max-w-sm mx-4 p-6 text-center shadow-2xl transform scale-95 transition-transform duration-300">
+        <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 mb-1">Hapus dari Wishlist?</h3>
+        <p class="text-sm font-semibold text-gray-800 mb-1" id="modal-delete-wishlist-name">—</p>
+        <p class="text-xs text-red-500 mb-5">Produk ini akan dihapus dari wishlist kamu.</p>
+        <div class="flex gap-3">
+            <button type="button" onclick="closeDeleteWishlistModal()"
+                class="flex-1 py-2.5 rounded-md border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+                Batal
+            </button>
+            <button type="button" id="modal-delete-wishlist-confirm"
+                class="flex-1 py-2.5 rounded-md bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors shadow-sm">
+                Ya, Hapus
+            </button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('akun-scripts')
 <script>
-    function removeWishlist(productId, btn) {
-    fetch(`/akun/wishlist/${productId}`, {
+   let deleteTargetId = null;
+
+function removeWishlist(productId, productName) {
+    deleteTargetId = productId;
+    document.getElementById('modal-delete-wishlist-name').textContent = '"' + productName + '"';
+    
+    const modal = document.getElementById('modal-delete-wishlist');
+    const box = document.getElementById('modal-delete-wishlist-box');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        box.classList.remove('scale-95');
+    }, 10);
+}
+
+function closeDeleteWishlistModal() {
+    const modal = document.getElementById('modal-delete-wishlist');
+    const box = document.getElementById('modal-delete-wishlist-box');
+    modal.classList.add('opacity-0');
+    box.classList.add('scale-95');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        deleteTargetId = null;
+    }, 300);
+}
+
+document.getElementById('modal-delete-wishlist-confirm').addEventListener('click', function() {
+    if (!deleteTargetId) return;
+
+    fetch(`/akun/wishlist/${deleteTargetId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -396,7 +448,8 @@
     })
     .then(r => r.json())
     .then(() => {
-        const card = document.getElementById('wishlist-item-' + productId);
+        closeDeleteWishlistModal();
+        const card = document.getElementById('wishlist-item-' + deleteTargetId);
         card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         card.style.opacity = '0';
         card.style.transform = 'scale(0.9)';
@@ -405,7 +458,12 @@
             if (!document.querySelector('.wishlist-card')) location.reload();
         }, 300);
     });
-}
+});
+
+document.getElementById('modal-delete-wishlist').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteWishlistModal();
+});
+
     const variantModal = document.getElementById('variantModal');
     let selectedColor = null;
     let selectedSize = null;

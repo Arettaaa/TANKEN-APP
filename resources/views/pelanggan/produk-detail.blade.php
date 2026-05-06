@@ -268,12 +268,12 @@
                     </svg>
                     {{ $totalStock <= 0 ? 'Stok Habis' : 'Tambah ke Keranjang' }} </button>
                         <button id="btn-wishlist" onclick="toggleWishlist()" class="w-12 h-12 border-2 rounded-lg flex items-center justify-center transition-colors
-    {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists()
-        ? 'border-black text-black bg-black'
-        : 'border-gray-200 text-gray-400 hover:border-gray-800 hover:text-gray-800' }}">
+   {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists()
+    ? 'border-red-400 bg-white text-red-500'
+    : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400' }}">
                             <svg xmlns="http://www.w3.org/2000/svg"
-                                fill="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'white' : 'none' }}"
-                                stroke="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'white' : 'currentColor' }}"
+                                fill="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'none' }}"
+                                stroke="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'currentColor' }}"
                                 viewBox="0 0 24 24" stroke-width="1.8" width="18" height="18">
                                 <path
                                     d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -538,21 +538,20 @@
                 const btn = document.getElementById('btn-wishlist');
                 const svg = btn.querySelector('svg');
 
-                if (data.status === 'added') {
-                    isWishlisted = true;
-                    btn.classList.replace('border-gray-200', 'border-black');
-                    btn.classList.replace('text-gray-400', 'text-black');
-                    btn.classList.add('bg-black');
-                    svg.setAttribute('fill', 'white');
-                    svg.setAttribute('stroke', 'white');
-                } else {
-                    isWishlisted = false;
-                    btn.classList.replace('border-black', 'border-gray-200');
-                    btn.classList.replace('text-black', 'text-gray-400');
-                    btn.classList.remove('bg-black');
-                    svg.setAttribute('fill', 'none');
-                    svg.setAttribute('stroke', 'currentColor');
-                }
+             if (data.status === 'added') {
+    btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
+    btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
+    svg.setAttribute('fill', '#ef4444');
+    svg.setAttribute('stroke', '#ef4444');
+    showWishlistToast();
+    updateNavbarWishlistBadge(+1);
+} else {
+    btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
+    btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    updateNavbarWishlistBadge(-1);
+}
             });
         @else
             window.location.href = '{{ route("login") }}';
@@ -674,5 +673,39 @@ document.addEventListener('keydown', e => {
         closeZoom();
     }
 });
+
+// Toast Wishlist
+if (data.status === 'added') {
+    btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
+    btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
+    svg.setAttribute('fill', '#ef4444');
+    svg.setAttribute('stroke', '#ef4444');
+    showWishlistToast();
+    updateNavbarWishlistBadge(+1);
+} else {
+    btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
+    btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    updateNavbarWishlistBadge(-1);
+}
+
+// Update badge wishlist di navbar langsung tanpa reload
+function updateNavbarWishlistBadge(delta) {
+    const badgeDesktop = document.getElementById('wishlist-badge-desktop');
+    const badgeMobile  = document.getElementById('wishlist-badge-mobile');
+
+    [badgeDesktop, badgeMobile].forEach(badge => {
+        if (!badge) return;
+        let current = parseInt(badge.textContent) || 0;
+        let newVal = Math.max(0, current + delta);
+        if (newVal > 0) {
+            badge.textContent = newVal > 99 ? '99+' : newVal;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    });
+}
 </script>
 @endpush
