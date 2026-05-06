@@ -279,7 +279,6 @@
     </div>
 </section>
 
-{{-- ===== 2. TICKER ===== --}}
 <div class="ticker-wrap">
     <div class="ticker-content">
         @php
@@ -294,9 +293,7 @@
     </div>
 </div>
 
-{{-- ===== 3. COLLECTION SPLIT ===== --}}
 <section class="collection-grid">
-    {{-- Women --}}
     <div class="collection-card h-[520px] md:h-[620px]">
         <img src="{{ asset('images/women-home.jpg') }}"
              alt="Women Collection"
@@ -339,7 +336,6 @@
     </div>
 </section>
 
-{{-- ===== 4. FEATURED PIECES ===== --}}
 <section class="bg-white py-16 md:py-20">
     <div class="max-w-7xl mx-auto px-6 lg:px-10">
 
