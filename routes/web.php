@@ -114,7 +114,6 @@ Route::name('pelanggan.')->group(function () {
     // VOUCHER - FE ONLY (MOCKUP API)
     // =================================
     Route::post('/voucher/check', function (\Illuminate\Http\Request $request) {
-        // Logika bohongan untuk nge-test input voucher di FE
         $code = strtoupper(trim($request->code));
         
         if ($code === 'TANKEN50') {
@@ -132,43 +131,59 @@ Route::name('pelanggan.')->group(function () {
     })->name('voucher.check');
 });
 
-// Women collection
-Route::get('/women', function () {
-    return view('pelanggan.homepage'); // ganti dengan view women nanti
-})->name('women');
+    // =================================
+    // CHECKOUT (PEMBELIAN) - FE ONLY
+    // =================================
+    // Menampilkan halaman checkout
+    Route::get('/checkout', function () {
+        // Pastikan file-nya ada di resources/views/pelanggan/checkout.blade.php
+        return view('pelanggan.checkout'); 
+    })->name('checkout.index');
 
-// Men collection
-Route::get('/men', function () {
-    return view('pelanggan.homepage'); // ganti dengan view men nanti
-})->name('men');
+    // Menangani klik tombol "Lanjutkan" (Form Submit)
+    Route::post('/checkout/proses', function () {
+        // Karena ini masih FE, kalau di-submit kita arahkan saja kembali ke beranda 
+        // (atau bisa kamu arahkan ke halaman "Success/Thank You" nanti)
+        return redirect('/')->with('success', 'Checkout berhasil disimulasikan!');
+    })->name('pelanggan.checkout.proses');
 
-// =================================
-// Help & Support
-// =================================
-// help
-Route::get('/help', function () {
-    return view('pelanggan.help'); // ← ganti dari homepage
-})->name('help');
+    // Women collection
+    Route::get('/women', function () {
+        return view('pelanggan.homepage'); // ganti dengan view women nanti
+    })->name('women');
 
-// shipping
-Route::get('/help/shipping', function () {
-    return view('pelanggan.shipping-information');
-})->name('help.shipping');
+    // Men collection
+    Route::get('/men', function () {
+        return view('pelanggan.homepage'); // ganti dengan view men nanti
+    })->name('men');
 
-// returns & exchanges
-Route::get('/help/returns', function () {
-    return view('pelanggan.returns-exchanges');
-})->name('help.returns');
+    // =================================
+    // Help & Support
+    // =================================
+    // help
+    Route::get('/help', function () {
+        return view('pelanggan.help'); // ← ganti dari homepage
+    })->name('help');
 
-// size guide
-Route::get('/help/size-guide', function () {
-    return view('pelanggan.size-guide');
-})->name('help.size-guide');
+    // shipping
+    Route::get('/help/shipping', function () {
+        return view('pelanggan.shipping-information');
+    })->name('help.shipping');
 
-// faq
-Route::get('/help/faq', function () {
-    return view('pelanggan.faq');
-})->name('help.faq');
+    // returns & exchanges
+    Route::get('/help/returns', function () {
+        return view('pelanggan.returns-exchanges');
+    })->name('help.returns');
+
+    // size guide
+    Route::get('/help/size-guide', function () {
+        return view('pelanggan.size-guide');
+    })->name('help.size-guide');
+
+    // faq
+    Route::get('/help/faq', function () {
+        return view('pelanggan.faq');
+    })->name('help.faq');
 
 
 // ==========================================
