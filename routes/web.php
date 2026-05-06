@@ -132,7 +132,7 @@ Route::name('pelanggan.')->group(function () {
 });
 
     // =================================
-    // CHECKOUT & PAYMENT - FE ONLY
+    // CHECKOUT, PAYMENT & REVIEW - FE ONLY
     // =================================
     
     // Step 1: Halaman Pengiriman
@@ -142,7 +142,6 @@ Route::name('pelanggan.')->group(function () {
 
     // Menerima submit dari Step 1, memindahkan user ke Step 2
     Route::post('/checkout/proses', function () {
-        // Mengarahkan ke halaman payment
         return redirect()->route('checkout.payment');
     })->name('pelanggan.checkout.proses');
 
@@ -151,10 +150,18 @@ Route::name('pelanggan.')->group(function () {
         return view('pelanggan.payment'); 
     })->name('checkout.payment');
 
-    // Menerima submit dari Step 2, memindahkan user ke Review / Success
+    // Menerima submit dari Step 2, memindahkan user ke Step 3 (Review)
     Route::post('/checkout/review', function () {
-        return redirect('/')->with('success', 'Pembayaran berhasil disimulasikan!');
+        return view('pelanggan.review-payment'); 
     })->name('checkout.review');
+
+    // Step 3: Menerima submit Final (Place Order)
+    Route::post('/checkout/place-order', function () {
+        // Nanti bisa diarahkan ke halaman invoice/success
+        return redirect('/')->with('success', 'Pesanan berhasil dibuat! Terima kasih.');
+    })->name('checkout.place-order');
+
+    
 
     // Women collection
     Route::get('/women', function () {
