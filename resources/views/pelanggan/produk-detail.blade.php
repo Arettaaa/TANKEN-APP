@@ -448,8 +448,8 @@
     let selectedSize  = null;
     let qty = 1;
     let currentZoomScale = 1;
-
-    // ---- Color ----
+ 
+    // ── Warna ───────────────────────────────────────────────
     function selectColor(color, btn) {
         selectedColor = color;
         document.getElementById('selected-color-label').textContent = color;
@@ -457,8 +457,8 @@
         btn.classList.add('active');
         document.getElementById('color-error').classList.add('hidden');
     }
-
-    // ---- Size ----
+ 
+    // ── Ukuran ──────────────────────────────────────────────
     function selectSize(size, btn) {
         selectedSize = size;
         document.getElementById('selected-size-label').textContent = size;
@@ -466,117 +466,179 @@
         btn.classList.add('active');
         document.getElementById('size-error').classList.add('hidden');
     }
-
-    // ---- Quantity ----
+ 
+    // ── Jumlah ──────────────────────────────────────────────
     function changeQty(delta) {
         qty = Math.max(1, qty + delta);
         document.getElementById('qty-display').textContent = qty;
     }
-
-    // ---- Add to Cart ----
+ 
+    // ── Tambah ke Keranjang ─────────────────────────────────
     function addToCart() {
         let valid = true;
-
-        {{-- DYNAMIC: cek apakah produk punya pilihan warna --}}
+ 
         @if(!empty($colorsArray))
         if (!selectedColor) {
             document.getElementById('color-error').classList.remove('hidden');
             valid = false;
         }
         @endif
-
+ 
         if (!selectedSize) {
             document.getElementById('size-error').classList.remove('hidden');
             valid = false;
         }
         if (!valid) {
-            document.getElementById('color-error').closest('div')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.querySelector('#color-error, #size-error')
+                ?.closest('div')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return;
         }
-
-        const cart = JSON.parse(sessionStorage.getItem('tanken_cart') || '[]');
-
-        {{-- OLD: key & data hardcoded --}}
-        {{-- DYNAMIC: pakai data dari DB --}}
-        const key  = '{{ $product->slug }}-' + (selectedColor || 'default') + '-' + selectedSize;
-        const idx  = cart.findIndex(i => i.key === key);
-
-        if (idx >= 0) {
-            cart[idx].qty += qty;
-        } else {
-            cart.push({
-                key,
-                name:  '{{ $product->name }}',
-                color: selectedColor,
-                size:  selectedSize,
-                price: {{ $product->price }},
-                qty,
-                img:   '{{ $product->main_image ? asset("storage/" . $product->main_image) : asset("images/men-home.jpg") }}'
-            });
-        }
-
-        sessionStorage.setItem('tanken_cart', JSON.stringify(cart));
-        window.dispatchEvent(new Event('cartUpdated'));
-        showToast();
+ 
+        const btn = document.querySelector('button[onclick="addToCart()"]');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `
+            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg>
+            Menambahkan...
+        `;
+ 
+        fetch('{{ route("pelanggan.keranjang.store") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            },
+            body: JSON.stringify({
+                product_id: {{ $product->id }},
+                color:      selectedColor,
+                size:       selectedSize,
+                quantity:   qty,
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+ 
+            if (data.success) {
+                showToast('Produk ditambahkan ke keranjang');
+                updateNavbarCartBadge(data.cart_count);
+            } else {
+                showToast(data.message || 'Gagal menambahkan produk.', true);
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            showToast('Terjadi kesalahan. Coba lagi.', true);
+        });
     }
-
-    // ---- Wishlist Toggle ----
-    let isWishlisted = {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'true' : 'false' }};
-
-    function toggleWishlist() {
-        @auth
-            fetch('{{ route("pelanggan.wishlist.toggle") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ product_id: {{ $product->id }} })
-            })
-            .then(r => r.json())
-            .then(data => {
-                const btn = document.getElementById('btn-wishlist');
-                const svg = btn.querySelector('svg');
-
-             if (data.status === 'added') {
-    btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-    btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
-    svg.setAttribute('fill', '#ef4444');
-    svg.setAttribute('stroke', '#ef4444');
-    showWishlistToast();
-    updateNavbarWishlistBadge(+1);
-} else {
-    btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
-    btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    updateNavbarWishlistBadge(-1);
-}
-            });
-        @else
-            window.location.href = '{{ route("login") }}';
-        @endauth
-    }
-    
-
-    function showToast() {
+ 
+    // ── Toast notifikasi ────────────────────────────────────
+    function showToast(message = 'Berhasil!', isError = false) {
         const toast = document.getElementById('cart-toast');
-        toast.classList.remove('hidden');
-        toast.classList.add('flex');
-        setTimeout(() => {
+        toast.className = [
+            'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
+            'text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl',
+            'flex items-center gap-2 whitespace-nowrap transition-all',
+            isError ? 'bg-red-600' : 'bg-black',
+        ].join(' ');
+ 
+        toast.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor" stroke-width="2.5" width="16" height="16"
+                 class="${isError ? 'text-white' : 'text-green-400'}">
+                ${isError
+                    ? '<path d="M18 6 6 18M6 6l12 12"/>'
+                    : '<path d="M20 6L9 17l-5-5"/>'}
+            </svg>
+            ${message}
+        `;
+ 
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
             toast.classList.add('hidden');
-            toast.classList.remove('flex');
         }, 2500);
     }
-
-    // ---- Thumbnail switch ----
+ 
+    // ── Badge keranjang di navbar ────────────────────────────
+    function updateNavbarCartBadge(count) {
+        const badge = document.getElementById('cart-badge');
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+ 
+    // ── Toast wishlist (dipanggil dari toggleWishlist) ───────
+    function showWishlistToast() {
+        showToast('Ditambahkan ke wishlist ❤️');
+    }
+ 
+    // ── Update badge wishlist di navbar ──────────────────────
+    function updateNavbarWishlistBadge(delta) {
+        ['wishlist-badge-desktop', 'wishlist-badge-mobile'].forEach(id => {
+            const badge = document.getElementById(id);
+            if (!badge) return;
+            let newVal = Math.max(0, (parseInt(badge.textContent) || 0) + delta);
+            badge.textContent = newVal > 99 ? '99+' : newVal;
+            badge.classList.toggle('hidden', newVal === 0);
+        });
+    }
+ 
+    // ── Toggle Wishlist ──────────────────────────────────────
+    let isWishlisted = {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'true' : 'false' }};
+ 
+    function toggleWishlist() {
+        @auth
+        fetch('{{ route("pelanggan.wishlist.toggle") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ product_id: {{ $product->id }} })
+        })
+        .then(r => r.json())
+        .then(data => {
+            const btn = document.getElementById('btn-wishlist');
+            const svg = btn.querySelector('svg');
+ 
+            if (data.status === 'added') {
+                btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
+                btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
+                svg.setAttribute('fill', '#ef4444');
+                svg.setAttribute('stroke', '#ef4444');
+                showWishlistToast();
+                updateNavbarWishlistBadge(+1);
+            } else {
+                btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
+                btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+                updateNavbarWishlistBadge(-1);
+            }
+        });
+        @else
+        window.location.href = '{{ route("login") }}';
+        @endauth
+    }
+ 
+    // ── Thumbnail ────────────────────────────────────────────
     function switchImage(src, btn) {
         document.getElementById('main-product-img').src = src;
         document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
     }
-
-    // ---- POPUP ZOOM ----
+ 
+    // ── Zoom ─────────────────────────────────────────────────
     function openZoom(src) {
         const overlay = document.getElementById('zoom-overlay');
         const img     = document.getElementById('zoom-img');
@@ -587,38 +649,29 @@
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
-
     function closeZoom(e) {
         if (e && e.target === document.getElementById('zoom-img')) return;
         document.getElementById('zoom-overlay').style.display = 'none';
         document.body.style.overflow = '';
     }
-
     function zoomChange(delta) {
         currentZoomScale = Math.min(4, Math.max(0.5, currentZoomScale + delta));
         applyZoom();
     }
-
-    function resetZoomLevel() {
-        currentZoomScale = 1;
-        applyZoom();
-    }
-
+    function resetZoomLevel() { currentZoomScale = 1; applyZoom(); }
     function applyZoom() {
-        const img = document.getElementById('zoom-img');
-        img.style.transform = `scale(${currentZoomScale})`;
+        document.getElementById('zoom-img').style.transform = `scale(${currentZoomScale})`;
         document.getElementById('zoom-level-label').textContent = Math.round(currentZoomScale * 100) + '%';
     }
-
+ 
     document.addEventListener('wheel', function(e) {
         if (document.getElementById('zoom-overlay').style.display === 'flex') {
             e.preventDefault();
             zoomChange(e.deltaY < 0 ? 0.2 : -0.2);
         }
     }, { passive: false });
-
-    let initDist = 0;
-    let initScale = 1;
+ 
+    let initDist = 0, initScale = 1;
     document.getElementById('zoom-img')?.addEventListener('touchstart', e => {
         if (e.touches.length === 2) {
             initDist  = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
@@ -633,12 +686,8 @@
             applyZoom();
         }
     }, { passive: false });
-
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeZoom();
-    });
-
-    // ---- Tabs ----
+ 
+    // ── Tabs ─────────────────────────────────────────────────
     function switchTab(tab) {
         ['desc', 'reviews'].forEach(t => {
             document.getElementById('content-' + t).classList.add('hidden');
@@ -651,61 +700,24 @@
         activeBtn.classList.add('text-black', 'border-black');
         activeBtn.classList.remove('text-gray-400', 'border-transparent');
     }
-
+ 
+    // ── Size Chart ───────────────────────────────────────────
     function openSizeChart() {
-    @if($product->size_chart_image)
-    document.getElementById('modal-sizechart').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    @else
-    alert('Size chart belum tersedia untuk produk ini.');
-    @endif
-}
-
-function closeSizeChart() {
-    document.getElementById('modal-sizechart').classList.add('hidden');
-    document.body.style.overflow = '';
-}
-
-// ESC juga bisa nutup
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        closeSizeChart();
-        closeZoom();
+        @if($product->size_chart_image)
+        document.getElementById('modal-sizechart').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        @else
+        alert('Size chart belum tersedia untuk produk ini.');
+        @endif
     }
-});
-
-// Toast Wishlist
-if (data.status === 'added') {
-    btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-    btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
-    svg.setAttribute('fill', '#ef4444');
-    svg.setAttribute('stroke', '#ef4444');
-    showWishlistToast();
-    updateNavbarWishlistBadge(+1);
-} else {
-    btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
-    btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    updateNavbarWishlistBadge(-1);
-}
-
-// Update badge wishlist di navbar langsung tanpa reload
-function updateNavbarWishlistBadge(delta) {
-    const badgeDesktop = document.getElementById('wishlist-badge-desktop');
-    const badgeMobile  = document.getElementById('wishlist-badge-mobile');
-
-    [badgeDesktop, badgeMobile].forEach(badge => {
-        if (!badge) return;
-        let current = parseInt(badge.textContent) || 0;
-        let newVal = Math.max(0, current + delta);
-        if (newVal > 0) {
-            badge.textContent = newVal > 99 ? '99+' : newVal;
-            badge.classList.remove('hidden');
-        } else {
-            badge.classList.add('hidden');
-        }
+    function closeSizeChart() {
+        document.getElementById('modal-sizechart')?.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+ 
+    // ── ESC untuk semua modal ────────────────────────────────
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') { closeSizeChart(); closeZoom(); }
     });
-}
 </script>
 @endpush
