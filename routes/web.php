@@ -149,20 +149,29 @@ Route::name('pelanggan.')->group(function () {
 });
 
     // =================================
-    // CHECKOUT (PEMBELIAN) - FE ONLY
+    // CHECKOUT & PAYMENT - FE ONLY
     // =================================
-    // Menampilkan halaman checkout
+    
+    // Step 1: Halaman Pengiriman
     Route::get('/checkout', function () {
-        // Pastikan file-nya ada di resources/views/pelanggan/checkout.blade.php
         return view('pelanggan.checkout'); 
     })->name('checkout.index');
 
-    // Menangani klik tombol "Lanjutkan" (Form Submit)
+    // Menerima submit dari Step 1, memindahkan user ke Step 2
     Route::post('/checkout/proses', function () {
-        // Karena ini masih FE, kalau di-submit kita arahkan saja kembali ke beranda 
-        // (atau bisa kamu arahkan ke halaman "Success/Thank You" nanti)
-        return redirect('/')->with('success', 'Checkout berhasil disimulasikan!');
+        // Mengarahkan ke halaman payment
+        return redirect()->route('checkout.payment');
     })->name('pelanggan.checkout.proses');
+
+    // Step 2: Halaman Pembayaran
+    Route::get('/checkout/payment', function () {
+        return view('pelanggan.payment'); 
+    })->name('checkout.payment');
+
+    // Menerima submit dari Step 2, memindahkan user ke Review / Success
+    Route::post('/checkout/review', function () {
+        return redirect('/')->with('success', 'Pembayaran berhasil disimulasikan!');
+    })->name('checkout.review');
 
     // Women collection
     Route::get('/women', function () {
