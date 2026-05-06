@@ -109,6 +109,46 @@ Route::name('pelanggan.')->group(function () {
         Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
         Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
     }); // <-- Penutup dari Route::name('pelanggan.')
+
+    // =================================
+    // KERANJANG BELANJA (CART) - FE ONLY
+    // =================================
+    Route::get('/keranjang', function () {
+        // Pastikan nama view ini sesuai dengan lokasi file keranjang.blade.php kamu
+        // Misalnya kalau di dalam folder resources/views/pelanggan/keranjang.blade.php
+        return view('pelanggan.keranjang'); 
+    })->name('keranjang.index');
+
+    // Dummy Route untuk Fetch API (Update Qty)
+    Route::patch('/keranjang/{id}', function () {
+        return response()->json(['success' => true, 'message' => 'Qty updated']);
+    })->name('keranjang.update');
+
+    // Dummy Route untuk Fetch API (Hapus Item)
+    Route::delete('/keranjang/{id}', function () {
+        return response()->json(['success' => true, 'message' => 'Item deleted']);
+    })->name('keranjang.destroy');
+
+    // =================================
+    // VOUCHER - FE ONLY (MOCKUP API)
+    // =================================
+    Route::post('/voucher/check', function (\Illuminate\Http\Request $request) {
+        // Logika bohongan untuk nge-test input voucher di FE
+        $code = strtoupper(trim($request->code));
+        
+        if ($code === 'TANKEN50') {
+            return response()->json([
+                'valid' => true,
+                'label' => 'Promo Diskon 50 Ribu',
+                'discount' => 50000
+            ]);
+        }
+
+        return response()->json([
+            'valid' => false,
+            'message' => 'Kode voucher tidak valid atau sudah kedaluwarsa.'
+        ]);
+    })->name('voucher.check');
 });
 
 // Women collection
