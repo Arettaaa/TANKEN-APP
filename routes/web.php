@@ -132,7 +132,7 @@ Route::name('pelanggan.')->group(function () {
 });
 
     // =================================
-    // CHECKOUT, PAYMENT & REVIEW - FE ONLY
+    // CHECKOUT, PAYMENT, REVIEW & CONFIRM
     // =================================
     
     // Step 1: Halaman Pengiriman
@@ -157,11 +157,22 @@ Route::name('pelanggan.')->group(function () {
 
     // Step 3: Menerima submit Final (Place Order)
     Route::post('/checkout/place-order', function () {
-        // Nanti bisa diarahkan ke halaman invoice/success
-        return redirect('/')->with('success', 'Pesanan berhasil dibuat! Terima kasih.');
+        // Logika save order ke database nanti ditaruh di controller
+        // Kalau sudah sukses, kita redirect ke halaman konfirmasi
+        return redirect()->route('checkout.success');
     })->name('checkout.place-order');
 
-    
+    // Step 4: Halaman Sukses / Order Confirmed
+    Route::get('/checkout/success', function () {
+        return view('pelanggan.payment-confirm');
+    })->name('checkout.success');
+
+    // Halaman Gagal / Payment Failed
+    Route::get('/checkout/failed', function () {
+        return view('pelanggan.payment-failed');
+    })->name('checkout.failed');
+
+
 
     // Women collection
     Route::get('/women', function () {
