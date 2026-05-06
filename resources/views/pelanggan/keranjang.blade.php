@@ -487,7 +487,7 @@ $totalCartCount = collect($cartItems)->sum('qty');
                     </div>
 
                     {{-- CTA Checkout --}}
-                    <a href="#"
+                    <a href="{{ route('checkout.index') }}"
                        id="checkoutBtn"
                        class="block w-full text-center bg-gray-900 text-white text-xs font-bold tracking-widest uppercase py-4 rounded-lg hover:bg-gray-700 transition-colors mb-3">
                         Checkout (<span id="checkoutQty">{{ $totalQty }}</span> Item)
