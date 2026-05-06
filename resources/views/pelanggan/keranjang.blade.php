@@ -566,39 +566,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
                         </div>
 
                     </div>
-<<<<<<< HEAD
-=======
-
-                    {{-- Total --}}
-                    <div class="flex justify-between items-center mb-6">
-                        <span class="font-extrabold text-gray-900 text-base">Total</span>
-                        <span class="font-extrabold text-gray-900 text-xl" id="summaryTotal">
-                            Rp {{ number_format($total, 0, ',', '.') }}
-                        </span>
-                    </div>
-
-                    {{-- CTA Checkout --}}
-                    <a href="{{ route('checkout.index') }}"
-                       id="checkoutBtn"
-                       class="block w-full text-center bg-gray-900 text-white text-xs font-bold tracking-widest uppercase py-4 rounded-lg hover:bg-gray-700 transition-colors mb-3">
-                        Checkout (<span id="checkoutQty">{{ $totalQty }}</span> Item)
-                    </a>
-
-                    {{-- Lanjut belanja --}}
-                    <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
-                       class="block w-full text-center border border-gray-300 text-gray-700 text-xs font-bold tracking-widest uppercase py-3.5 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
-                        Lanjut Belanja
-                    </a>
-
-                    {{-- Info aman --}}
-                    <div class="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="13" height="13">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                        Transaksi aman & terenkripsi
-                    </div>
-
->>>>>>> 3515cdb9400064270c5dabd71dc7495f55cc3559
                 </div>
 
             </div>
