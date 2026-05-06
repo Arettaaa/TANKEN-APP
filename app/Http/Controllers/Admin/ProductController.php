@@ -7,7 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductStock;
 use App\Models\ActivityLog;
-use App\Models\ProductGallery; // TAMBAHAN: Import model ProductGallery
+use App\Models\ProductGallery; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
