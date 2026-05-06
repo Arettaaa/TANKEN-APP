@@ -20,7 +20,7 @@ use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Pelanggan\CustomerProfileController;
 use App\Http\Controllers\Pelanggan\AddressController;
 use App\Http\Controllers\Pelanggan\WishlistController;
-
+use App\Http\Controllers\Pelanggan\CartController;
 
 
 
@@ -74,19 +74,15 @@ Route::name('pelanggan.')->group(function () {
     })->name('produk.detail');
 
 
-    // ==========================================
     // ROUTE AKUN PELANGGAN (DIBUNGKUS PREFIX 'akun')
-    // ==========================================
     Route::prefix('akun')->group(function () {
 
-        // 1. Edit Profil (URL: /akun/profil | Nama Rute: pelanggan.profil-edit)
         Route::get('/profil', function () {
             return view('pelanggan.profil-edit');
         })->name('profil-edit');
         Route::put('/profil/simpan', [CustomerProfileController::class, 'update'])->name('profil.simpan');
 
 
-        // 2. Ganti Password (URL: /akun/password | Nama Rute: pelanggan.profil-password)
         Route::get('/password', function () {
             return view('pelanggan.profil-password');
         })->name('profil-password');
@@ -94,7 +90,6 @@ Route::name('pelanggan.')->group(function () {
         Route::put('/password/simpan', [CustomerProfileController::class, 'updatePassword'])
             ->name('ganti-password.simpan');
 
-        // 3. Riwayat Pesanan (URL: /akun/pesanan | Nama Rute: pelanggan.profil-order)
         Route::get('/pesanan', function () {
             return view('pelanggan.profil-order');
         })->name('profil-order');
@@ -103,31 +98,17 @@ Route::name('pelanggan.')->group(function () {
         Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
         Route::delete('/wishlist/{productId}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
 
+        Route::get('/keranjang',        [CartController::class, 'index'])  ->name('keranjang.index');
+        Route::post('/keranjang',       [CartController::class, 'store'])  ->name('keranjang.store');
+        Route::patch('/keranjang/{id}', [CartController::class, 'update']) ->name('keranjang.update');
+        Route::delete('/keranjang/{id}',[CartController::class, 'destroy'])->name('keranjang.destroy');
+            
         Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
         Route::post('/alamat', [AddressController::class, 'store'])->name('alamat.store');
         Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
         Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
         Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
-    }); // <-- Penutup dari Route::name('pelanggan.')
-
-    // =================================
-    // KERANJANG BELANJA (CART) - FE ONLY
-    // =================================
-    Route::get('/keranjang', function () {
-        // Pastikan nama view ini sesuai dengan lokasi file keranjang.blade.php kamu
-        // Misalnya kalau di dalam folder resources/views/pelanggan/keranjang.blade.php
-        return view('pelanggan.keranjang'); 
-    })->name('keranjang.index');
-
-    // Dummy Route untuk Fetch API (Update Qty)
-    Route::patch('/keranjang/{id}', function () {
-        return response()->json(['success' => true, 'message' => 'Qty updated']);
-    })->name('keranjang.update');
-
-    // Dummy Route untuk Fetch API (Hapus Item)
-    Route::delete('/keranjang/{id}', function () {
-        return response()->json(['success' => true, 'message' => 'Item deleted']);
-    })->name('keranjang.destroy');
+    }); 
 
     // =================================
     // VOUCHER - FE ONLY (MOCKUP API)
