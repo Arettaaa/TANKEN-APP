@@ -83,15 +83,41 @@ class CheckoutController extends Controller
     // POST /checkout/proses — lanjut ke step 2
     public function proses(Request $request)
     {
-        $request->validate([
-            'address_id'      => 'required|exists:addresses,id',
-            'shipping_method' => 'required|string',
-            'shipping_cost'   => 'required|integer',
-            'shipping_days'   => 'nullable|string', // ← nullable, bukan required
-        ]);
+        // Kalau pakai alamat baru (address_id kosong)
+        if (!$request->address_id) {
+            $request->validate([
+                'new_region'  => 'required|string',
+                'new_city_id' => 'required|string',
+                'address'     => 'required|string',
+                'zip_code'    => 'required|string',
+                'shipping_method' => 'required|string',
+                'shipping_cost'   => 'required|integer',
+            ]);
+
+            // Simpan sebagai alamat baru
+            $addr = \App\Models\Address::create([
+                'user_id'    => auth()->id(),
+                'name'       => auth()->user()->name,
+                'phone'      => auth()->user()->phone,
+                'street'     => $request->address,
+                'region'     => $request->new_region,
+                'city_id'    => $request->new_city_id,
+                'postal'     => $request->zip_code,
+                'is_default' => false,
+            ]);
+
+            $addressId = $addr->id;
+        } else {
+            $request->validate([
+                'address_id'      => 'required|exists:addresses,id',
+                'shipping_method' => 'required|string',
+                'shipping_cost'   => 'required|integer',
+            ]);
+            $addressId = $request->address_id;
+        }
 
         session([
-            'checkout_address_id'    => $request->address_id,
+            'checkout_address_id'    => $addressId,
             'checkout_shipping'      => $request->shipping_method,
             'checkout_shipping_cost' => $request->shipping_cost,
             'checkout_shipping_days' => $request->shipping_days ?? '2-3 hari',

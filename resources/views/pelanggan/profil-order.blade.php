@@ -35,48 +35,6 @@
 
 @section('akun-content')
 
-@php
-// Data dummy pesanan
-$orders = collect([
-    [
-        'id'       => 'TKN-2026-0001',
-        'date'     => '10 Feb 2026',
-        'est_date' => '17 Feb 2026',
-        'items'    => 1,
-        'total'    => 1499000,
-        'status'   => 'shipped',
-        'tracking' => 'TJN123456789',
-        'product'  => ['name' => 'Flex Performance Jogger', 'size' => 'M', 'color' => 'Black', 'qty' => 1, 'price' => 1499000],
-        'address'  => 'Jl. Raya Dramaga, Margajaya, Kec. Bogor Barat, Kota Bogor, Jawa Barat 16680',
-        'payment'  => 'GoPay',
-    ],
-    [
-        'id'       => 'TKN-2026-0002',
-        'date'     => '05 Feb 2026',
-        'est_date' => '12 Feb 2026',
-        'items'    => 1,
-        'total'    => 899000,
-        'status'   => 'delivered',
-        'tracking' => 'TJN987654321',
-        'product'  => ['name' => 'Classic Chino Pants', 'size' => 'L', 'color' => 'Khaki', 'qty' => 1, 'price' => 899000],
-        'address'  => 'Jl. Raya Dramaga, Margajaya, Kec. Bogor Barat, Kota Bogor, Jawa Barat 16680',
-        'payment'  => 'Bank Transfer (BCA)',
-    ],
-    [
-        'id'       => 'TKN-2026-0003',
-        'date'     => '28 Jan 2026',
-        'est_date' => '04 Feb 2026',
-        'items'    => 2,
-        'total'    => 2150000,
-        'status'   => 'processing',
-        'tracking' => '-',
-        'product'  => ['name' => 'Urban Cargo Pants', 'size' => 'XL', 'color' => 'Olive', 'qty' => 2, 'price' => 1075000],
-        'address'  => 'Jl. Raya Dramaga, Margajaya, Kec. Bogor Barat, Kota Bogor, Jawa Barat 16680',
-        'payment'  => 'Credit Card ending in 4242',
-    ]
-]);
-@endphp
-
 <div>
     {{-- Header --}}
     <p class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Manajemen Pesanan</p>
@@ -86,10 +44,12 @@ $orders = collect([
     {{-- Tabs Navigasi dengan Javascript Filter --}}
     <div class="flex items-center gap-6 sm:gap-8 border-b border-gray-200 overflow-x-auto hide-scrollbar mb-8">
         <button onclick="filterOrders('all', this)" class="tab-btn whitespace-nowrap pb-3 border-b-2 border-black font-bold text-sm text-gray-900 uppercase tracking-wider text-[11px] transition-colors">Semua</button>
+        <button onclick="filterOrders('menunggu', this)" class="tab-btn whitespace-nowrap pb-3 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wider text-[11px] transition-colors">Menunggu</button>
         <button onclick="filterOrders('processing', this)" class="tab-btn whitespace-nowrap pb-3 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wider text-[11px] transition-colors">Diproses</button>
         <button onclick="filterOrders('shipped', this)" class="tab-btn whitespace-nowrap pb-3 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wider text-[11px] transition-colors">Dikirim</button>
         <button onclick="filterOrders('delivered', this)" class="tab-btn whitespace-nowrap pb-3 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wider text-[11px] transition-colors">Selesai</button>
         <button onclick="filterOrders('cancelled', this)" class="tab-btn whitespace-nowrap pb-3 border-b-2 border-transparent font-bold text-gray-400 hover:text-gray-900 uppercase tracking-wider text-[11px] transition-colors">Dibatalkan</button>
+
     </div>
 
     {{-- List Pesanan --}}
@@ -97,26 +57,27 @@ $orders = collect([
 
         @forelse($orders as $index => $order)
         @php
-            $statusLabel = match($order['status']) {
-                'processing' => 'DIPROSES',
-                'shipped'    => 'DIKIRIM',
-                'delivered'  => 'SELESAI',
-                'cancelled'  => 'DIBATALKAN',
-                default      => strtoupper($order['status']),
+          $statusLabel = match($order['status']) {
+                'pending', 'waiting_confirmation' => 'MENUNGGU',
+                'confirmed', 'processing'         => 'DIPROSES',
+                'shipped'                         => 'DIKIRIM',
+                'delivered'                       => 'SELESAI',
+                'cancelled'                       => 'DIBATALKAN',
+                default                           => strtoupper($order['status']),
             };
-            
-            // Warna Badge Status (Hijau Pastel untuk Selesai, sisanya standar TANKEN)
+
             $badgeClass = match($order['status']) {
-                'delivered'  => 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-                'shipped'    => 'bg-gray-800 text-white',
-                'processing' => 'bg-gray-100 text-gray-800 border border-gray-200',
-                'cancelled'  => 'bg-red-50 text-red-700 border border-red-100',
-                default      => 'bg-gray-100 text-gray-800',
+                'pending', 'waiting_confirmation' => 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+                'confirmed', 'processing'         => 'bg-gray-100 text-gray-800 border border-gray-200',
+                'shipped'                         => 'bg-gray-800 text-white',
+                'delivered'                       => 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+                'cancelled'                       => 'bg-red-50 text-red-700 border border-red-100',
+                default                           => 'bg-gray-100 text-gray-800',
             };
         @endphp
 
         {{-- Wrapper Card Pesanan --}}
-        <div class="order-wrapper border border-gray-200 rounded-lg overflow-hidden bg-white" data-status="{{ $order['status'] }}">
+        <div class="order-wrapper border border-gray-200 rounded-lg overflow-hidden bg-white" data-status="{{ $order['tab_status'] }}">
             
             {{-- Bagian Header Kartu --}}
             <div class="flex flex-col sm:flex-row sm:items-center justify-between p-5 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleAccordion('order-{{ $index }}')">
@@ -146,12 +107,38 @@ $orders = collect([
             <div id="body-order-{{ $index }}" class="hidden border-t border-gray-100">
                 <div class="p-5 sm:p-6 bg-white">
                     
-                    {{-- Timeline Tracking (Hanya Tampil Jika Tidak Dibatalkan) --}}
                     @if($order['status'] !== 'cancelled')
                     <div class="mb-8">
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Status Pengiriman</span>
-                            <span class="text-[10px] font-mono font-medium text-gray-500">Resi: {{ $order['tracking'] }}</span>
+                            
+                            @if($order['tracking'] && $order['tracking'] !== '-')
+                            @php
+                                $courierName = $order['courier'] ?? '';
+                                if (str_contains(strtolower($courierName), 'jne')) {
+                                    $courierUrl = 'https://www.jne.co.id/id/tracking/trace';
+                                } elseif (str_contains(strtolower($courierName), 'j&t') || str_contains(strtolower($courierName), 'jnt')) {
+                                    $courierUrl = 'https://www.jet.co.id/track';
+                                } elseif (str_contains(strtolower($courierName), 'sicepat')) {
+                                    $courierUrl = 'https://www.sicepat.com/checkAwb';
+                                } else {
+                                    $courierUrl = 'https://cekresi.com/?noresi=' . $order['tracking'];
+                                }
+                            @endphp
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-mono font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded cursor-pointer select-all"
+                                    title="Klik untuk copy"
+                                    onclick="copyResi('{{ $order['tracking'] }}', this)">
+                                    {{ $order['tracking'] }}
+                                </span>
+                                <a href="{{ $courierUrl }}" target="_blank"
+                                class="text-[10px] font-bold text-gray-500 hover:text-black underline underline-offset-2 flex items-center gap-1 transition-colors">
+                                    Lacak <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                                </a>
+                            </div>
+                            @else
+                            <span class="text-[10px] font-mono font-medium text-gray-400 italic">Resi belum tersedia</span>
+                            @endif
                         </div>
                         
                         <div class="relative w-full max-w-lg mx-auto py-2">
@@ -196,21 +183,35 @@ $orders = collect([
                     {{-- Detail Produk --}}
                     <div class="mb-6">
                         <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase block mb-3">Daftar Produk</span>
+                       @foreach($order['products'] as $product)
                         <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-md bg-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-gray-200">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($order['product']['name']) }}&background=random" alt="Product" class="w-full h-full object-cover">
+                            <div class="w-16 h-16 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
+                                @if($product['image'])
+                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <i class="fa-solid fa-shirt text-gray-300 text-xl"></i>
+                                    </div>
+                                @endif
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-gray-900 truncate">{{ $order['product']['name'] }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">Ukuran: {{ $order['product']['size'] }} | Warna: {{ $order['product']['color'] }} | Qty: {{ $order['product']['qty'] }}</p>
+                                <p class="text-sm font-bold text-gray-900 truncate">{{ $product['name'] }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                    Ukuran: {{ $product['size'] }}
+                                    @if($product['color'] && $product['color'] !== '-')
+                                        | Warna: {{ $product['color'] }}
+                                    @endif
+                                    | Qty: {{ $product['qty'] }}
+                                </p>
                             </div>
                             <div class="font-bold text-sm text-gray-900 flex-shrink-0">
-                                Rp {{ number_format($order['product']['price'], 0, ',', '.') }}
+                                Rp {{ number_format($product['price'], 0, ',', '.') }}
                             </div>
                         </div>
+                        @endforeach
                     </div>
 
-                    {{-- Alamat & Pembayaran --}}
+                  {{-- Alamat & Pembayaran --}}
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                         <div class="bg-gray-50/50 p-4 rounded-md border border-gray-100">
                             <div class="flex items-center gap-2 mb-2 text-[10px] font-bold tracking-widest text-gray-400 uppercase">
@@ -218,6 +219,14 @@ $orders = collect([
                                 Alamat Pengiriman
                             </div>
                             <p class="text-xs text-gray-700 leading-relaxed">{{ $order['address'] }}</p>
+                            
+                            {{-- Tambah info kurir di sini --}}
+                            @if(!empty($order['courier']))
+                            <div class="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1.5">
+                                <i class="fa-solid fa-truck text-gray-400 text-[10px]"></i>
+                                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{{ $order['courier'] }}</span>
+                            </div>
+                            @endif
                         </div>
                         
                         <div class="bg-gray-50/50 p-4 rounded-md border border-gray-100">
@@ -228,7 +237,6 @@ $orders = collect([
                             <p class="text-xs text-gray-700 font-medium">{{ $order['payment'] }}</p>
                         </div>
                     </div>
-
                     {{-- Tombol Aksi Dinamis (Berubah sesuai status pesanan) --}}
                     <div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-gray-100">
                         <button class="w-full sm:w-1/2 bg-black text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-800 transition-colors">
@@ -244,11 +252,24 @@ $orders = collect([
                             <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
                                 Rincian Batal
                             </button>
-                        @else
-                            <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
-                                Lacak Paket
-                            </button>
-                        @endif
+                      @else
+                        @php
+                            $courierUrl = '#';
+                            $courierName = $order['courier'] ?? '';
+                            if (str_contains(strtolower($courierName), 'jne')) {
+                                $courierUrl = 'https://www.jne.co.id/id/tracking/trace';
+                            } elseif (str_contains(strtolower($courierName), 'j&t') || str_contains(strtolower($courierName), 'jnt')) {
+                                $courierUrl = 'https://www.jet.co.id/track';
+                            } elseif (str_contains(strtolower($courierName), 'sicepat')) {
+                                $courierUrl = 'https://www.sicepat.com/checkAwb';
+                            }
+                        @endphp
+                        <a href="{{ $courierUrl }}" target="_blank"
+                        class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors text-center flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                            Lacak Paket
+                        </a>
+                    @endif
                     </div>
 
                 </div>
@@ -327,5 +348,17 @@ $orders = collect([
             emptyState.classList.add('hidden');
         }
     }
+
+    function copyResi(resi, el) {
+    navigator.clipboard.writeText(resi).then(() => {
+        const original = el.textContent;
+        el.textContent = 'Tersalin!';
+        el.classList.add('text-green-600', 'bg-green-50');
+        setTimeout(() => {
+            el.textContent = original;
+            el.classList.remove('text-green-600', 'bg-green-50');
+        }, 1500);
+    });
+}
 </script>
 @endpush

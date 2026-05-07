@@ -458,8 +458,8 @@ $shippingOptions = [
                             {{-- Kode Pos --}}
                             <div class="mb-7">
                                 <label class="form-label">Kode Pos <span class="text-red-400">*</span></label>
-                                <input type="text" name="zip_code" class="form-input" value="{{ old('zip_code') }}"
-                                    placeholder="12720">
+                                <input type="text" name="zip_code" id="zip_code_input" class="form-input"
+                                    value="{{ old('zip_code') }}" placeholder="12720">
                             </div>
                         </div>
 
@@ -780,21 +780,35 @@ $shippingOptions = [
         }
     }
 
-    function finishRegionSelection() {
-        const full = `${regionState.kel.name}, ${regionState.kec.name}, ${regionState.kota.name}, ${regionState.prov.name}`;
-        document.getElementById('regionDisplayText').innerText = full;
-        document.getElementById('regionDisplayText').classList.replace('text-gray-400', 'text-gray-900');
-        document.getElementById('newAddrRegion').value  = full;
-       document.getElementById('newAddrCityId').value  = 'dist_' + regionState.kec.id;
-document.getElementById('checkoutCityId').value = 'dist_' + regionState.kec.id;
+   function finishRegionSelection() {
+    const full = `${regionState.kel.name}, ${regionState.kec.name}, ${regionState.kota.name}, ${regionState.prov.name}`;
+    document.getElementById('regionDisplayText').innerText = full;
+    document.getElementById('regionDisplayText').classList.replace('text-gray-400', 'text-gray-900');
+    document.getElementById('newAddrRegion').value  = full;
+    document.getElementById('newAddrCityId').value  = 'dist_' + regionState.kec.id;
+    document.getElementById('checkoutCityId').value = 'dist_' + regionState.kec.id;
 
-        // Deselect alamat tersimpan
-        document.getElementById('selectedAddressId').value = '';
-        document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));
+    // Auto-isi kode pos dari kelurahan
+    fetchKodePos(regionState.kel.id);
 
-        closeRegionDropdown();
-loadOngkir('dist_' + regionState.kec.id);
+    document.getElementById('selectedAddressId').value = '';
+    document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));
+
+    closeRegionDropdown();
+    loadOngkir('dist_' + regionState.kec.id);
+}
+
+async function fetchKodePos(kelurahanId) {
+    try {
+        const res  = await fetch(`/wilayah?type=kelurahan_detail&id=${kelurahanId}`);
+        const json = await res.json();
+        if (json.value && json.value[0] && json.value[0].postal_code) {
+            document.getElementById('zip_code_input').value = json.value[0].postal_code;
+        }
+    } catch(e) {
+        // Biarkan user isi manual kalau gagal
     }
+}
 
     function toggleNewAddressForm() {
         const form = document.getElementById('newAddressForm');

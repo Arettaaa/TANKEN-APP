@@ -112,6 +112,8 @@ class PaymentController extends Controller
 
         DB::beginTransaction();
         try {
+            preg_match('/(\d+)(?!.*\d)/', $shippingDays, $matches);
+            $daysMax = isset($matches[1]) ? (int)$matches[1] : 3;
             $address = Address::findOrFail($addressId);
             $order = Order::create([
                 'user_id'           => auth()->id(),
@@ -119,9 +121,9 @@ class PaymentController extends Controller
                 'customer_name'     => $address->name,
                 'customer_email'    => auth()->user()->email,
                 'customer_phone'    => $address->phone ?? auth()->user()->phone,
-                'shipping_address'  => $address->street,
-                'shipping_city'     => $address->region,
-                'shipping_province' => $address->region,
+                'shipping_address'     => $address->street,
+                'shipping_city'        => $address->region,  // region = "Kel, Kec, Kota, Prov"
+                'shipping_province'    => '',                 // kosongkan, sudah ada di region
                 'shipping_postal_code' => $address->postal,
                 'status'            => 'pending',
                 'payment_status'    => 'waiting_confirmation',
@@ -135,6 +137,7 @@ class PaymentController extends Controller
                 'ppn'               => $ppn,
                 'total'             => $total,
                 'discount'          => 0,
+                'estimated_arrival' => now()->addDays($daysMax)->toDateString(),
             ]);
 
             foreach ($cartItems as $item) {

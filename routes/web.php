@@ -23,6 +23,8 @@ use App\Http\Controllers\Pelanggan\WishlistController;
 use App\Http\Controllers\Pelanggan\CartController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
 use App\Http\Controllers\Pelanggan\PaymentController as PelangganPaymentController;
+use App\Http\Controllers\Pelanggan\CustomerOrderController;
+
 
 
 
@@ -91,9 +93,7 @@ Route::prefix('akun')->group(function () {
         Route::put('/password/simpan', [CustomerProfileController::class, 'updatePassword'])
             ->name('ganti-password.simpan');
 
-        Route::get('/pesanan', function () {
-            return view('pelanggan.profil-order');
-        })->name('profil-order');
+        Route::get('/pesanan', [CustomerOrderController::class, 'index'])->name('profil-order');
 
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('profil-wishlist');
         Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
