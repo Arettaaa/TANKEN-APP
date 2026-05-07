@@ -100,7 +100,7 @@ class OrderController extends Controller
                     $order->order_number,
                     $order->customer_name,
                     $order->customer_email,
-                    $order->created_at->format('Y-m-d H:i'),
+                    $order->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
                     $order->total,
                     strtoupper($order->status),
                     strtoupper($order->payment_status),

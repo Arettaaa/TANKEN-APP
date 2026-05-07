@@ -16,7 +16,7 @@ class CustomerOrderController extends Controller
             ->get()
             ->map(function ($order) {
                 // Tab filter mapping
-                $tabStatus = match($order->status) {
+                $tabStatus = match ($order->status) {
                     'pending', 'waiting_confirmation' => 'menunggu',
                     'confirmed', 'processing'         => 'processing',
                     'shipped'                         => 'shipped',
@@ -33,6 +33,7 @@ class CustomerOrderController extends Controller
                 Carbon::setLocale('id');
 
                 return [
+                    'db_id'      => $order->id,
                     'id'         => $order->order_number,
                     'date'       => Carbon::parse($order->created_at)->translatedFormat('d M Y'),
                     'est_date'   => $estDate->translatedFormat('d M Y'),
@@ -58,7 +59,7 @@ class CustomerOrderController extends Controller
                         $order->shipping_province,
                         $order->shipping_postal_code,
                     ])),
-                    'payment'  => match($order->payment_method) {
+                    'payment'  => match ($order->payment_method) {
                         'bank_transfer' => 'Transfer Bank (' . strtoupper($order->payment_reference ?? '') . ')',
                         'qris'          => 'QRIS',
                         default         => $order->payment_method ?? '-',
@@ -67,5 +68,33 @@ class CustomerOrderController extends Controller
             });
 
         return view('pelanggan.profil-order', compact('orders'));
+    }
+
+    public function beliLagi($id)
+    {
+        $order = \App\Models\Order::with('items')->where('user_id', auth()->id())->findOrFail($id);
+
+        foreach ($order->items as $item) {
+            $cartItem = \App\Models\CartItem::where('user_id', auth()->id())
+                ->where('product_id', $item->product_id)
+                ->where('size', $item->size)
+                ->where('color', $item->color)
+                ->first();
+
+            if ($cartItem) {
+                $cartItem->increment('quantity', $item->quantity);
+            } else {
+                \App\Models\CartItem::create([
+                    'user_id'    => auth()->id(),
+                    'product_id' => $item->product_id,
+                    'quantity'   => $item->quantity,
+                    'size'       => $item->size,
+                    'color'      => $item->color,
+                ]);
+            }
+        }
+
+        return redirect()->route('pelanggan.keranjang.index')
+            ->with('success', 'Produk dari pesanan sebelumnya berhasil ditambahkan ke keranjang!');
     }
 }

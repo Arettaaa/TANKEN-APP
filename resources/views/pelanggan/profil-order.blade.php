@@ -239,15 +239,19 @@
                     </div>
                     {{-- Tombol Aksi Dinamis (Berubah sesuai status pesanan) --}}
                     <div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-gray-100">
-                        <button class="w-full sm:w-1/2 bg-black text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-800 transition-colors">
+                    <form action="{{ route('pelanggan.pesanan.beli-lagi', $order['db_id']) }}" method="POST" class="w-full sm:w-1/2">
+                        @csrf
+                        <button type="submit" class="w-full bg-black text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-800 transition-colors">
                             Beli Lagi
                         </button>
+                    </form>
                         
                         {{-- Logika Tombol Ulasan ala Shopee --}}
                         @if($order['status'] == 'delivered')
-                            <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
+                           <a href="{{ route('pelanggan.ulasan.create', ['order_id' => $order['db_id']]) }}"
+                            class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors text-center">
                                 Beri Ulasan
-                            </button>
+                            </a>
                         @elseif($order['status'] == 'cancelled')
                             <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
                                 Rincian Batal

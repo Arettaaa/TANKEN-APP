@@ -66,4 +66,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\CartItem::class);
     }
+
+    public function reviews()
+    {
+        return $this->hasMany(\App\Models\Review::class);
+    }
 }

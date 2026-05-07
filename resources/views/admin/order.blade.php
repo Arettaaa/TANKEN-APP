@@ -372,7 +372,7 @@
 
                     <td class="px-5 py-4">
                         <span class="inline-flex px-2.5 py-1 text-xs font-semibold rounded-md {{ $payClass }}">
-                            {{ ucfirst($payment) }}
+                           {{ $payment === 'waiting_confirmation' ? 'Waiting Confirmation' : ucfirst($payment) }}
                         </span>
                     </td>
 
@@ -424,8 +424,30 @@
 
                                     {{-- Sudah selesai / dibatalkan → tidak ada aksi --}}
                                     @else
-                                    <div class="px-4 py-3 text-xs text-gray-400 text-center">
-                                        Tidak ada aksi tersedia
+                                    @php
+                                    $actionMsg = match(true) {
+                                    in_array($status, ['delivered']) => ['icon' => 'fa-check-double', 'color' =>
+                                    'text-green-500', 'bg' => 'bg-green-50', 'title' => 'Order Selesai', 'desc' =>
+                                    'Sudah diterima customer'],
+                                    in_array($status, ['cancelled','refunded'])=> ['icon' => 'fa-ban', 'color' =>
+                                    'text-red-400', 'bg' => 'bg-red-50', 'title' => ucfirst($status), 'desc' => 'Tidak
+                                    ada aksi tersedia'],
+                                    $payment === 'unpaid' => ['icon' => 'fa-clock', 'color' => 'text-yellow-500','bg' =>
+                                    'bg-yellow-50', 'title' => 'Menunggu Bayar', 'desc' => 'Customer belum membayar'],
+                                    default => ['icon' => 'fa-circle-info', 'color' => 'text-gray-400', 'bg' =>
+                                    'bg-gray-50', 'title' => 'Tidak Ada Aksi', 'desc' => 'Tidak ada aksi tersedia'],
+                                    };
+                                    @endphp
+                                    <div class="px-4 py-3 flex items-center gap-2.5">
+                                        <div
+                                            class="w-7 h-7 rounded-full {{ $actionMsg['bg'] }} flex items-center justify-center flex-shrink-0">
+                                            <i
+                                                class="fa-solid {{ $actionMsg['icon'] }} {{ $actionMsg['color'] }} text-[10px]"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-bold text-gray-700">{{ $actionMsg['title'] }}</div>
+                                            <div class="text-[10px] text-gray-400 mt-0.5">{{ $actionMsg['desc'] }}</div>
+                                        </div>
                                     </div>
                                     @endif
                                 </div>

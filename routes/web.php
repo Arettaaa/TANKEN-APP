@@ -24,6 +24,7 @@ use App\Http\Controllers\Pelanggan\CartController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
 use App\Http\Controllers\Pelanggan\PaymentController as PelangganPaymentController;
 use App\Http\Controllers\Pelanggan\CustomerOrderController;
+use App\Http\Controllers\Pelanggan\ReviewController as PelangganReviewController;
 
 
 
@@ -78,7 +79,7 @@ Route::name('pelanggan.')->group(function () {
     })->name('produk.detail');
 
 
-Route::prefix('akun')->group(function () {
+    Route::prefix('akun')->group(function () {
 
         Route::get('/profil', function () {
             return view('pelanggan.profil-edit');
@@ -94,6 +95,7 @@ Route::prefix('akun')->group(function () {
             ->name('ganti-password.simpan');
 
         Route::get('/pesanan', [CustomerOrderController::class, 'index'])->name('profil-order');
+        Route::post('/pesanan/{id}/beli-lagi', [CustomerOrderController::class, 'beliLagi'])->name('pesanan.beli-lagi');
 
         Route::get('/wishlist', [WishlistController::class, 'index'])->name('profil-wishlist');
         Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
@@ -117,6 +119,9 @@ Route::prefix('akun')->group(function () {
 
         Route::get('/checkout/payment',         [PelangganPaymentController::class, 'index'])->name('checkout.payment');
         Route::post('/checkout/payment/simpan', [PelangganPaymentController::class, 'simpan'])->name('checkout.payment.simpan');
+
+        Route::get('/ulasan',  [PelangganReviewController::class, 'create'])->name('ulasan.create');
+        Route::post('/ulasan', [PelangganReviewController::class, 'store'])->name('ulasan.store');
     });
 
     // =================================
@@ -140,15 +145,15 @@ Route::prefix('akun')->group(function () {
     })->name('voucher.check');
 });
 
-    // Step 4: Halaman Sukses / Order Confirmed
-    Route::get('/checkout/success', function () {
-        return view('pelanggan.payment-confirm');
-    })->name('checkout.success');
+// Step 4: Halaman Sukses / Order Confirmed
+Route::get('/checkout/success', function () {
+    return view('pelanggan.payment-confirm');
+})->name('checkout.success');
 
-    // Halaman Gagal / Payment Failed
-    Route::get('/checkout/failed', function () {
-        return view('pelanggan.payment-failed');
-    })->name('checkout.failed');
+// Halaman Gagal / Payment Failed
+Route::get('/checkout/failed', function () {
+    return view('pelanggan.payment-failed');
+})->name('checkout.failed');
 
 
 // =================================
