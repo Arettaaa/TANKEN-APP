@@ -183,32 +183,41 @@
                     {{-- Detail Produk --}}
                     <div class="mb-6">
                         <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase block mb-3">Daftar Produk</span>
-                       @foreach($order['products'] as $product)
-                        <div class="flex items-center gap-4">
-                            <div class="w-16 h-16 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200">
-                                @if($product['image'])
-                                    <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center">
-                                        <i class="fa-solid fa-shirt text-gray-300 text-xl"></i>
-                                    </div>
+                     @foreach($order['products'] as $product)
+                    <div class="flex items-center gap-4">
+                        {{-- 1. Gambar Produk jadi Link (Ubah div jadi a, tambah block & hover effect) --}}
+                        <a href="{{ $product['slug'] ? route('pelanggan.produk.detail', $product['slug']) : '#' }}" 
+                        class="block w-16 h-16 rounded-md bg-gray-100 flex-shrink-0 overflow-hidden border border-gray-200 hover:opacity-80 transition-opacity">
+                            @if($product['image'])
+                                <img src="{{ $product['image'] }}" alt="{{ $product['name'] }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <i class="fa-solid fa-shirt text-gray-300 text-xl"></i>
+                                </div>
+                            @endif
+                        </a>
+
+                        <div class="flex-1 min-w-0">
+                            {{-- 2. Nama Produk jadi Link (Ubah p jadi a, tambah block & hover text) --}}
+                            <a href="{{ $product['slug'] ? route('pelanggan.produk.detail', $product['slug']) : '#' }}" 
+                            class="block text-sm font-bold text-gray-900 truncate hover:text-gray-600 transition-colors">
+                                {{ $product['name'] }}
+                            </a>
+                            
+                            <p class="text-xs text-gray-500 mt-0.5">
+                                Ukuran: {{ $product['size'] }}
+                                @if($product['color'] && $product['color'] !== '-')
+                                    | Warna: {{ $product['color'] }}
                                 @endif
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm font-bold text-gray-900 truncate">{{ $product['name'] }}</p>
-                                <p class="text-xs text-gray-500 mt-0.5">
-                                    Ukuran: {{ $product['size'] }}
-                                    @if($product['color'] && $product['color'] !== '-')
-                                        | Warna: {{ $product['color'] }}
-                                    @endif
-                                    | Qty: {{ $product['qty'] }}
-                                </p>
-                            </div>
-                            <div class="font-bold text-sm text-gray-900 flex-shrink-0">
-                                Rp {{ number_format($product['price'], 0, ',', '.') }}
-                            </div>
+                                | Qty: {{ $product['qty'] }}
+                            </p>
                         </div>
-                        @endforeach
+
+                        <div class="font-bold text-sm text-gray-900 flex-shrink-0">
+                            Rp {{ number_format($product['price'], 0, ',', '.') }}
+                        </div>
+                    </div>
+                    @endforeach
                     </div>
 
                   {{-- Alamat & Pembayaran --}}

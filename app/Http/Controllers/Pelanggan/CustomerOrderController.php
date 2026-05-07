@@ -45,6 +45,7 @@ class CustomerOrderController extends Controller
                     'courier'    => $order->courier ?? '',
                     'products'   => $order->items->map(fn($item) => [
                         'name'  => $item->product_name,
+                        'slug'  => $item->product ? $item->product->slug : null,
                         'size'  => $item->size,
                         'color' => $item->color ?? '-',
                         'qty'   => $item->quantity,
