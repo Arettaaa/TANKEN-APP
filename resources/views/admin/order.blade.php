@@ -7,40 +7,151 @@
 @push('styles')
 <style>
     /* Stat icon */
-    .stat-icon { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 16px; }
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-bottom: 16px;
+    }
 
     /* Custom Dropdown Filter */
-    .dropdown-item:hover { background-color: #f9fafb; }
-    .custom-dropdown-btn { appearance: none; background-color: white; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 14px; font-size: 0.875rem; color: #4b5563; display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; transition: border-color 0.2s; }
-    .custom-dropdown-btn:focus { border-color: #111; outline: none; }
+    .dropdown-item:hover {
+        background-color: #f9fafb;
+    }
+
+    .custom-dropdown-btn {
+        appearance: none;
+        background-color: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 8px 14px;
+        font-size: 0.875rem;
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+
+    .custom-dropdown-btn:focus {
+        border-color: #111;
+        outline: none;
+    }
 
     /* Search */
-    .search-box { position: relative; }
-    .search-box input { padding: 8px 14px 8px 36px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.875rem; font-family: 'Inter', sans-serif; outline: none; width: 260px; background: #fff; transition: border-color 0.2s; }
-    .search-box input:focus { border-color: #111; }
-    .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+    .search-box {
+        position: relative;
+    }
+
+    .search-box input {
+        padding: 8px 14px 8px 36px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        width: 260px;
+        background: #fff;
+        transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+        border-color: #111;
+    }
+
+    .search-box svg {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        pointer-events: none;
+    }
 
     /* Status pill */
-    .status-pill { display: inline-block; width: 110px; height: 28px; border-radius: 4px; }
-    .pill-pending    { background: #fef9c3; }
-    .pill-confirmed  { background: #dbeafe; }
-    .pill-processing { background: #ede9fe; }
-    .pill-shipped    { background: #e0f2fe; }
-    .pill-delivered  { background: #dcfce7; }
-    .pill-cancelled  { background: #fee2e2; }
+    .status-pill {
+        display: inline-block;
+        width: 110px;
+        height: 28px;
+        border-radius: 4px;
+    }
+
+    .pill-pending {
+        background: #fef9c3;
+    }
+
+    .pill-confirmed {
+        background: #dbeafe;
+    }
+
+    .pill-processing {
+        background: #ede9fe;
+    }
+
+    .pill-shipped {
+        background: #e0f2fe;
+    }
+
+    .pill-delivered {
+        background: #dcfce7;
+    }
+
+    .pill-cancelled {
+        background: #fee2e2;
+    }
 
     /* Payment badge */
-    .pay-paid    { background: #dcfce7; color: #16a34a; }
-    .pay-pending { background: #fef9c3; color: #ca8a04; }
-    .pay-failed  { background: #fee2e2; color: #dc2626; }
-    .pay-refund  { background: #ede9fe; color: #7c3aed; }
+    .pay-paid {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .pay-pending {
+        background: #fef9c3;
+        color: #ca8a04;
+    }
+
+    .pay-failed {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .pay-refund {
+        background: #ede9fe;
+        color: #7c3aed;
+    }
 
     /* Table row */
-    .order-row:hover { background: #fafafa; cursor: pointer; }
+    .order-row:hover {
+        background: #fafafa;
+        cursor: pointer;
+    }
 
     /* Action btn */
-    .action-btn { width: 30px; height: 30px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border: none; background: transparent; color: #6b7280; transition: background 0.15s, color 0.15s; }
-    .action-btn:hover { background: #f3f4f6; color: #111; }
+    .action-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: #6b7280;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    .action-btn:hover {
+        background: #f3f4f6;
+        color: #111;
+    }
 </style>
 @endpush
 
@@ -80,22 +191,33 @@
 {{-- ===== FILTER BAR ===== --}}
 <div class="bg-white border border-gray-100 rounded-lg p-4 mb-4 shadow-sm">
     <div class="flex flex-wrap items-center gap-3">
-        
+
         {{-- Custom Dropdown: Status --}}
         <div class="relative custom-dropdown">
             <button type="button" onclick="toggleFilterMenu('statusMenu')" class="custom-dropdown-btn min-w-[140px]">
                 <span id="label-status">Semua Status</span>
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
             </button>
-            <div id="statusMenu" class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+            <div id="statusMenu"
+                class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
                 <ul class="text-sm text-gray-700">
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium" onclick="selectFilterItem('status', '', 'Semua Status')">Semua Status</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('status', 'pending', 'Pending')"><span class="w-2 h-2 rounded-full bg-yellow-300"></span> Pending</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('status', 'confirmed', 'Confirmed')"><span class="w-2 h-2 rounded-full bg-blue-300"></span> Confirmed</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('status', 'processing', 'Processing')"><span class="w-2 h-2 rounded-full bg-purple-300"></span> Processing</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('status', 'shipped', 'Shipped')"><span class="w-2 h-2 rounded-full bg-blue-100"></span> Shipped</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('status', 'delivered', 'Delivered')"><span class="w-2 h-2 rounded-full bg-green-400"></span> Delivered</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('status', 'cancelled', 'Cancelled')"><span class="w-2 h-2 rounded-full bg-red-400"></span> Cancelled</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium"
+                        onclick="selectFilterItem('status', '', 'Semua Status')">Semua Status</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('status', 'pending', 'Pending')"><span
+                            class="w-2 h-2 rounded-full bg-yellow-300"></span> Pending</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('status', 'processing', 'Processing')"><span
+                            class="w-2 h-2 rounded-full bg-purple-300"></span> Processing</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('status', 'shipped', 'Shipped')"><span
+                            class="w-2 h-2 rounded-full bg-blue-100"></span> Shipped</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('status', 'delivered', 'Delivered')"><span
+                            class="w-2 h-2 rounded-full bg-green-400"></span> Delivered</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('status', 'cancelled', 'Cancelled')"><span
+                            class="w-2 h-2 rounded-full bg-red-400"></span> Cancelled</li>
                 </ul>
             </div>
             <input type="hidden" id="input-status" value="">
@@ -107,12 +229,20 @@
                 <span id="label-payment">Semua Bayar</span>
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
             </button>
-            <div id="paymentMenu" class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+            <div id="paymentMenu"
+                class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
                 <ul class="text-sm text-gray-700">
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium" onclick="selectFilterItem('payment', '', 'Semua Bayar')">Semua Bayar</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('payment', 'paid', 'Sudah Bayar')"><i class="fa-solid fa-check text-green-500"></i> Sudah Bayar</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('payment', 'unpaid', 'Belum Bayar')"><i class="fa-regular fa-clock text-yellow-500"></i> Belum Bayar</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilterItem('payment', 'refunded', 'Refunded')"><i class="fa-solid fa-rotate-left text-purple-500"></i> Refunded</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium"
+                        onclick="selectFilterItem('payment', '', 'Semua Bayar')">Semua Bayar</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('payment', 'paid', 'Sudah Bayar')"><i
+                            class="fa-solid fa-check text-green-500"></i> Sudah Bayar</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('payment', 'unpaid', 'Belum Bayar')"><i
+                            class="fa-regular fa-clock text-yellow-500"></i> Belum Bayar</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                        onclick="selectFilterItem('payment', 'refunded', 'Refunded')"><i
+                            class="fa-solid fa-rotate-left text-purple-500"></i> Refunded</li>
                 </ul>
             </div>
             <input type="hidden" id="input-payment" value="">
@@ -124,12 +254,17 @@
                 <span id="label-date">Semua Waktu</span>
                 <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
             </button>
-            <div id="dateMenu" class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
+            <div id="dateMenu"
+                class="drop-menu absolute left-0 w-full mt-1 bg-white border border-gray-100 rounded-md shadow-lg hidden z-30 overflow-hidden">
                 <ul class="text-sm text-gray-700">
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium" onclick="selectFilterItem('date', '', 'Semua Waktu')">Semua Waktu</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer" onclick="selectFilterItem('date', 'today', 'Hari Ini')">Hari Ini</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer" onclick="selectFilterItem('date', 'week', '7 Hari Terakhir')">7 Hari Terakhir</li>
-                    <li class="dropdown-item px-4 py-2.5 cursor-pointer" onclick="selectFilterItem('date', 'month', 'Bulan Ini')">Bulan Ini</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium"
+                        onclick="selectFilterItem('date', '', 'Semua Waktu')">Semua Waktu</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer"
+                        onclick="selectFilterItem('date', 'today', 'Hari Ini')">Hari Ini</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer"
+                        onclick="selectFilterItem('date', 'week', '7 Hari Terakhir')">7 Hari Terakhir</li>
+                    <li class="dropdown-item px-4 py-2.5 cursor-pointer"
+                        onclick="selectFilterItem('date', 'month', 'Bulan Ini')">Bulan Ini</li>
                 </ul>
             </div>
             <input type="hidden" id="input-date" value="">
@@ -144,7 +279,8 @@
         </div>
 
         {{-- Tombol Export (Direct Download URL) --}}
-        <a href="{{ route('admin.orders.export') }}" target="_blank" class="flex items-center gap-2 px-4 py-2 border border-gray-900 text-gray-900 text-sm font-semibold rounded-md hover:bg-gray-900 hover:text-white transition-colors shadow-sm">
+        <a href="{{ route('admin.orders.export') }}" target="_blank"
+            class="flex items-center gap-2 px-4 py-2 border border-gray-900 text-gray-900 text-sm font-semibold rounded-md hover:bg-gray-900 hover:text-white transition-colors shadow-sm">
             <i class="fa-solid fa-download"></i> Export Excel
         </a>
     </div>
@@ -169,39 +305,37 @@
 
                 @forelse($orders as $order)
                 @php
-                    $oid      = $order->order_number;
-                    $customer = $order->customer_name;
-                    $email    = $order->customer_email;
-                    $date     = $order->created_at->format('Y-m-d H:i');
-                    $total    = $order->total;
-                    $status   = $order->status;
-                    $payment  = $order->payment_status;
-                    $items    = $order->items->sum('quantity');
-                    $shipping = $order->courier ?? '-';
-                    $dbId     = $order->id;
+                $oid = $order->order_number;
+                $customer = $order->customer_name;
+                $email = $order->customer_email;
+                $date = $order->created_at->format('Y-m-d H:i');
+                $total = $order->total;
+                $status = $order->status;
+                $payment = $order->payment_status;
+                $items = $order->items->sum('quantity');
+                $shipping = $order->courier ?? '-';
+                $dbId = $order->id;
 
-                    $pillClass = match($status) {
-                        'pending'    => 'pill-pending',
-                        'confirmed'  => 'pill-confirmed',
-                        'processing' => 'pill-processing',
-                        'shipped'    => 'pill-shipped',
-                        'delivered'  => 'pill-delivered',
-                        'cancelled'  => 'pill-cancelled',
-                        'refunded'   => 'pill-cancelled',
-                        default      => 'pill-pending',
-                    };
-                    
-                    $payClass = match($payment) {
-                        'paid'    => 'pay-paid',
-                        'unpaid'  => 'pay-pending',
-                        'refunded'=> 'pay-refund',
-                        default   => 'pay-pending',
-                    };
+                $pillClass = match($status) {
+                'pending' => 'pill-pending',
+                'confirmed' => 'pill-confirmed',
+                'processing' => 'pill-processing',
+                'shipped' => 'pill-shipped',
+                'delivered' => 'pill-delivered',
+                'cancelled' => 'pill-cancelled',
+                'refunded' => 'pill-cancelled',
+                default => 'pill-pending',
+                };
+
+                $payClass = match($payment) {
+                'paid' => 'pay-paid',
+                'unpaid' => 'pay-pending',
+                'refunded'=> 'pay-refund',
+                default => 'pay-pending',
+                };
                 @endphp
 
-                <tr class="order-row transition-colors"
-                    data-status="{{ $status }}"
-                    data-payment="{{ $payment }}"
+                <tr class="order-row transition-colors" data-status="{{ $status }}" data-payment="{{ $payment }}"
                     data-date="{{ $order->created_at->format('Y-m-d') }}"
                     data-search="{{ strtolower($oid . ' ' . $customer . ' ' . $email) }}">
 
@@ -229,7 +363,8 @@
                     <td class="px-5 py-4">
                         <div class="relative inline-block">
                             <span class="status-pill {{ $pillClass }}"></span>
-                            <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">
+                            <span
+                                class="absolute inset-0 flex items-center justify-center text-xs font-bold text-gray-700">
                                 {{ ucfirst($status) }}
                             </span>
                         </div>
@@ -242,17 +377,59 @@
                     </td>
 
                     <td class="px-5 py-4">
-                        <div class="flex items-center gap-1">
+                        <div class="relative flex items-center gap-1">
+                            {{-- Tombol View --}}
                             <a href="{{ route('admin.orders.show', $dbId) }}" class="action-btn" title="Lihat Detail">
                                 <i class="fa-regular fa-eye text-[15px]"></i>
                             </a>
 
-                            @if(!in_array($status, ['delivered','cancelled', 'refunded']))
-                            <button class="action-btn" title="Update Status"
-                                    onclick="openStatusModal('{{ $dbId }}', '{{ $status }}', '{{ $oid }}')">
-                                <i class="fa-solid fa-pen-to-square text-[15px]"></i>
-                            </button>
-                            @endif
+
+                            {{-- Dropdown Menu --}}
+                            <div class="relative">
+                                <button class="action-btn" onclick="toggleActionMenu(event, 'action-{{ $dbId }}')">
+                                    <i class="fa-solid fa-ellipsis-vertical text-[15px]"></i>
+                                </button>
+
+                                <div id="action-{{ $dbId }}"
+                                    class="action-menu hidden absolute right-0 mt-1 w-48 bg-white border border-gray-100 rounded-lg shadow-lg z-40 overflow-hidden py-1">
+
+                                    {{-- Kalau masih nunggu konfirmasi → tampilkan Terima/Tolak SAJA --}}
+                                    @if($payment === 'waiting_confirmation')
+                                    <div class="px-4 py-2 text-xs text-gray-400 font-medium uppercase tracking-wider">
+                                        Verifikasi Pembayaran
+                                    </div>
+
+                                    <button
+                                        onclick="closeActionMenus(); openKonfirmasiModal('{{ $dbId }}', '{{ $oid }}')"
+                                        class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 transition-colors">
+                                        <i class="fa-solid fa-circle-check w-4"></i>
+                                        Terima Pembayaran
+                                    </button>
+
+                                    <button onclick="closeActionMenus(); openTolakModal('{{ $dbId }}', '{{ $oid }}')"
+                                        class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                                        <i class="fa-solid fa-circle-xmark w-4"></i>
+                                        Tolak Pembayaran
+                                    </button>
+
+                                    {{-- Kalau sudah confirmed/paid → tampilkan Update Status --}}
+                                    @elseif($payment === 'paid' && !in_array($status,
+                                    ['delivered','cancelled','refunded']))
+                                    <button
+                                        onclick="closeActionMenus(); openStatusModal('{{ $dbId }}', '{{ $status }}', '{{ $oid }}')"
+                                        class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                        <i class="fa-solid fa-pen-to-square text-gray-400 w-4"></i>
+                                        Update Status
+                                    </button>
+
+                                    {{-- Sudah selesai / dibatalkan → tidak ada aksi --}}
+                                    @else
+                                    <div class="px-4 py-3 text-xs text-gray-400 text-center">
+                                        Tidak ada aksi tersedia
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -281,7 +458,8 @@
 
 {{-- ===== MODAL UPDATE STATUS ===== --}}
 <div id="statusModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/40 backdrop-blur-sm">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 transform scale-95 opacity-0 transition-all duration-200" id="modalContent">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 transform scale-95 opacity-0 transition-all duration-200"
+        id="modalContent">
         <div class="flex items-center justify-between mb-5">
             <div>
                 <h3 class="font-bold text-gray-900 text-base">Update Status Order</h3>
@@ -293,29 +471,113 @@
         </div>
 
         <label class="block text-sm font-semibold text-gray-700 mb-2">Status Baru</label>
-        <select id="newStatusSelect" class="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors mb-5 bg-white">
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
+        <select id="newStatusSelect" onchange="handleStatusChange(this.value)"
+            class="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors mb-4 bg-white">
+            <option value="processing">Processing — Sedang dikemas</option>
+            <option value="shipped">Shipped — Sudah dikirim</option>
+            <option value="delivered">Delivered — Sudah diterima</option>
+            <option value="cancelled">Cancelled — Dibatalkan</option>
         </select>
 
+        {{-- Input No Resi — hanya muncul kalau pilih Shipped --}}
+        <div id="resiSection" class="hidden mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                Nomor Resi <span class="text-red-400">*</span>
+            </label>
+            <input type="text" id="trackingNumber" placeholder="Contoh: JNE1234567890"
+                class="w-full border border-gray-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:border-gray-900 transition-colors uppercase tracking-wider">
+            <p class="text-xs text-gray-400 mt-1">Nomor resi dari kurir pengiriman.</p>
+        </div>
+
         <div class="flex gap-3">
-            <button onclick="closeStatusModal()" class="flex-1 py-2.5 border border-gray-200 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
+            <button onclick="closeStatusModal()"
+                class="flex-1 py-2.5 border border-gray-200 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors shadow-sm">
                 Batal
             </button>
-            <button onclick="submitStatus()" id="submitStatusBtn" class="flex-1 py-2.5 bg-gray-900 rounded-md text-sm font-semibold text-white hover:bg-black transition-colors shadow-sm">
+            <button onclick="submitStatus()" id="submitStatusBtn"
+                class="flex-1 py-2.5 bg-gray-900 rounded-md text-sm font-semibold text-white hover:bg-black transition-colors shadow-sm">
                 Simpan
             </button>
         </div>
     </div>
 </div>
 
+{{-- ===== MODAL KONFIRMASI PEMBAYARAN ===== --}}
+<div id="konfirmasiModal"
+    class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 transform scale-95 opacity-0 transition-all duration-200"
+        id="konfirmasiModalContent">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-check text-green-600"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-900 text-base">Konfirmasi Pembayaran</h3>
+                <p class="text-xs text-gray-400 font-mono mt-0.5" id="konfirmasiOrderId">—</p>
+            </div>
+        </div>
+
+        <p class="text-sm text-gray-600 mb-5">
+            Apakah kamu yakin ingin <span class="font-semibold text-green-600">menerima</span> pembayaran ini?
+            Status order akan otomatis berubah menjadi <span class="font-semibold">Confirmed</span>.
+        </p>
+
+        <div class="flex gap-3">
+            <button onclick="closeKonfirmasiModal()"
+                class="flex-1 py-2.5 border border-gray-200 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
+                Batal
+            </button>
+            <button onclick="submitKonfirmasi()" id="submitKonfirmasiBtn"
+                class="flex-1 py-2.5 bg-green-600 rounded-md text-sm font-semibold text-white hover:bg-green-700 transition-colors">
+                Ya, Terima
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- ===== MODAL TOLAK PEMBAYARAN ===== --}}
+<div id="tolakModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-6 transform scale-95 opacity-0 transition-all duration-200"
+        id="tolakModalContent">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-xmark text-red-500"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-gray-900 text-base">Tolak Pembayaran</h3>
+                <p class="text-xs text-gray-400 font-mono mt-0.5" id="tolakOrderId">—</p>
+            </div>
+        </div>
+
+        <p class="text-sm text-gray-600 mb-3">
+            Pembayaran akan <span class="font-semibold text-red-500">ditolak</span> dan status order berubah menjadi
+            <span class="font-semibold">Cancelled</span>.
+        </p>
+
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+            Alasan Penolakan <span class="text-gray-400 font-normal">(opsional)</span>
+        </label>
+        <textarea id="tolakReason" rows="3" placeholder="Contoh: Bukti transfer tidak valid, nominal tidak sesuai..."
+            class="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-gray-900 resize-none transition-colors mb-5"></textarea>
+
+        <div class="flex gap-3">
+            <button onclick="closeTolakModal()"
+                class="flex-1 py-2.5 border border-gray-200 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
+                Batal
+            </button>
+            <button onclick="submitTolak()" id="submitTolakBtn"
+                class="flex-1 py-2.5 bg-red-500 rounded-md text-sm font-semibold text-white hover:bg-red-600 transition-colors">
+                Ya, Tolak
+            </button>
+        </div>
+    </div>
+</div>
+
 {{-- FLOATING TOAST NOTIFICATION --}}
-<div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden transform transition-all duration-300 ease-out translate-y-[-20px] opacity-0">
-    <div id="toast-box" class="flex items-center gap-3 bg-white border border-gray-100 text-gray-800 text-sm font-semibold px-5 py-3.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+<div id="toast-container"
+    class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden transform transition-all duration-300 ease-out translate-y-[-20px] opacity-0">
+    <div id="toast-box"
+        class="flex items-center gap-3 bg-white border border-gray-100 text-gray-800 text-sm font-semibold px-5 py-3.5 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         <div id="toast-icon" class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"></div>
         <span id="toast-msg"></span>
     </div>
@@ -416,23 +678,195 @@
 
     document.getElementById('searchInput').addEventListener('input', applyFilters);
 
+    // ==== KONFIRMASI & TOLAK PEMBAYARAN ====
+let currentKonfirmasiId = null;
+let currentTolakId      = null;
+
+function openKonfirmasiModal(dbId, orderId) {
+    currentKonfirmasiId = dbId;
+    document.getElementById('konfirmasiOrderId').textContent = orderId;
+    const modal   = document.getElementById('konfirmasiModal');
+    const content = document.getElementById('konfirmasiModalContent');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function closeKonfirmasiModal() {
+    const content = document.getElementById('konfirmasiModalContent');
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        document.getElementById('konfirmasiModal').classList.add('hidden');
+        currentKonfirmasiId = null;
+    }, 200);
+}
+
+function submitKonfirmasi() {
+    if (!currentKonfirmasiId) return;
+    const btn = document.getElementById('submitKonfirmasiBtn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+    btn.disabled = true;
+
+    fetch(`/admin/orders/${currentKonfirmasiId}/konfirmasi`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({}),
+    })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(() => {
+        closeKonfirmasiModal();
+        showToast('Pembayaran berhasil dikonfirmasi ✓', 'success');
+        setTimeout(() => window.location.reload(), 1200);
+    })
+    .catch(() => {
+        showToast('Gagal mengkonfirmasi pembayaran', 'error');
+        btn.innerHTML = 'Ya, Terima';
+        btn.disabled = false;
+    });
+}
+
+function openTolakModal(dbId, orderId) {
+    currentTolakId = dbId;
+    document.getElementById('tolakOrderId').textContent = orderId;
+    document.getElementById('tolakReason').value = '';
+    const modal   = document.getElementById('tolakModal');
+    const content = document.getElementById('tolakModalContent');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function closeTolakModal() {
+    const content = document.getElementById('tolakModalContent');
+    content.classList.remove('scale-100', 'opacity-100');
+    content.classList.add('scale-95', 'opacity-0');
+    setTimeout(() => {
+        document.getElementById('tolakModal').classList.add('hidden');
+        currentTolakId = null;
+    }, 200);
+}
+
+function submitTolak() {
+    if (!currentTolakId) return;
+    const btn    = document.getElementById('submitTolakBtn');
+    const reason = document.getElementById('tolakReason').value;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+    btn.disabled = true;
+
+    fetch(`/admin/orders/${currentTolakId}/tolak`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ reason }),
+    })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(() => {
+        closeTolakModal();
+        showToast('Pembayaran berhasil ditolak.', 'error');
+        setTimeout(() => window.location.reload(), 1200);
+    })
+    .catch(() => {
+        showToast('Gagal menolak pembayaran.', 'error');
+        btn.innerHTML = 'Ya, Tolak';
+        btn.disabled = false;
+    });
+}
+
+// Klik backdrop untuk close modal
+document.getElementById('konfirmasiModal').addEventListener('click', function(e) {
+    if (e.target === this) closeKonfirmasiModal();
+});
+document.getElementById('tolakModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTolakModal();
+});
+
 
     // ==== 4. MODAL LOGIC ====
     const statusModal = document.getElementById('statusModal');
     const modalContent = document.getElementById('modalContent');
     let currentOrderDbId = null;
 
-    function openStatusModal(dbId, currentStatus, orderId) {
-        currentOrderDbId = dbId;
-        document.getElementById('modalOrderId').textContent = orderId;
-        document.getElementById('newStatusSelect').value = currentStatus;
-        
-        statusModal.classList.remove('hidden');
-        setTimeout(() => {
-            modalContent.classList.remove('scale-95', 'opacity-0');
-            modalContent.classList.add('scale-100', 'opacity-100');
-        }, 10);
+  function handleStatusChange(value) {
+    const resiSection = document.getElementById('resiSection');
+    if (value === 'shipped') {
+        resiSection.classList.remove('hidden');
+    } else {
+        resiSection.classList.add('hidden');
+        document.getElementById('trackingNumber').value = '';
     }
+}
+
+// function openStatusModal(dbId, currentStatus, orderId) {
+//     currentOrderDbId = dbId;
+//     document.getElementById('modalOrderId').textContent = orderId;
+
+//     // Set value dropdown, tapi skip 'confirmed' & 'pending' karena tidak ada di opsi
+//     const allowedStatuses = ['processing', 'shipped', 'delivered', 'cancelled'];
+//     const select = document.getElementById('newStatusSelect');
+//     select.value = allowedStatuses.includes(currentStatus) ? currentStatus : 'processing';
+
+//     // Reset resi section
+//     document.getElementById('resiSection').classList.add('hidden');
+//     document.getElementById('trackingNumber').value = '';
+//     handleStatusChange(select.value);
+
+//     statusModal.classList.remove('hidden');
+//     setTimeout(() => {
+//         modalContent.classList.remove('scale-95', 'opacity-0');
+//         modalContent.classList.add('scale-100', 'opacity-100');
+//     }, 10);
+// }
+
+function openStatusModal(dbId, currentStatus, orderId) {
+    currentOrderDbId = dbId;
+    document.getElementById('modalOrderId').textContent = orderId;
+
+    const flow = {
+        'pending'    : ['processing', 'cancelled'],
+        'confirmed'  : ['processing', 'cancelled'],
+        'processing' : ['shipped',    'cancelled'],
+        'shipped'    : ['delivered',  'cancelled'],
+    };
+
+    const allowed = flow[currentStatus] ?? [];
+    const labels = {
+        'processing' : 'Processing — Sedang dikemas',
+        'shipped'    : 'Shipped — Sudah dikirim',
+        'delivered'  : 'Delivered — Sudah diterima',
+        'cancelled'  : 'Cancelled — Dibatalkan',
+    };
+
+    const select = document.getElementById('newStatusSelect');
+    select.innerHTML = ''; 
+
+    allowed.forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = labels[val];
+        select.appendChild(opt);
+    });
+
+    document.getElementById('resiSection').classList.add('hidden');
+    document.getElementById('trackingNumber').value = '';
+    handleStatusChange(select.value);
+
+    statusModal.classList.remove('hidden');
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
 
     function closeStatusModal() {
         modalContent.classList.remove('scale-100', 'opacity-100');
@@ -447,33 +881,63 @@
         if (e.target === this) closeStatusModal();
     });
 
-    function submitStatus() {
-        if (!currentOrderDbId) return;
-        const newStatus = document.getElementById('newStatusSelect').value;
-        const btn = document.getElementById('submitStatusBtn');
+   function submitStatus() {
+    if (!currentOrderDbId) return;
+    const newStatus = document.getElementById('newStatusSelect').value;
+    const tracking  = document.getElementById('trackingNumber').value.trim();
 
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-        btn.disabled = true;
-
-        fetch(`/admin/orders/${currentOrderDbId}/status`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
-            body: JSON.stringify({ status: newStatus }),
-        })
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-            closeStatusModal();
-            showToast('Status berhasil diperbarui', 'success');
-            setTimeout(() => { window.location.reload(); }, 1000);
-        })
-        .catch(() => {
-            showToast('Gagal mengupdate status', 'error');
-            btn.innerHTML = 'Simpan';
-            btn.disabled = false;
-        });
+    // Validasi: kalau Shipped, resi wajib diisi
+    if (newStatus === 'shipped' && !tracking) {
+        document.getElementById('trackingNumber').focus();
+        document.getElementById('trackingNumber').classList.add('border-red-400');
+        return;
     }
+    document.getElementById('trackingNumber').classList.remove('border-red-400');
+
+    const btn = document.getElementById('submitStatusBtn');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+    btn.disabled = true;
+
+    fetch(`/admin/orders/${currentOrderDbId}/status`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({
+            status: newStatus,
+            tracking_number: tracking || null,
+        }),
+    })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(() => {
+        closeStatusModal();
+        showToast('Status berhasil diperbarui', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+    })
+    .catch(() => {
+        showToast('Gagal mengupdate status', 'error');
+        btn.innerHTML = 'Simpan';
+        btn.disabled = false;
+    });
+}
+
+    // ==== ACTION DROPDOWN MENU ====
+function toggleActionMenu(event, menuId) {
+    event.stopPropagation();
+    closeActionMenus(); // tutup semua yang lain dulu
+
+    const menu = document.getElementById(menuId);
+    if (menu) menu.classList.toggle('hidden');
+}
+
+function closeActionMenus() {
+    document.querySelectorAll('.action-menu').forEach(m => m.classList.add('hidden'));
+}
+
+// Klik di luar → tutup semua dropdown
+document.addEventListener('click', function () {
+    closeActionMenus();
+});
 </script>
 @endpush

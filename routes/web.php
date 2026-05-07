@@ -209,6 +209,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::patch('/orders/{order}/konfirmasi', [OrderController::class, 'konfirmasi'])->name('orders.konfirmasi');
+    Route::patch('/orders/{order}/tolak',      [OrderController::class, 'tolak'])->name('orders.tolak');
 
     // Stock
     Route::get('stock', [StockController::class, 'index'])->name('stock.index');

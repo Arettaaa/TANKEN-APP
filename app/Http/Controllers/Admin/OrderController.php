@@ -17,8 +17,8 @@ class OrderController extends Controller
         // Fitur Search
         if ($search = $request->search) {
             $query->where('order_number', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_email', 'like', "%{$search}%");
+                ->orWhere('customer_name', 'like', "%{$search}%")
+                ->orWhere('customer_email', 'like', "%{$search}%");
         }
 
         $orders = $query->paginate(15)->withQueryString();
@@ -42,18 +42,33 @@ class OrderController extends Controller
     public function updateStatus(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,processing,shipped,delivered,cancelled,refunded',
+            'status'          => 'required|in:processing,shipped,delivered,cancelled',
+            'tracking_number' => 'nullable|string|max:100',
         ]);
 
-        $old = $order->status;
-        $order->update(['status' => $request->status]);
-        ActivityLog::log('Status order diubah', "{$order->order_number}: {$old} → {$request->status}", 'info');
+        // Kalau shipped, resi wajib ada
+        if ($request->status === 'shipped' && empty($request->tracking_number)) {
+            return response()->json(['success' => false, 'message' => 'Nomor resi wajib diisi.'], 422);
+        }
 
-        // Ubah return ke JSON agar ditangkap sukses oleh fetch() API di Javascript
+        $old = $order->status;
+
+        $order->update([
+            'status'          => $request->status,
+            'tracking_number' => $request->tracking_number ?? $order->tracking_number,
+        ]);
+
+        ActivityLog::log(
+            'Status order diubah',
+            "{$order->order_number}: {$old} → {$request->status}" .
+                ($request->tracking_number ? " | Resi: {$request->tracking_number}" : ''),
+            'info'
+        );
+
         return response()->json([
-            'success' => true,
-            'message' => 'Status order berhasil diupdate.',
-            'new_status' => $request->status
+            'success'    => true,
+            'message'    => 'Status order berhasil diupdate.',
+            'new_status' => $request->status,
         ]);
     }
 
@@ -73,9 +88,9 @@ class OrderController extends Controller
 
         $columns = ['Order ID', 'Nama Customer', 'Email', 'Tanggal', 'Total (Rp)', 'Status Order', 'Status Bayar', 'Kurir', 'Jumlah Item'];
 
-        $callback = function() use($orders, $columns) {
+        $callback = function () use ($orders, $columns) {
             $file = fopen('php://output', 'w');
-            
+
             // Tambahkan header kolom
             fputcsv($file, $columns);
 
@@ -98,5 +113,58 @@ class OrderController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+
+    public function konfirmasi(Request $request, Order $order)
+    {
+        if ($order->payment_status !== 'waiting_confirmation') {
+            return response()->json(['success' => false, 'message' => 'Status tidak valid.'], 422);
+        }
+
+        $order->update([
+            'payment_status' => 'paid',
+            'status'         => 'confirmed',
+            'paid_at'        => now(),
+        ]);
+
+        ActivityLog::log(
+            'Pembayaran dikonfirmasi',
+            "Order {$order->order_number} diterima oleh admin.",
+            'info'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Order {$order->order_number} berhasil dikonfirmasi.",
+        ]);
+    }
+
+    public function tolak(Request $request, Order $order)
+    {
+        if ($order->payment_status !== 'waiting_confirmation') {
+            return response()->json(['success' => false, 'message' => 'Status tidak valid.'], 422);
+        }
+
+        $request->validate([
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $order->update([
+            'payment_status' => 'unpaid',
+            'status'         => 'cancelled',
+            'notes'          => $request->reason ?? 'Pembayaran ditolak oleh admin.',
+        ]);
+
+        ActivityLog::log(
+            'Pembayaran ditolak',
+            "Order {$order->order_number} ditolak. Alasan: " . ($request->reason ?? '-'),
+            'warning'
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => "Order {$order->order_number} telah ditolak.",
+        ]);
     }
 }
