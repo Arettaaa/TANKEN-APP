@@ -4,70 +4,182 @@
 
 @push('akun-styles')
 <style>
-    .address-card { transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-    .address-card:hover { border-color: #d1d5db; background-color: #fafafa; }
+    .address-card {
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .address-card:hover {
+        border-color: #d1d5db;
+        background-color: #fafafa;
+    }
 
     .modal-overlay {
-        opacity: 0; visibility: hidden;
+        opacity: 0;
+        visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
     .modal-content {
-        transform: translateY(20px) scale(0.95); opacity: 0;
+        transform: translateY(20px) scale(0.95);
+        opacity: 0;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     }
-    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
 
-    .input-group { display: flex; flex-direction: column; gap: 6px; }
-    .input-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: #6b7280; }
+    .modal-overlay.active .modal-content {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .input-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #6b7280;
+    }
+
     .form-input-box {
-        width: 100%; padding: 14px 16px; background-color: #f9fafb; border: 1px solid transparent;
-        border-radius: 8px; font-size: 0.875rem; color: #111; outline: none; transition: all 0.2s;
+        width: 100%;
+        padding: 14px 16px;
+        background-color: #f9fafb;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        color: #111;
+        outline: none;
+        transition: all 0.2s;
     }
-    .form-input-box:focus, .form-input-box.active-dropdown {
-        background-color: #fff; border-color: #111; box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.05);
+
+    .form-input-box:focus,
+    .form-input-box.active-dropdown {
+        background-color: #fff;
+        border-color: #111;
+        box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.05);
     }
-    .form-input-box::placeholder { color: #9ca3af; }
-    .form-input-box.error-border { border-color: #ef4444; background-color: #fef2f2; }
+
+    .form-input-box::placeholder {
+        color: #9ca3af;
+    }
+
+    .form-input-box.error-border {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
 
     .label-pill {
-        padding: 8px 20px; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
-        letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid #e5e7eb;
-        color: #6b7280; background: #fff; transition: all 0.2s ease; cursor: pointer;
+        padding: 8px 20px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: 1px solid #e5e7eb;
+        color: #6b7280;
+        background: #fff;
+        transition: all 0.2s ease;
+        cursor: pointer;
     }
-    .label-pill.active { background: #111; border-color: #111; color: #fff; }
+
+    .label-pill.active {
+        background: #111;
+        border-color: #111;
+        color: #fff;
+    }
 
     .region-dropdown {
-        display: none; position: absolute; top: calc(100% + 4px); left: 0; width: 100%;
-        background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); z-index: 50; overflow: hidden;
+        display: none;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+        overflow: hidden;
     }
-    .region-dropdown.show { display: flex; flex-direction: column; }
+
+    .region-dropdown.show {
+        display: flex;
+        flex-direction: column;
+    }
 
     .region-tab {
-        flex: 1; text-align: center; padding: 12px 4px; font-size: 0.75rem; font-weight: 600;
-        color: #9ca3af; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s;
+        flex: 1;
+        text-align: center;
+        padding: 12px 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #9ca3af;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
     }
-    .region-tab.active { color: #111; border-bottom-color: #111; }
-    .region-tab:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .region-tab.active {
+        color: #111;
+        border-bottom-color: #111;
+    }
+
+    .region-tab:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
 
     .region-list-item {
-        padding: 10px 16px; font-size: 0.8125rem; font-weight: 500; color: #374151;
-        cursor: pointer; transition: background-color 0.2s;
+        padding: 10px 16px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: background-color 0.2s;
     }
-    .region-list-item:hover { background-color: #f3f4f6; color: #111; }
+
+    .region-list-item:hover {
+        background-color: #f3f4f6;
+        color: #111;
+    }
 
     .region-search-wrapper {
-        padding: 10px 16px; border-bottom: 1px solid #e5e7eb; background: #fff;
+        padding: 10px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fff;
     }
-    .region-search-input {
-        width: 100%; padding: 8px 12px 8px 36px; background-color: #f9fafb;
-        border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.8125rem; outline: none;
-    }
-    .region-search-input:focus { border-color: #111; }
 
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .region-search-input {
+        width: 100%;
+        padding: 8px 12px 8px 36px;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 0.8125rem;
+        outline: none;
+    }
+
+    .region-search-input:focus {
+        border-color: #111;
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>
 @endpush
 
@@ -80,7 +192,8 @@
             <p class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Pengiriman</p>
             <h2 class="text-xl sm:text-2xl font-extrabold text-gray-900">Alamat Saya</h2>
         </div>
-        <button type="button" id="btnTambahAlamat" class="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-black text-white text-[11px] font-bold tracking-widest uppercase px-6 py-3.5 rounded-md hover:bg-gray-800 transition-colors shadow-sm">
+        <button type="button" id="btnTambahAlamat"
+            class="w-full sm:w-auto inline-flex justify-center items-center gap-2 bg-black text-white text-[11px] font-bold tracking-widest uppercase px-6 py-3.5 rounded-md hover:bg-gray-800 transition-colors shadow-sm">
             <i class="fa-solid fa-plus text-sm"></i> Tambah Alamat
         </button>
     </div>
@@ -95,7 +208,8 @@
     {{-- List Alamat — DYNAMIC dari DB --}}
     <div class="flex flex-col gap-4">
         @forelse($addresses as $addr)
-        <div class="address-card border border-gray-200 rounded-lg p-5 sm:p-6 bg-white flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6" id="address-item-{{ $addr->id }}">
+        <div class="address-card border border-gray-200 rounded-lg p-5 sm:p-6 bg-white flex flex-col sm:flex-row sm:items-start justify-between gap-4 sm:gap-6"
+            id="address-item-{{ $addr->id }}">
 
             <div class="flex-1">
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
@@ -106,18 +220,23 @@
 
                 <div class="text-sm text-gray-600 leading-relaxed mb-3">
                     <p>{{ $addr->street }}</p>
-                    <p class="uppercase text-[11px] tracking-wide mt-1 font-semibold text-gray-500">{{ $addr->region }}, ID, {{ $addr->postal }}</p>
+                    <p class="uppercase text-[11px] tracking-wide mt-1 font-semibold text-gray-500">{{ $addr->region }},
+                        ID, {{ $addr->postal }}</p>
                     @if($addr->details)
-                    <p class="text-gray-400 italic mt-1"><i class="fa-regular fa-note-sticky mr-1"></i>{{ $addr->details }}</p>
+                    <p class="text-gray-400 italic mt-1"><i class="fa-regular fa-note-sticky mr-1"></i>{{ $addr->details
+                        }}</p>
                     @endif
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
                     @if($addr->is_default)
-                    <span class="bg-black text-white text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded">Utama</span>
+                    <span
+                        class="bg-black text-white text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded">Utama</span>
                     @endif
                     @if($addr->label)
-                    <span class="border border-gray-300 text-gray-600 text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded">{{ $addr->label }}</span>
+                    <span
+                        class="border border-gray-300 text-gray-600 text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded">{{
+                        $addr->label }}</span>
                     @endif
                 </div>
             </div>
@@ -134,9 +253,11 @@
                 </div>
 
                 @if(!$addr->is_default)
-                <form action="{{ route('pelanggan.alamat.default', $addr->id) }}" method="POST" class="w-full sm:w-auto">
+                <form action="{{ route('pelanggan.alamat.default', $addr->id) }}" method="POST"
+                    class="w-full sm:w-auto">
                     @csrf
-                    <button type="submit" class="w-full sm:w-auto border border-gray-300 text-gray-700 hover:border-black hover:text-black text-[10px] font-bold tracking-widest uppercase px-4 py-2 rounded transition-colors">
+                    <button type="submit"
+                        class="w-full sm:w-auto border border-gray-300 text-gray-700 hover:border-black hover:text-black text-[10px] font-bold tracking-widest uppercase px-4 py-2 rounded transition-colors">
                         Atur sbg Utama
                     </button>
                 </form>
@@ -154,72 +275,94 @@
 </div>
 
 {{-- MODAL: TAMBAH / UBAH ALAMAT --}}
-<div id="addressModal" class="modal-overlay fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-    <div class="modal-content w-full max-w-[650px] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+<div id="addressModal"
+    class="modal-overlay fixed inset-0 z-[120] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div
+        class="modal-content w-full max-w-[650px] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
-        <div class="px-6 sm:px-8 py-5 flex items-center justify-between sticky top-0 bg-white z-10 border-b border-gray-100">
+        <div
+            class="px-6 sm:px-8 py-5 flex items-center justify-between sticky top-0 bg-white z-10 border-b border-gray-100">
             <h3 id="modalTitle" class="text-lg font-extrabold text-gray-900">Alamat Pengiriman</h3>
-            <button type="button" id="btnCloseModal" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black transition-colors">
+            <button type="button" id="btnCloseModal"
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black transition-colors">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <div class="p-6 sm:px-8 overflow-y-auto hide-scrollbar flex-1 relative" id="modalScrollBody">
             <form id="addressForm">
+                <input type="hidden" id="addrCityId" value="">
                 <input type="hidden" id="addrId">
 
                 <div class="mb-8">
                     <label class="input-label mb-3 block">Simpan Sebagai</label>
                     <div class="flex items-center gap-3">
-                        <button type="button" onclick="setLabel('Rumah')" id="btnLabelRumah" class="label-pill">Rumah</button>
-                        <button type="button" onclick="setLabel('Kantor')" id="btnLabelKantor" class="label-pill">Kantor</button>
+                        <button type="button" onclick="setLabel('Rumah')" id="btnLabelRumah"
+                            class="label-pill">Rumah</button>
+                        <button type="button" onclick="setLabel('Kantor')" id="btnLabelKantor"
+                            class="label-pill">Kantor</button>
                     </div>
                     <input type="hidden" id="addrLabel" value="">
                 </div>
 
                 <div class="mb-8">
-                    <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
+                    <h4
+                        class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
                         <i class="fa-regular fa-address-book text-gray-400"></i> Informasi Kontak
                     </h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="input-group">
                             <label class="input-label">Nama Lengkap</label>
-                            <input type="text" id="addrName" class="form-input-box" placeholder="Contoh: Mahza Aiko" oninput="clearError('addrName')">
-                            <p id="err-addrName" class="hidden text-xs text-red-500 font-medium mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nama tidak boleh kosong.</p>
+                            <input type="text" id="addrName" class="form-input-box" placeholder="Contoh: Mahza Aiko"
+                                oninput="clearError('addrName')">
+                            <p id="err-addrName" class="hidden text-xs text-red-500 font-medium mt-1"><i
+                                    class="fa-solid fa-circle-exclamation mr-1"></i>Nama tidak boleh kosong.</p>
                         </div>
                         <div class="input-group">
                             <label class="input-label">Nomor Telepon</label>
-                            <input type="number" id="addrPhone" class="form-input-box" placeholder="Contoh: 08123456789" oninput="clearError('addrPhone')">
-                            <p id="err-addrPhone" class="hidden text-xs text-red-500 font-medium mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Nomor telepon wajib diisi.</p>
+                            <input type="number" id="addrPhone" class="form-input-box" placeholder="Contoh: 08123456789"
+                                oninput="clearError('addrPhone')">
+                            <p id="err-addrPhone" class="hidden text-xs text-red-500 font-medium mt-1"><i
+                                    class="fa-solid fa-circle-exclamation mr-1"></i>Nomor telepon wajib diisi.</p>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
+                    <h4
+                        class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
                         <i class="fa-solid fa-location-dot text-gray-400"></i> Detail Alamat
                     </h4>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div class="input-group md:col-span-2 relative">
                             <label class="input-label">Provinsi, Kota, Kecamatan, Kelurahan</label>
-                            <div id="regionTrigger" class="form-input-box cursor-pointer flex justify-between items-center" onclick="toggleRegionDropdown()">
+                            <div id="regionTrigger"
+                                class="form-input-box cursor-pointer flex justify-between items-center"
+                                onclick="toggleRegionDropdown()">
                                 <span id="regionDisplayText" class="text-gray-400 truncate pr-4">Pilih Wilayah</span>
                                 <i class="fa-solid fa-chevron-down text-gray-400 text-xs"></i>
                             </div>
                             <input type="hidden" id="addrRegion" value="">
-                            <p id="err-addrRegion" class="hidden text-xs text-red-500 font-medium mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Silakan lengkapi wilayah.</p>
+                            <p id="err-addrRegion" class="hidden text-xs text-red-500 font-medium mt-1"><i
+                                    class="fa-solid fa-circle-exclamation mr-1"></i>Silakan lengkapi wilayah.</p>
 
                             <div id="regionDropdown" class="region-dropdown">
                                 <div class="region-search-wrapper relative">
-                                    <i class="fa-solid fa-magnifying-glass absolute left-7 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                                    <input type="text" id="regionSearchInput" class="region-search-input" placeholder="Cari wilayah..." oninput="handleSearch(this.value)">
+                                    <i
+                                        class="fa-solid fa-magnifying-glass absolute left-7 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                    <input type="text" id="regionSearchInput" class="region-search-input"
+                                        placeholder="Cari wilayah..." oninput="handleSearch(this.value)">
                                 </div>
                                 <div class="flex border-b border-gray-100 bg-gray-50/50">
-                                    <button type="button" class="region-tab active" id="tab-0" onclick="changeStep(0)">Provinsi</button>
-                                    <button type="button" class="region-tab" id="tab-1" onclick="changeStep(1)" disabled>Kota</button>
-                                    <button type="button" class="region-tab" id="tab-2" onclick="changeStep(2)" disabled>Kecamatan</button>
-                                    <button type="button" class="region-tab" id="tab-3" onclick="changeStep(3)" disabled>Kelurahan</button>
+                                    <button type="button" class="region-tab active" id="tab-0"
+                                        onclick="changeStep(0)">Provinsi</button>
+                                    <button type="button" class="region-tab" id="tab-1" onclick="changeStep(1)"
+                                        disabled>Kota</button>
+                                    <button type="button" class="region-tab" id="tab-2" onclick="changeStep(2)"
+                                        disabled>Kecamatan</button>
+                                    <button type="button" class="region-tab" id="tab-3" onclick="changeStep(3)"
+                                        disabled>Kelurahan</button>
                                 </div>
                                 <div class="p-1 max-h-48 overflow-y-auto" id="regionListContainer"></div>
                             </div>
@@ -227,28 +370,36 @@
 
                         <div class="input-group">
                             <label class="input-label">Kode Pos</label>
-                            <input type="number" id="addrPostal" class="form-input-box" placeholder="Cth: 16680" oninput="clearError('addrPostal')">
-                            <p id="err-addrPostal" class="hidden text-xs text-red-500 font-medium mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Wajib diisi.</p>
+                            <input type="number" id="addrPostal" class="form-input-box" placeholder="Cth: 16680"
+                                oninput="clearError('addrPostal')">
+                            <p id="err-addrPostal" class="hidden text-xs text-red-500 font-medium mt-1"><i
+                                    class="fa-solid fa-circle-exclamation mr-1"></i>Wajib diisi.</p>
                         </div>
                     </div>
 
                     <div class="input-group mb-5">
                         <label class="input-label">Nama Jalan, Gedung, No. Rumah</label>
-                        <input type="text" id="addrStreet" class="form-input-box" placeholder="Contoh: Jl. Sudirman No. 12, Gedung A" oninput="clearError('addrStreet')">
-                        <p id="err-addrStreet" class="hidden text-xs text-red-500 font-medium mt-1"><i class="fa-solid fa-circle-exclamation mr-1"></i>Jalan/Gedung wajib diisi.</p>
+                        <input type="text" id="addrStreet" class="form-input-box"
+                            placeholder="Contoh: Jl. Sudirman No. 12, Gedung A" oninput="clearError('addrStreet')">
+                        <p id="err-addrStreet" class="hidden text-xs text-red-500 font-medium mt-1"><i
+                                class="fa-solid fa-circle-exclamation mr-1"></i>Jalan/Gedung wajib diisi.</p>
                     </div>
 
                     <div class="input-group">
                         <label class="input-label">Detail Lainnya (Opsional)</label>
-                        <input type="text" id="addrDetails" class="form-input-box" placeholder="Contoh: Patokan dekat minimarket, pagar hitam">
+                        <input type="text" id="addrDetails" class="form-input-box"
+                            placeholder="Contoh: Patokan dekat minimarket, pagar hitam">
                     </div>
                 </div>
             </form>
         </div>
 
-        <div class="px-6 sm:px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-end gap-3 sticky bottom-0 rounded-b-2xl">
-            <button type="button" id="btnBatal" class="text-sm font-bold text-gray-500 hover:text-black px-4 py-2 transition-colors">Batal</button>
-            <button type="button" id="btnSubmitAddress" class="bg-black text-white h-12 px-8 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+        <div
+            class="px-6 sm:px-8 py-5 border-t border-gray-100 bg-white flex items-center justify-end gap-3 sticky bottom-0 rounded-b-2xl">
+            <button type="button" id="btnBatal"
+                class="text-sm font-bold text-gray-500 hover:text-black px-4 py-2 transition-colors">Batal</button>
+            <button type="button" id="btnSubmitAddress"
+                class="bg-black text-white h-12 px-8 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
                 Simpan Alamat
             </button>
         </div>
@@ -259,7 +410,7 @@
 
 @push('akun-scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
 
     const modal       = document.getElementById('addressModal');
     const btnTambah   = document.getElementById('btnTambahAlamat');
@@ -386,6 +537,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('street',  document.getElementById('addrStreet').value);
         formData.append('details', document.getElementById('addrDetails').value);
         formData.append('label',   document.getElementById('addrLabel').value);
+        formData.append('city_id', document.getElementById('addrCityId').value);
 
         btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MENYIMPAN...';
         btnSubmit.classList.replace('bg-black', 'bg-gray-400');
@@ -534,15 +686,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function finishRegionSelection() {
-        const fullString = `${regionState.kel.name}, ${regionState.kec.name}, ${regionState.kota.name}, ${regionState.prov.name}`;
-        const displayTxt = document.getElementById('regionDisplayText');
-        displayTxt.innerText = fullString;
-        displayTxt.classList.replace('text-gray-400', 'text-gray-900');
-        document.getElementById('addrRegion').value = fullString;
-        clearError('addrRegion');
-        closeRegionDropdown();
-    }
+   function finishRegionSelection() {
+    const fullString = `${regionState.kel.name}, ${regionState.kec.name}, ${regionState.kota.name}, ${regionState.prov.name}`;
+    const displayTxt = document.getElementById('regionDisplayText');
+    displayTxt.innerText = fullString;
+    displayTxt.classList.replace('text-gray-400', 'text-gray-900');
+    document.getElementById('addrRegion').value = fullString;
+    document.getElementById('addrCityId').value = 'dist_' + regionState.kec.id;
+    clearError('addrRegion');
+    closeRegionDropdown();
+}
 
     form.addEventListener('click', (e) => {
         if(!regionTrigger.contains(e.target) && !regionDropdown.contains(e.target)) closeRegionDropdown();

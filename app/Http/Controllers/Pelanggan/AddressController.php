@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Pelanggan;
+
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Controller;
 use App\Models\Address;
@@ -34,6 +35,7 @@ class AddressController extends Controller
             'name',
             'phone',
             'region',
+            'city_id',
             'postal',
             'street',
             'details',
@@ -57,6 +59,7 @@ class AddressController extends Controller
             'name',
             'phone',
             'region',
+            'city_id',
             'postal',
             'street',
             'details',

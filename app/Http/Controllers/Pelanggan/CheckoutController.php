@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\CartItem;
 use App\Models\Address;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
 
 class CheckoutController extends Controller
 {
@@ -52,8 +54,14 @@ class CheckoutController extends Controller
         $total        = $subtotal + $ppn + $shippingCost;
 
         return view('pelanggan.checkout', compact(
-            'cartItems', 'addresses', 'defaultAddress',
-            'subtotal', 'ppn', 'shippingCost', 'total', 'shippingOptions'
+            'cartItems',
+            'addresses',
+            'defaultAddress',
+            'subtotal',
+            'ppn',
+            'shippingCost',
+            'total',
+            'shippingOptions'
         ));
     }
 
@@ -87,5 +95,55 @@ class CheckoutController extends Controller
         ]);
 
         return redirect()->route('checkout.payment');
+    }
+    public function getOngkir(Request $request)
+    {
+        $distId  = $request->city_id;
+        $weight  = 1;
+        $apiKey  = env('BINDERBYTE_API_KEY');
+        $origin  = 'dist_32.75.02';
+
+        $courierServices = [
+            'jne'     => ['REG'],
+            'sicepat' => ['REG'],
+            'jnt'     => ['EZ'],
+        ];
+
+        $results = [];
+
+        foreach ($courierServices as $courier => $allowedServices) {
+            try {
+                $response = Http::asForm()->post('https://api.binderbyte.com/v1/cost', [
+                    'api_key'     => $apiKey,
+                    'courier'     => $courier,
+                    'origin'      => $origin,
+                    'destination' => $distId,
+                    'weight'      => $weight,
+                ]);
+
+                $data = $response->json();
+
+                if (!isset($data['data']['results'])) continue;
+
+                foreach ($data['data']['results'] as $result) {
+                    foreach ($result['costs'] as $cost) {
+                        if (!in_array($cost['service'], $allowedServices)) continue;
+
+                        $results[] = [
+                            'courier' => $result['name'],
+                            'service' => $cost['service'],
+                            'days'    => ($cost['estimated'] && $cost['estimated'] !== '- hari')
+                                ? $cost['estimated']
+                                : '2-3 hari',
+                            'price'   => (int) $cost['price'],
+                        ];
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error("Ongkir error $courier: " . $e->getMessage());
+            }
+        }
+
+        return response()->json($results);
     }
 }

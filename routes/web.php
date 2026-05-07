@@ -107,6 +107,7 @@ Route::prefix('akun')->group(function () {
         Route::post('/checkout/simpan-item', [CheckoutController::class, 'simpanItem'])->name('checkout.simpanItem');
         Route::get('/checkout',             [CheckoutController::class, 'index'])->name('checkout.index');
         Route::post('/checkout/proses',     [CheckoutController::class, 'proses'])->name('pelanggan.checkout.proses');
+        Route::get('/checkout/ongkir', [CheckoutController::class, 'getOngkir'])->name('checkout.ongkir');
 
         Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
         Route::post('/alamat', [AddressController::class, 'store'])->name('alamat.store');
