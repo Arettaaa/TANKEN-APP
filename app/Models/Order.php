@@ -10,17 +10,41 @@ class Order extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'order_number', 'user_id', 'customer_name', 'customer_email', 'customer_phone',
-        'shipping_address', 'shipping_city', 'shipping_province', 'shipping_postal_code',
-        'courier', 'shipping_cost', 'subtotal', 'discount', 'total',
-        'voucher_code', 'status', 'payment_status', 'payment_method',
-        'payment_reference', 'paid_at', 'notes',
+        'order_number',
+        'user_id',
+        'customer_name',
+        'customer_email',
+        'customer_phone',
+        'shipping_address',
+        'shipping_city',
+        'shipping_province',
+        'shipping_postal_code',
+        'courier',
+        'shipping_cost',
+        'subtotal',
+        'discount',
+        'total',
+        'voucher_code',
+        'status',
+        'payment_status',
+        'payment_method',
+        'payment_reference',
+        'paid_at',
+        'notes',
+        'payment_proof',
+        'ppn'
     ];
 
     protected $casts = ['paid_at' => 'datetime'];
 
-    public function user()   { return $this->belongsTo(User::class); }
-    public function items()  { return $this->hasMany(OrderItem::class); }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 
     public function getFormattedTotalAttribute(): string
     {
@@ -39,5 +63,14 @@ class Order extends Model
             'refunded'   => '<span class="badge-gray">Refunded</span>',
             default      => $this->status,
         };
+    }
+
+    public static function generateNumber(): string
+    {
+        do {
+            $number = 'TANKEN-' . strtoupper(substr(md5(uniqid()), 0, 8));
+        } while (self::where('order_number', $number)->exists());
+
+        return $number;
     }
 }

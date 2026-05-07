@@ -1,296 +1,156 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Pelanggan;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\Category;
-use App\Models\ProductStock;
-use App\Models\ActivityLog;
-use App\Models\ProductGallery; 
+use App\Models\CartItem;
+use App\Models\Address;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
-class ProductController extends Controller
+
+class CheckoutController extends Controller
 {
-
-    public function index(Request $request)
+    // GET /checkout
+    public function index()
     {
-        $query = Product::with(['category', 'stocks', 'galleries', 'reviews']);
+        $selectedIds = session('checkout_ids', []);
 
-        // Search (sudah ada)
-        if ($search = $request->search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%");
-            });
+        if (empty($selectedIds)) {
+            return redirect()->route('pelanggan.keranjang.index')
+                ->with('error', 'Pilih minimal 1 produk untuk checkout.');
         }
 
-        // ✅ TAMBAH INI: Filter category
-        if ($request->category) {
-            $query->where('category_id', $request->category);
-        }
+        $cartItems = CartItem::whereIn('id', $selectedIds)
+            ->where('user_id', auth()->id())
+            ->with('product')
+            ->get()
+            ->map(fn($item) => [
+                'id'    => $item->id,
+                'name'  => $item->product->name,
+                'image' => $item->product->main_image
+                    ? asset('storage/' . $item->product->main_image)
+                    : null,
+                'size'  => $item->size,
+                'qty'   => $item->quantity,
+                'price' => $item->product->price,
+            ]);
 
-        // ✅ TAMBAH INI: Filter type (pendek/panjang)
-        if ($request->type) {
-            $query->where('type', $request->type);
-        }
+        $addresses      = auth()->user()->addresses()->orderByDesc('is_default')->get();
+        $defaultAddress = $addresses->firstWhere('is_default', true);
 
-        // ✅ TAMBAH INI: Sort
-        match ($request->sort) {
-            'price-asc'   => $query->orderBy('price', 'asc'),
-            'price-desc'  => $query->orderBy('price', 'desc'),
-            'stock-asc'  => $query->withSum('stocks', 'quantity')->orderBy('stocks_sum_quantity', 'asc'),
-            'stock-desc' => $query->withSum('stocks', 'quantity')->orderBy('stocks_sum_quantity', 'desc'),
-            default       => $query->latest(),
-        };
+        $PPN_RATE     = 0.11;
+        $subtotal     = $cartItems->sum(fn($i) => $i['price'] * $i['qty']);
+        $ppn          = round($subtotal * $PPN_RATE);
 
-        $products = $query->paginate(10)->withQueryString();
-        $categories = Category::all();
-
-        return view('admin.products', compact('products', 'categories'));
-    }
-
-    public function exportExcel(Request $request)
-    {
-        $products = Product::with('stocks')
-            ->when($request->category, fn($q) => $q->where('category_id', $request->category))
-            ->when($request->type, fn($q) => $q->where('type', $request->type))
-            ->get();
-
-        $filename = "Tanken_Products_" . date('Y-m-d') . ".csv";
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+        $shippingOptions = [
+            ['id' => 'jne',      'name' => 'JNE Regular',      'days' => '2-3 hari', 'price' => 150000],
+            ['id' => 'jnt',      'name' => 'J&T Express',       'days' => '2-4 hari', 'price' => 120000],
+            ['id' => 'sicepat',  'name' => 'SiCepat Reguler',   'days' => '2-3 hari', 'price' => 130000, 'default' => true],
+            ['id' => 'anteraja', 'name' => 'AnterAja Standard', 'days' => '3-4 hari', 'price' => 110000],
         ];
 
-        $callback = function () use ($products) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['No', 'Nama', 'SKU', 'Tipe', 'Harga', 'Stok', 'Status']);
-            foreach ($products as $i => $p) {
-                fputcsv($file, [
-                    $i + 1,
-                    $p->name,
-                    $p->sku,
-                    $p->type,
-                    $p->price,
-                    $p->stocks->sum('quantity'),
-                    $p->is_active ? 'Aktif' : 'Nonaktif',
-                ]);
-            }
-            fclose($file);
-        };
+        $shippingCost = 130000;
+        $total        = $subtotal + $ppn + $shippingCost;
 
-        return response()->stream($callback, 200, $headers);
-    }
-    public function create()
-    {
-        $categories = Category::all();
-        return view('admin.products.create', compact('categories'));
+        return view('pelanggan.checkout', compact(
+            'cartItems',
+            'addresses',
+            'defaultAddress',
+            'subtotal',
+            'ppn',
+            'shippingCost',
+            'total',
+            'shippingOptions'
+        ));
     }
 
-    public function store(Request $request)
+    // POST /checkout/simpan-item — dipanggil dari keranjang
+    public function simpanItem(Request $request)
     {
-        // ===== JALAN NINJA: CEGAT & UBAH DATA SEBELUM VALIDASI =====
-        if ($request->has('colors') && is_string($request->colors)) {
-            $cleanColors = str_replace(['[', ']', '"'], '', $request->colors);
-            $request->merge(['colors' => array_filter(array_map('trim', explode(',', $cleanColors)))]);
-        }
-        if ($request->has('sizes') && is_string($request->sizes)) {
-            $cleanSizes = str_replace(['[', ']', '"'], '', $request->sizes);
-            $request->merge(['sizes' => array_filter(array_map('trim', explode(',', $cleanSizes)))]);
-        }
-        // ============================================================
+        $ids = $request->input('selected_ids', []);
 
-        $validated = $request->validate([
-            'name'             => 'required|string|max:255',
-            'category_id'      => 'required|exists:categories,id',
-            'type'             => 'required|in:panjang,pendek',
-            'price'            => 'required|integer|min:0',
-            'sku'              => 'required|string|unique:products,sku',
-            'description'      => 'nullable|string',
-            'main_image'       => 'nullable|image|max:2048',
-            'size_chart_image' => 'nullable|image|max:2048',
-            'colors'           => 'nullable|array',
-            'sizes'            => 'nullable|array',
-            'initial_stock'    => 'nullable|integer|min:0',
-            'additional_images.*' => 'nullable|image|max:2048', // TAMBAHAN: Validasi foto multiple
+        if (empty($ids)) {
+            return back()->with('error', 'Pilih minimal 1 produk untuk checkout.');
+        }
+
+        session(['checkout_ids' => $ids]);
+
+        return redirect()->route('pelanggan.checkout.index');
+    }
+
+    // POST /checkout/proses — lanjut ke step 2
+    public function proses(Request $request)
+    {
+        $request->validate([
+            'address_id'      => 'required|exists:addresses,id',
+            'shipping_method' => 'required|string',
+            'shipping_cost'   => 'required|integer',
         ]);
 
-        // Upload Foto Utama
-        if ($request->hasFile('main_image')) {
-            $validated['main_image'] = $request->file('main_image')->store('products', 'public');
-        }
-
-        // Upload Size Chart
-        if ($request->hasFile('size_chart_image')) {
-            $validated['size_chart_image'] = $request->file('size_chart_image')->store('products/size_charts', 'public');
-        }
-
-        $validated['slug'] = Str::slug($validated['name']);
-        $colors = $request->colors ?? ['Default'];
-        $sizes = $request->sizes ?? ['All Size'];
-        $initialStock = $request->initial_stock ?? 20;
-
-        $validated['colors'] = $colors;
-        $validated['sizes'] = $sizes;
-
-        $product = Product::create($validated);
-
-        // TAMBAHAN: Logic untuk menyimpan multiple images ke tabel product_galleries
-        if ($request->hasFile('additional_images')) {
-            foreach ($request->file('additional_images') as $image) {
-                $path = $image->store('products/galleries', 'public');
-                ProductGallery::create([
-                    'product_id' => $product->id,
-                    'image'      => $path
-                ]);
-            }
-        }
-
-        $stockData = [];
-        foreach ($colors as $color) {
-            foreach ($sizes as $size) {
-                if (!empty($color) && !empty($size)) {
-                    $stockData[] = [
-                        'product_id' => $product->id,
-                        'color'      => $color,
-                        'size'       => $size,
-                        'quantity'   => $initialStock,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-            }
-        }
-
-        if (!empty($stockData)) {
-            ProductStock::insert($stockData);
-        }
-
-        ActivityLog::log('Produk ditambahkan', $product->name, 'success');
-
-        return redirect()->route('admin.products.index')->with('success', "Produk beserta variasi stok awal berhasil ditambahkan.");
-    }
-
-    public function show(Product $product)
-    {
-        $product->load('category', 'stocks', 'reviews.user');
-        return view('admin.products.show', compact('product'));
-    }
-
-    public function edit(Product $product)
-    {
-        $categories = Category::all();
-        return view('admin.products.edit', compact('product', 'categories'));
-    }
-
-    public function update(Request $request, Product $product)
-    {
-        // ===== JALAN NINJA (Sama seperti store) =====
-        if ($request->has('colors') && is_string($request->colors)) {
-            $cleanColors = str_replace(['[', ']', '"'], '', $request->colors);
-            $request->merge(['colors' => array_filter(array_map('trim', explode(',', $cleanColors)))]);
-        }
-        if ($request->has('sizes') && is_string($request->sizes)) {
-            $cleanSizes = str_replace(['[', ']', '"'], '', $request->sizes);
-            $request->merge(['sizes' => array_filter(array_map('trim', explode(',', $cleanSizes)))]);
-        }
-
-        $validated = $request->validate([
-            'name'             => 'required|string|max:255',
-            'category_id'      => 'required|exists:categories,id',
-            'type'             => 'required|in:panjang,pendek',
-            'price'            => 'required|integer|min:0',
-            'sku'              => 'required|string|unique:products,sku,' . $product->id,
-            'description'      => 'nullable|string',
-            'main_image'       => 'nullable|image|max:2048',
-            'size_chart_image' => 'nullable|image|max:2048',
-            'colors'           => 'nullable|array',
-            'sizes'            => 'nullable|array',
-            'additional_images.*' => 'nullable|image|max:2048', // TAMBAHAN: Validasi foto multiple
+        session([
+            'checkout_address_id'    => $request->address_id,
+            'checkout_shipping'      => $request->shipping_method,
+            'checkout_shipping_cost' => $request->shipping_cost,
         ]);
 
-        // Replace Foto Utama jika ada yang baru
-        if ($request->hasFile('main_image')) {
-            if ($product->main_image) Storage::disk('public')->delete($product->main_image);
-            $validated['main_image'] = $request->file('main_image')->store('products', 'public');
-        }
+        return redirect()->route('checkout.payment');
+    }
+    public function getOngkir(Request $request)
+    {
+        $distId  = $request->city_id;
+        $weight  = 1;
+        $apiKey  = env('BINDERBYTE_API_KEY');
+        $origin  = 'dist_32.75.02';
 
-        // Replace Size Chart jika ada yang baru
-        if ($request->hasFile('size_chart_image')) {
-            if ($product->size_chart_image) Storage::disk('public')->delete($product->size_chart_image);
-            $validated['size_chart_image'] = $request->file('size_chart_image')->store('products/size_charts', 'public');
-        }
+        $courierServices = [
+            'jne'     => ['REG'],
+            'sicepat' => ['REG'],
+            'jnt'     => ['EZ'],
+        ];
 
-        $colors = $request->colors ?? [];
-        $sizes = $request->sizes ?? [];
-        $validated['colors'] = $colors;
-        $validated['sizes'] = $sizes;
+        // Cache per tujuan, simpan 6 jam
+        $cacheKey = "ongkir_{$origin}_{$distId}";
 
-        // 1. Update data produk di tabel products
-        $product->update($validated);
+        $results = cache()->remember($cacheKey, now()->addHours(6), function () use ($courierServices, $apiKey, $origin, $distId, $weight) {
+            $results = [];
 
-        // TAMBAHAN: Logic untuk menyimpan tambahan multiple images saat proses Edit
-        // (Sistemnya menambahkan foto baru ke galeri yang sudah ada)
-        if ($request->hasFile('additional_images')) {
-            foreach ($request->file('additional_images') as $image) {
-                $path = $image->store('products/galleries', 'public');
-                ProductGallery::create([
-                    'product_id' => $product->id,
-                    'image'      => $path
-                ]);
-            }
-        }
+            foreach ($courierServices as $courier => $allowedServices) {
+                try {
+                    $response = Http::timeout(8)->retry(2, 500)->asForm()->post('https://api.binderbyte.com/v1/cost', [
+                        'api_key'     => $apiKey,
+                        'courier'     => $courier,
+                        'origin'      => $origin,
+                        'destination' => $distId,
+                        'weight'      => $weight,
+                    ]);
 
-        // 2. LOGIKA UPDATE VARIASI STOK
-        // Hapus variasi yang warnanya/ukurannya sudah tidak dicentang lagi
-        if (!empty($colors) && !empty($sizes)) {
-            ProductStock::where('product_id', $product->id)
-                ->where(function ($query) use ($colors, $sizes) {
-                    $query->whereNotIn('color', $colors)
-                        ->orWhereNotIn('size', $sizes);
-                })->delete();
-        } else {
-            ProductStock::where('product_id', $product->id)->delete();
-        }
+                    $data = $response->json();
 
-        // Tambahkan variasi baru yang baru saja dicentang (dengan stok default 0)
-        foreach ($colors as $color) {
-            foreach ($sizes as $size) {
-                if (!empty($color) && !empty($size)) {
-                    // firstOrCreate: Kalau datanya sudah ada, biarkan. Kalau belum ada, buat baru dengan stok 0
-                    ProductStock::firstOrCreate(
-                        ['product_id' => $product->id, 'color' => $color, 'size' => $size],
-                        ['quantity' => 0]
-                    );
+                    if (!isset($data['data']['results'])) continue;
+
+                    foreach ($data['data']['results'] as $result) {
+                        foreach ($result['costs'] as $cost) {
+                            if (!in_array($cost['service'], $allowedServices)) continue;
+
+                            $results[] = [
+                                'courier' => $result['name'],
+                                'service' => $cost['service'],
+                                'days'    => ($cost['estimated'] && $cost['estimated'] !== '- hari')
+                                    ? $cost['estimated']
+                                    : '2-3 hari',
+                                'price'   => (int) $cost['price'],
+                            ];
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("Ongkir error $courier: " . $e->getMessage());
                 }
             }
-        }
 
-        ActivityLog::log('Produk diupdate', $product->name, 'info');
+            return $results;
+        });
 
-        return redirect()->route('admin.products.index')->with('success', "Produk beserta variasinya berhasil diperbarui.");
-    }
-
-    public function destroy(Product $product)
-    {
-        $name = $product->name;
-
-        // TAMBAHAN: Hapus file fisik galeri dari storage sebelum datanya dihapus dari DB
-        if ($product->galleries) {
-            foreach ($product->galleries as $gallery) {
-                Storage::disk('public')->delete($gallery->image);
-            }
-        }
-
-        // Ini otomatis akan menghapus stoknya juga karena di migration pakai ->onDelete('cascade')
-        $product->delete();
-        ActivityLog::log('Produk dihapus', $name, 'danger');
-        return redirect()->route('admin.products.index')->with('success', "Produk berhasil dihapus.");
+        return response()->json($results);
     }
 }

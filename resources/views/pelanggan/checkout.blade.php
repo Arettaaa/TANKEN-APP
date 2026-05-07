@@ -378,6 +378,7 @@ $shippingOptions = [
                         <input type="hidden" name="shipping_cost" id="shippingCostInput" value="">
                         <input type="hidden" name="city_id" id="checkoutCityId"
                             value="{{ $defaultAddress->city_id ?? '' }}">
+                        <input type="hidden" name="shipping_days" id="shippingDaysInput" value="">
 
                         {{-- Form alamat baru (hidden kalau ada alamat tersimpan) --}}
                         <div id="newAddressForm" class="{{ $addresses->count() > 0 ? 'hidden' : '' }}">
@@ -620,7 +621,7 @@ $shippingOptions = [
                     ${formatRp(opt.price)}
                 </span>
             `;
-            div.onclick = () => selectShipping(div, `${opt.courier}-${opt.service}`, opt.price);
+            div.onclick = () => selectShipping(div, `${opt.courier}-${opt.service}`, opt.price, opt.days);
             container.appendChild(div);
 
             // Auto-pilih yang pertama
@@ -629,31 +630,35 @@ $shippingOptions = [
                 document.getElementById('shippingCostInput').value   = opt.price;
                 document.getElementById('summaryShipping').textContent = formatRp(opt.price);
                 document.getElementById('summaryTotal').textContent    = formatRp(subtotalBase + ppnBase + opt.price);
+                document.getElementById('shippingDaysInput').value   = opt.days;
             }
         });
     }
 
-    function selectShipping(el, id, price) {
-        document.querySelectorAll('.ship-option').forEach(o => {
-            o.classList.remove('active');
-            o.querySelector('.ship-name').classList.replace('text-white', 'text-gray-900');
-            o.querySelector('.ship-days').classList.remove('text-white/55');
-            o.querySelector('.ship-days').classList.add('text-gray-400');
-            o.querySelector('.ship-price').classList.replace('text-white', 'text-gray-900');
-        });
+    function selectShipping(el, id, price, days) {
+    // Loop reset semua — TANPA days di sini
+    document.querySelectorAll('.ship-option').forEach(o => {
+        o.classList.remove('active');
+        o.querySelector('.ship-name').classList.replace('text-white', 'text-gray-900');
+        o.querySelector('.ship-days').classList.remove('text-white/55');
+        o.querySelector('.ship-days').classList.add('text-gray-400');
+        o.querySelector('.ship-price').classList.replace('text-white', 'text-gray-900');
+    });
 
-        el.classList.add('active');
-        el.querySelector('.ship-name').classList.replace('text-gray-900', 'text-white');
-        el.querySelector('.ship-days').classList.add('text-white/55');
-        el.querySelector('.ship-days').classList.remove('text-gray-400');
-        el.querySelector('.ship-price').classList.replace('text-gray-900', 'text-white');
+    // Set active ke yang dipilih
+    el.classList.add('active');
+    el.querySelector('.ship-name').classList.replace('text-gray-900', 'text-white');
+    el.querySelector('.ship-days').classList.add('text-white/55');
+    el.querySelector('.ship-days').classList.remove('text-gray-400');
+    el.querySelector('.ship-price').classList.replace('text-gray-900', 'text-white');
 
-        document.getElementById('shippingMethodInput').value      = id;
-        document.getElementById('shippingCostInput').value        = price;
-        document.getElementById('summaryShipping').textContent    = formatRp(price);
-        document.getElementById('summaryTotal').textContent       = formatRp(subtotalBase + ppnBase + price);
-    }
-
+    // Update hidden inputs & summary — days baru dipakai di sini
+    document.getElementById('shippingMethodInput').value   = id;
+    document.getElementById('shippingCostInput').value     = price;
+    document.getElementById('shippingDaysInput').value     = days;
+    document.getElementById('summaryShipping').textContent = formatRp(price);
+    document.getElementById('summaryTotal').textContent    = formatRp(subtotalBase + ppnBase + price);
+}
     // ===== PILIH ALAMAT TERSIMPAN =====
     function selectAddress(el, id, cityId) {
         document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));

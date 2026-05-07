@@ -3,14 +3,14 @@
 @section('title', 'Pesanan Dikonfirmasi — TANKEN')
 
 @section('content')
-
 @php
-    // Data Dummy (Nanti bisa diambil dari database)
-    $orderNumber = 'ORD-' . date('Ymd') . rand(1000, 9999);
-    
-    // Estimasi pengiriman: Hari ini + 3 hari kedepan
-    \Carbon\Carbon::setLocale('id'); // Pastikan format tanggal bahasa Indonesia
-    $estimatedDelivery = \Carbon\Carbon::now()->addDays(3)->translatedFormat('d F Y');
+    $orderNumber  = session('order_number', '-');
+    $shippingDays = session('shipping_days', '2-3 hari');
+
+    \Carbon\Carbon::setLocale('id');
+    preg_match('/(\d+)(?!.*\d)/', $shippingDays, $matches);
+    $daysMax = isset($matches[1]) ? (int)$matches[1] : 3;
+    $estimatedDelivery = \Carbon\Carbon::now()->addDays($daysMax)->translatedFormat('d F Y');
 @endphp
 
 <div class="bg-white min-h-[75vh] flex flex-col items-center justify-center py-16 px-5 sm:px-6">
@@ -53,14 +53,6 @@
                 Lanjut Belanja <i class="fa-solid fa-arrow-right text-sm"></i>
             </a>
         </div>
-
-        {{-- Kotak Info Tambahan Bawah --}}
-        <div class="w-full border border-gray-100 bg-white rounded-md p-6 sm:p-8 text-center shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <p class="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-xl mx-auto">
-                Email konfirmasi telah dikirim ke alamat email Anda beserta rincian pesanan dan informasi pelacakan pengiriman.
-            </p>
-        </div>
-
     </div>
 </div>
 
@@ -68,12 +60,9 @@
 
 @push('scripts')
 <script>
-    // Opsional: Untuk menghapus data keranjang dari SessionStorage setelah checkout berhasil
-    // (Biar kalau user balik ke katalog, keranjangnya sudah kosong)
     document.addEventListener('DOMContentLoaded', () => {
         sessionStorage.removeItem('tanken_cart');
         
-        // Panggil event untuk me-refresh badge keranjang di navbar (jadi 0)
         window.dispatchEvent(new Event('cartUpdated'));
     });
 </script>

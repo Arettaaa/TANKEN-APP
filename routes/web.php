@@ -22,7 +22,7 @@ use App\Http\Controllers\Pelanggan\AddressController;
 use App\Http\Controllers\Pelanggan\WishlistController;
 use App\Http\Controllers\Pelanggan\CartController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
-
+use App\Http\Controllers\Pelanggan\PaymentController as PelangganPaymentController;
 
 
 
@@ -106,7 +106,7 @@ Route::prefix('akun')->group(function () {
 
         Route::post('/checkout/simpan-item', [CheckoutController::class, 'simpanItem'])->name('checkout.simpanItem');
         Route::get('/checkout',             [CheckoutController::class, 'index'])->name('checkout.index');
-        Route::post('/checkout/proses',     [CheckoutController::class, 'proses'])->name('pelanggan.checkout.proses');
+        Route::post('/checkout/proses', [CheckoutController::class, 'proses'])->name('checkout.proses');
         Route::get('/checkout/ongkir', [CheckoutController::class, 'getOngkir'])->name('checkout.ongkir');
 
         Route::get('/alamat', [AddressController::class, 'index'])->name('profil-alamat');
@@ -114,6 +114,9 @@ Route::prefix('akun')->group(function () {
         Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
         Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
         Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
+
+        Route::get('/checkout/payment',         [PelangganPaymentController::class, 'index'])->name('checkout.payment');
+        Route::post('/checkout/payment/simpan', [PelangganPaymentController::class, 'simpan'])->name('checkout.payment.simpan');
     });
 
     // =================================
@@ -136,35 +139,6 @@ Route::prefix('akun')->group(function () {
         ]);
     })->name('voucher.check');
 });
-
-    // =================================
-    // CHECKOUT, PAYMENT, REVIEW & CONFIRM
-    // =================================
-    
-    // Step 1: Halaman Pengiriman
-    Route::get('/checkout', function () {
-        return view('pelanggan.checkout');
-    })->name('checkout.index');
-
-    Route::post('/checkout/proses', function () {
-        return redirect()->route('checkout.payment');
-    })->name('pelanggan.checkout.proses');
-
-    Route::get('/checkout/payment', function () {
-        return view('pelanggan.payment');
-    })->name('checkout.payment');
-
-    // Menerima submit dari Step 2, memindahkan user ke Step 3 (Review)
-    Route::post('/checkout/review', function () {
-        return view('pelanggan.review-payment'); 
-    })->name('checkout.review');
-
-    // Step 3: Menerima submit Final (Place Order)
-    Route::post('/checkout/place-order', function () {
-        // Logika save order ke database nanti ditaruh di controller
-        // Kalau sudah sukses, kita redirect ke halaman konfirmasi
-        return redirect()->route('checkout.success');
-    })->name('checkout.place-order');
 
     // Step 4: Halaman Sukses / Order Confirmed
     Route::get('/checkout/success', function () {
