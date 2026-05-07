@@ -1,156 +1,214 @@
 <?php
 
-namespace App\Http\Controllers\Pelanggan;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\CartItem;
-use App\Models\Address;
+use App\Models\Product;
+use App\Models\ProductGallery;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
-
-class CheckoutController extends Controller
+class ProductController extends Controller
 {
-    // GET /checkout
-    public function index()
+    public function index(Request $request)
     {
-        $selectedIds = session('checkout_ids', []);
+        $query = Product::with(['stocks', 'reviews', 'galleries']);
 
-        if (empty($selectedIds)) {
-            return redirect()->route('pelanggan.keranjang.index')
-                ->with('error', 'Pilih minimal 1 produk untuk checkout.');
+        if ($search = $request->search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            });
         }
 
-        $cartItems = CartItem::whereIn('id', $selectedIds)
-            ->where('user_id', auth()->id())
-            ->with('product')
-            ->get()
-            ->map(fn($item) => [
-                'id'    => $item->id,
-                'name'  => $item->product->name,
-                'image' => $item->product->main_image
-                    ? asset('storage/' . $item->product->main_image)
-                    : null,
-                'size'  => $item->size,
-                'qty'   => $item->quantity,
-                'price' => $item->product->price,
-            ]);
-
-        $addresses      = auth()->user()->addresses()->orderByDesc('is_default')->get();
-        $defaultAddress = $addresses->firstWhere('is_default', true);
-
-        $PPN_RATE     = 0.11;
-        $subtotal     = $cartItems->sum(fn($i) => $i['price'] * $i['qty']);
-        $ppn          = round($subtotal * $PPN_RATE);
-
-        $shippingOptions = [
-            ['id' => 'jne',      'name' => 'JNE Regular',      'days' => '2-3 hari', 'price' => 150000],
-            ['id' => 'jnt',      'name' => 'J&T Express',       'days' => '2-4 hari', 'price' => 120000],
-            ['id' => 'sicepat',  'name' => 'SiCepat Reguler',   'days' => '2-3 hari', 'price' => 130000, 'default' => true],
-            ['id' => 'anteraja', 'name' => 'AnterAja Standard', 'days' => '3-4 hari', 'price' => 110000],
-        ];
-
-        $shippingCost = 130000;
-        $total        = $subtotal + $ppn + $shippingCost;
-
-        return view('pelanggan.checkout', compact(
-            'cartItems',
-            'addresses',
-            'defaultAddress',
-            'subtotal',
-            'ppn',
-            'shippingCost',
-            'total',
-            'shippingOptions'
-        ));
-    }
-
-    // POST /checkout/simpan-item — dipanggil dari keranjang
-    public function simpanItem(Request $request)
-    {
-        $ids = $request->input('selected_ids', []);
-
-        if (empty($ids)) {
-            return back()->with('error', 'Pilih minimal 1 produk untuk checkout.');
+        if ($category = $request->category) {
+            $query->where('category_id', $category);
         }
 
-        session(['checkout_ids' => $ids]);
+        if ($type = $request->type) {
+            $query->where('type', $type);
+        }
 
-        return redirect()->route('pelanggan.checkout.index');
+        if ($sort = $request->sort) {
+            match($sort) {
+                'price-asc'   => $query->orderBy('price', 'asc'),
+                'price-desc'  => $query->orderBy('price', 'desc'),
+                'stock-asc'   => $query->orderBy('stock', 'asc'),
+                'stock-desc'  => $query->orderBy('stock', 'desc'),
+                default       => $query->latest(),
+            };
+        } else {
+            $query->latest();
+        }
+
+        $products = $query->paginate(10);
+
+        return view('admin.products', compact('products'));
     }
 
-    // POST /checkout/proses — lanjut ke step 2
-    public function proses(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
-            'address_id'      => 'required|exists:addresses,id',
-            'shipping_method' => 'required|string',
-            'shipping_cost'   => 'required|integer',
+            'name'          => 'required|string|max:255',
+            'sku'           => 'required|string|unique:products,sku',
+            'category_id'   => 'required|integer',
+            'price'         => 'required|numeric|min:0',
+            'type'          => 'required|in:pendek,panjang',
+            'initial_stock' => 'required|integer|min:0',
+            'main_image'    => 'nullable|image|max:2048',
         ]);
 
-        session([
-            'checkout_address_id'    => $request->address_id,
-            'checkout_shipping'      => $request->shipping_method,
-            'checkout_shipping_cost' => $request->shipping_cost,
-        ]);
+        $sizes  = $request->sizes  ? explode(',', $request->sizes)  : [];
+        $colors = $request->colors ? explode(',', $request->colors) : [];
 
-        return redirect()->route('checkout.payment');
-    }
-    public function getOngkir(Request $request)
-    {
-        $distId  = $request->city_id;
-        $weight  = 1;
-        $apiKey  = env('BINDERBYTE_API_KEY');
-        $origin  = 'dist_32.75.02';
-
-        $courierServices = [
-            'jne'     => ['REG'],
-            'sicepat' => ['REG'],
-            'jnt'     => ['EZ'],
+        $data = [
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
+            'sku'         => $request->sku,
+            'category_id' => $request->category_id,
+            'price'       => $request->price,
+            'type'        => $request->type,
+            'description' => $request->description,
+            'stock'       => $request->initial_stock,
+            'sizes'       => $sizes,
+            'colors'      => $colors,
+            'is_active'   => true,
         ];
 
-        // Cache per tujuan, simpan 6 jam
-        $cacheKey = "ongkir_{$origin}_{$distId}";
+        if ($request->hasFile('main_image')) {
+            $data['main_image'] = $request->file('main_image')->store('products', 'public');
+        }
 
-        $results = cache()->remember($cacheKey, now()->addHours(6), function () use ($courierServices, $apiKey, $origin, $distId, $weight) {
-            $results = [];
+        if ($request->hasFile('size_chart_image')) {
+            $data['size_chart_image'] = $request->file('size_chart_image')->store('products/size-charts', 'public');
+        }
 
-            foreach ($courierServices as $courier => $allowedServices) {
-                try {
-                    $response = Http::timeout(8)->retry(2, 500)->asForm()->post('https://api.binderbyte.com/v1/cost', [
-                        'api_key'     => $apiKey,
-                        'courier'     => $courier,
-                        'origin'      => $origin,
-                        'destination' => $distId,
-                        'weight'      => $weight,
-                    ]);
+        $product = Product::create($data);
 
-                    $data = $response->json();
-
-                    if (!isset($data['data']['results'])) continue;
-
-                    foreach ($data['data']['results'] as $result) {
-                        foreach ($result['costs'] as $cost) {
-                            if (!in_array($cost['service'], $allowedServices)) continue;
-
-                            $results[] = [
-                                'courier' => $result['name'],
-                                'service' => $cost['service'],
-                                'days'    => ($cost['estimated'] && $cost['estimated'] !== '- hari')
-                                    ? $cost['estimated']
-                                    : '2-3 hari',
-                                'price'   => (int) $cost['price'],
-                            ];
-                        }
-                    }
-                } catch (\Exception $e) {
-                    \Log::error("Ongkir error $courier: " . $e->getMessage());
-                }
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $img) {
+                $path = $img->store('products/gallery', 'public');
+                ProductGallery::create([
+                    'product_id' => $product->id,
+                    'image'      => $path,
+                ]);
             }
+        }
 
-            return $results;
-        });
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Produk berhasil ditambahkan.');
+    }
 
-        return response()->json($results);
+    public function update(Request $request, Product $product)
+    {
+        $request->validate([
+            'name'       => 'required|string|max:255',
+            'sku'        => 'required|string|unique:products,sku,' . $product->id,
+            'price'      => 'required|numeric|min:0',
+            'main_image' => 'nullable|image|max:2048',
+        ]);
+
+        $sizes  = $request->sizes  ? explode(',', $request->sizes)  : [];
+        $colors = $request->colors ? explode(',', $request->colors) : [];
+
+        $data = [
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
+            'sku'         => $request->sku,
+            'category_id' => $request->category_id,
+            'price'       => $request->price,
+            'type'        => $request->type,
+            'description' => $request->description,
+            'sizes'       => $sizes,
+            'colors'      => $colors,
+        ];
+
+        if ($request->hasFile('main_image')) {
+            if ($product->main_image) {
+                Storage::disk('public')->delete($product->main_image);
+            }
+            $data['main_image'] = $request->file('main_image')->store('products', 'public');
+        }
+
+        if ($request->hasFile('size_chart_image')) {
+            $data['size_chart_image'] = $request->file('size_chart_image')->store('products/size-charts', 'public');
+        }
+
+        $product->update($data);
+
+        if ($request->hasFile('additional_images')) {
+            foreach ($request->file('additional_images') as $img) {
+                $path = $img->store('products/gallery', 'public');
+                ProductGallery::create([
+                    'product_id' => $product->id,
+                    'image'      => $path,
+                ]);
+            }
+        }
+
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Produk berhasil diupdate.');
+    }
+
+    public function destroy(Product $product)
+    {
+        if ($product->main_image) {
+            Storage::disk('public')->delete($product->main_image);
+        }
+
+        $product->delete();
+
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Produk berhasil dihapus.');
+    }
+
+    public function updateStock(Request $request, Product $product)
+    {
+        $request->validate(['stock' => 'required|integer|min:0']);
+        $product->update(['stock' => $request->stock]);
+        return response()->json(['success' => true]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $products = Product::with(['stocks', 'reviews'])->get();
+        $filename = "Tanken_Products_" . date('Y-m-d') . ".csv";
+
+        $headers = [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ];
+
+        $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'Harga', 'Stok', 'Status'];
+
+        $callback = function() use ($products, $columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            foreach ($products as $p) {
+                fputcsv($file, [
+                    $p->id,
+                    $p->name,
+                    $p->sku,
+                    $p->category_id == 1 ? 'Men' : 'Women',
+                    ucfirst($p->type),
+                    $p->price,
+                    $p->stock,
+                    $p->is_active ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function toggleStatus(Request $request, Product $product)
+    {
+        $product->update(['is_active' => $request->is_active]);
+        return response()->json(['success' => true]);
     }
 }
