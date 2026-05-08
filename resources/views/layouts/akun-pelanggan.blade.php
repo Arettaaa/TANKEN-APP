@@ -40,7 +40,15 @@
 
         {{-- Breadcrumb --}}
         <p class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Akun</p>
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 lg:mb-8">Akun Saya</h1>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-4">Akun Saya</h1>
+
+        {{-- Tombol Back Tambahan --}}
+        <a href="{{ route('pelanggan.home') ?? url('/') }}" class="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold tracking-widest uppercase text-gray-500 hover:text-gray-900 transition-colors mb-6 lg:mb-8">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+        </a>
 
         <div class="flex flex-col lg:flex-row gap-6 items-start">
 
