@@ -53,15 +53,15 @@ class ReviewController extends Controller
             if ($exists) continue;
 
             Review::create([
-                'product_id'  => $reviewData['product_id'],
-                'user_id'     => Auth::id(),
-                'rating'      => $reviewData['rating'],
-                'comment'     => $reviewData['comment'] ?? null,
-                'is_approved' => false,
+                'product_id' => $reviewData['product_id'],
+                'user_id'    => Auth::id(),
+                'rating'     => $reviewData['rating'],
+                'comment'    => $reviewData['comment'] ?? null,
+                'status'     => 'pending', 
             ]);
         }
 
-        return redirect()->route('pelanggan.profil-order')
-                         ->with('success', 'Ulasan berhasil dikirim! Terima kasih.');
+       return redirect()->route('pelanggan.profil-order')
+                 ->with('success', 'Ulasan kamu berhasil dikirim dan sedang menunggu persetujuan admin. Terima kasih!');
     }
 }

@@ -13,7 +13,7 @@ class Review extends Model
         'user_id',
         'rating',
         'comment',
-        'is_approved',
+        'status',
     ];
 
     public function product()
@@ -24,5 +24,10 @@ class Review extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
     }
 }

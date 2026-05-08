@@ -66,15 +66,18 @@ Route::name('pelanggan.')->group(function () {
         return view('pelanggan.homepage');
     })->name('home');
 
-    // Nama rute jadi: pelanggan.katalog
     Route::get('/katalog', function () {
         $products = \App\Models\Product::all();
         return view('pelanggan.katalog', compact('products'));
     })->name('katalog');
 
-    // Nama rute jadi: pelanggan.produk.detail
     Route::get('/produk/{slug}', function ($slug) {
-        $product = \App\Models\Product::where('slug', $slug)->firstOrFail();
+        $product = \App\Models\Product::with([
+            'galleries',
+            'stocks',
+            'reviews' => fn($q) => $q->where('status', 'approved')->with('user'),
+        ])->where('slug', $slug)->firstOrFail();
+
         return view('pelanggan.produk-detail', compact('product'));
     })->name('produk.detail');
 

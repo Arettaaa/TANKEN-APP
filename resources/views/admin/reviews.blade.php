@@ -15,14 +15,27 @@
         justify-content: center;
         flex-shrink: 0;
     }
-    
+
     /* Table row hover */
-    .review-row:hover { background: #fafafa; }
+    .review-row:hover {
+        background: #fafafa;
+    }
 
     /* Status badge */
-    .badge-approved { background: #dcfce7; color: #16a34a; }
-    .badge-pending  { background: #fef9c3; color: #ca8a04; }
-    .badge-rejected { background: #fee2e2; color: #dc2626; }
+    .badge-approved {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .badge-pending {
+        background: #fef9c3;
+        color: #ca8a04;
+    }
+
+    .badge-rejected {
+        background: #fee2e2;
+        color: #dc2626;
+    }
 
     /* Action icon btn */
     .action-btn {
@@ -37,17 +50,36 @@
         background: transparent;
         transition: background 0.15s;
     }
-    .action-btn.approve { color: #16a34a; }
-    .action-btn.approve:hover { background: #dcfce7; }
-    .action-btn.reject  { color: #dc2626; }
-    .action-btn.reject:hover  { background: #fee2e2; }
-    .action-btn.delete  { color: #dc2626; }
-    .action-btn.delete:hover  { background: #fee2e2; }
+
+    .action-btn.approve {
+        color: #16a34a;
+    }
+
+    .action-btn.approve:hover {
+        background: #dcfce7;
+    }
+
+    .action-btn.reject {
+        color: #dc2626;
+    }
+
+    .action-btn.reject:hover {
+        background: #fee2e2;
+    }
+
+    .action-btn.delete {
+        color: #dc2626;
+    }
+
+    .action-btn.delete:hover {
+        background: #fee2e2;
+    }
 
     /* Search input */
     .search-box {
         position: relative;
     }
+
     .search-box input {
         padding: 9px 14px 9px 36px;
         border: 1.5px solid #e5e7eb;
@@ -59,7 +91,11 @@
         background: #fff;
         transition: border-color 0.2s;
     }
-    .search-box input:focus { border-color: #111; }
+
+    .search-box input:focus {
+        border-color: #111;
+    }
+
     .search-box svg {
         position: absolute;
         left: 12px;
@@ -70,7 +106,9 @@
     }
 
     /* Custom Dropdown Hover */
-    .dropdown-item:hover { background-color: #f9fafb; }
+    .dropdown-item:hover {
+        background-color: #f9fafb;
+    }
 </style>
 @endpush
 
@@ -81,8 +119,9 @@
     {{-- Total Reviews --}}
     <div class="bg-white rounded-md border border-gray-100 p-5 shadow-sm">
         <div class="stat-card-icon bg-blue-50 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="1.8" width="20" height="20">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="1.8"
+                width="20" height="20">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
         </div>
         <div class="text-2xl font-extrabold text-gray-900">{{ $total ?? 0 }}</div>
@@ -92,8 +131,9 @@
     {{-- Approved --}}
     <div class="bg-white rounded-md border border-gray-100 p-5 shadow-sm">
         <div class="stat-card-icon bg-green-50 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="1.8" width="20" height="20">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="1.8"
+                width="20" height="20">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
         </div>
         <div class="text-2xl font-extrabold text-gray-900">{{ $approved ?? 0 }}</div>
@@ -103,8 +143,9 @@
     {{-- Pending --}}
     <div class="bg-white rounded-md border border-gray-100 p-5 shadow-sm">
         <div class="stat-card-icon bg-yellow-50 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#eab308" stroke-width="1.8" width="20" height="20">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#eab308" stroke-width="1.8"
+                width="20" height="20">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
         </div>
         <div class="text-2xl font-extrabold text-gray-900">{{ $pending ?? 0 }}</div>
@@ -114,8 +155,9 @@
     {{-- Avg Rating --}}
     <div class="bg-white rounded-md border border-gray-100 p-5 shadow-sm">
         <div class="stat-card-icon bg-purple-50 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="1.8" width="20" height="20">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="1.8"
+                width="20" height="20">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
         </div>
         <div class="text-2xl font-extrabold text-gray-900">{{ $avgRating ?? '0.0' }}</div>
@@ -129,21 +171,27 @@
 
     {{-- 1. Custom Dropdown: Filter Status --}}
     <div class="relative custom-dropdown">
-        <button type="button" onclick="toggleDropdown('statusMenu')" class="flex items-center justify-between w-36 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-900 transition-colors">
+        <button type="button" onclick="toggleDropdown('statusMenu')"
+            class="flex items-center justify-between w-36 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-900 transition-colors">
             <span id="statusLabel" class="text-gray-600 font-medium">Semua Status</span>
             <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
         </button>
         {{-- Menu --}}
-        <div id="statusMenu" class="drop-menu absolute left-0 w-full mt-2 bg-white border border-gray-100 rounded-lg shadow-lg hidden z-30 overflow-hidden">
+        <div id="statusMenu"
+            class="drop-menu absolute left-0 w-full mt-2 bg-white border border-gray-100 rounded-lg shadow-lg hidden z-30 overflow-hidden">
             <ul class="text-sm text-gray-700">
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium" onclick="selectFilter('status', '', 'Semua Status')">Semua Status</li>
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilter('status', 'approved', 'Approved')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium"
+                    onclick="selectFilter('status', '', 'Semua Status')">Semua Status</li>
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                    onclick="selectFilter('status', 'approved', 'Approved')">
                     <span class="w-2 h-2 rounded-full bg-green-500"></span> Approved
                 </li>
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilter('status', 'pending', 'Pending')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                    onclick="selectFilter('status', 'pending', 'Pending')">
                     <span class="w-2 h-2 rounded-full bg-yellow-400"></span> Pending
                 </li>
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2" onclick="selectFilter('status', 'rejected', 'Rejected')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-2"
+                    onclick="selectFilter('status', 'rejected', 'Rejected')">
                     <span class="w-2 h-2 rounded-full bg-red-500"></span> Rejected
                 </li>
             </ul>
@@ -154,17 +202,23 @@
 
     {{-- 2. Custom Dropdown: Filter Rating --}}
     <div class="relative custom-dropdown">
-        <button type="button" onclick="toggleDropdown('ratingMenu')" class="flex items-center justify-between w-40 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-900 transition-colors">
-            <span id="ratingLabel" class="text-gray-600 font-medium"><i class="fa-regular fa-star mr-1"></i> Semua Rating</span>
+        <button type="button" onclick="toggleDropdown('ratingMenu')"
+            class="flex items-center justify-between w-40 px-4 py-2.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-gray-900 transition-colors">
+            <span id="ratingLabel" class="text-gray-600 font-medium"><i class="fa-regular fa-star mr-1"></i> Semua
+                Rating</span>
             <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
         </button>
         {{-- Menu --}}
-        <div id="ratingMenu" class="drop-menu absolute left-0 w-48 mt-2 bg-white border border-gray-100 rounded-lg shadow-lg hidden z-30 overflow-hidden">
+        <div id="ratingMenu"
+            class="drop-menu absolute left-0 w-48 mt-2 bg-white border border-gray-100 rounded-lg shadow-lg hidden z-30 overflow-hidden">
             <ul class="text-sm text-gray-700">
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium" onclick="selectFilter('rating', '', '<i class=\'fa-regular fa-star mr-1\'></i> Semua Rating')">Semua Rating</li>
-                
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer font-medium"
+                    onclick="selectFilter('rating', '', '<i class=\'fa-regular fa-star mr-1\'></i> Semua Rating')">Semua
+                    Rating</li>
+
                 {{-- 5 Bintang --}}
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5" onclick="selectFilter('rating', '5', '5 Bintang')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5"
+                    onclick="selectFilter('rating', '5', '5 Bintang')">
                     <span class="flex gap-0.5">
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
@@ -176,7 +230,8 @@
                 </li>
 
                 {{-- 4 Bintang --}}
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5" onclick="selectFilter('rating', '4', '4 Bintang')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5"
+                    onclick="selectFilter('rating', '4', '4 Bintang')">
                     <span class="flex gap-0.5">
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
@@ -188,7 +243,8 @@
                 </li>
 
                 {{-- 3 Bintang --}}
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5" onclick="selectFilter('rating', '3', '3 Bintang')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5"
+                    onclick="selectFilter('rating', '3', '3 Bintang')">
                     <span class="flex gap-0.5">
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
@@ -200,7 +256,8 @@
                 </li>
 
                 {{-- 2 Bintang --}}
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5" onclick="selectFilter('rating', '2', '2 Bintang')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5"
+                    onclick="selectFilter('rating', '2', '2 Bintang')">
                     <span class="flex gap-0.5">
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
@@ -212,7 +269,8 @@
                 </li>
 
                 {{-- 1 Bintang --}}
-                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5" onclick="selectFilter('rating', '1', '1 Bintang')">
+                <li class="dropdown-item px-4 py-2.5 cursor-pointer flex items-center gap-1.5"
+                    onclick="selectFilter('rating', '1', '1 Bintang')">
                     <span class="flex gap-0.5">
                         <i class="fa-solid fa-star text-[11px]" style="color: rgb(255, 212, 59);"></i>
                         <i class="fa-solid fa-star text-[11px]" style="color: #e5e7eb;"></i>
@@ -232,14 +290,17 @@
 
     {{-- Search --}}
     <div class="search-box">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15">
-            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            width="15" height="15">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
         </svg>
         <input type="text" id="searchInput" placeholder="Search reviews...">
     </div>
 
     {{-- Export Excel --}}
-    <button class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-900 text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-900 hover:text-white transition-colors">
+    <button
+        class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-900 text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-900 hover:text-white transition-colors">
         <i class="fa-solid fa-download"></i>
         Export Excel
     </button>
@@ -266,30 +327,28 @@
 
                 @forelse($reviews ?? [] as $review)
                 @php
-                    $status = $review->status ?? 'pending';
-                    $product = $review->product_name ?? 'Produk';
-                    $user = $review->user_name ?? 'User';
-                    $email = $review->user_email ?? '';
-                    $rating = floor($review->rating ?? 0); // Dibulatkan ke bawah untuk logika bintang
-                    $comment = $review->comment ?? '';
-                    $date = $review->created_at ?? now();
+                $status = $review->status ?? 'pending';
+                $product = $review->product->name ?? 'Produk';
+                $user = $review->user->name ?? 'User';
+                $email = $review->user->email ?? '';
+                $rating = floor($review->rating ?? 0);
+                $comment = $review->comment ?? '';
+                $date = $review->created_at ?? now();
 
-                    $badgeClass = match($status) {
-                        'approved' => 'badge-approved',
-                        'pending'  => 'badge-pending',
-                        'rejected' => 'badge-rejected',
-                        default    => 'badge-gray',
-                    };
-                    $badgeLabel = match($status) {
-                        'approved' => 'Approved',
-                        'pending'  => 'Pending',
-                        'rejected' => 'Rejected',
-                        default    => ucfirst($status),
-                    };
+                $badgeClass = match($status) {
+                'approved' => 'badge-approved',
+                'pending' => 'badge-pending',
+                'rejected' => 'badge-rejected',
+                default => 'badge-pending',
+                };
+                $badgeLabel = match($status) {
+                'approved' => 'Approved',
+                'pending' => 'Pending',
+                'rejected' => 'Rejected',
+                default => ucfirst($status),
+                };
                 @endphp
-                <tr class="review-row transition-colors"
-                    id="row-{{ $review->id }}"
-                    data-status="{{ $status }}"
+                <tr class="review-row transition-colors" id="row-{{ $review->id }}" data-status="{{ $status }}"
                     data-rating="{{ $rating }}">
 
                     {{-- Product --}}
@@ -308,15 +367,15 @@
                         <div class="flex items-center gap-2">
                             <div class="flex gap-0.5">
                                 {{-- Ikon FontAwesome --}}
-                                @for($s = 1; $s <= 5; $s++)
-                                    @if($s <= $rating)
-                                        <i class="fa-solid fa-star text-[12px]" style="color: rgb(255, 212, 59);"></i>
+                                @for($s = 1; $s <= 5; $s++) @if($s <=$rating) <i class="fa-solid fa-star text-[12px]"
+                                    style="color: rgb(255, 212, 59);"></i>
                                     @else
-                                        <i class="fa-solid fa-star text-[12px]" style="color: #e5e7eb;"></i>
+                                    <i class="fa-solid fa-star text-[12px]" style="color: #e5e7eb;"></i>
                                     @endif
-                                @endfor
+                                    @endfor
                             </div>
-                            <span class="text-sm font-bold text-gray-700">{{ number_format($review->rating ?? 0, 1) }}</span>
+                            <span class="text-sm font-bold text-gray-700">{{ number_format($review->rating ?? 0, 1)
+                                }}</span>
                         </div>
                     </td>
 
@@ -343,18 +402,20 @@
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-1">
                             @if($status === 'pending' || $status === 'rejected')
-                            <button class="action-btn approve" title="Approve" onclick="changeStatus({{ $review->id }}, 'approved')">
+                            <button class="action-btn approve" title="Approve"
+                                onclick="changeStatus({{ $review->id }}, 'approved')">
                                 <i class="fa-solid fa-check"></i>
                             </button>
                             @endif
 
                             @if($status === 'pending' || $status === 'approved')
-                            <button class="action-btn reject" title="Reject" onclick="changeStatus({{ $review->id }}, 'rejected')">
+                            <button class="action-btn reject" title="Reject"
+                                onclick="changeStatus({{ $review->id }}, 'rejected')">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                             @endif
 
-                            <button class="action-btn delete" title="Hapus" onclick="deleteReview({{ $review->id }})">
+                          <button class="action-btn delete" title="Hapus" onclick="deleteReview({{ $review->id }}, '{{ addslashes($user) }}')">
                                 <i class="fa-regular fa-trash-can"></i>
                             </button>
                         </div>
@@ -381,6 +442,31 @@
             <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300"></i>
         </div>
         <p class="text-sm text-gray-500 font-medium">Tidak ada review yang sesuai dengan filter.</p>
+    </div>
+</div>
+
+{{-- MODAL: Konfirmasi Hapus Review --}}
+<div id="modal-delete-review"
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 backdrop-blur-sm"
+    onclick="if(event.target===this) closeDeleteModal()">
+    <div class="bg-white rounded-md w-full max-w-sm mx-4 p-6 text-center shadow-2xl">
+        <div class="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-triangle-exclamation text-red-500 text-2xl"></i>
+        </div>
+        <h3 class="text-base font-bold text-gray-900 mb-1">Hapus Review?</h3>
+        <p class="text-xs text-gray-500 mb-1">Review dari <span id="delete-review-user"
+                class="font-semibold text-gray-700"></span></p>
+        <p class="text-xs text-red-500 mb-5">Tindakan ini tidak dapat dibatalkan.</p>
+        <div class="flex gap-3">
+            <button type="button" onclick="closeDeleteModal()"
+                class="flex-1 py-2.5 rounded-md border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors">
+                Batal
+            </button>
+            <button type="button" id="btn-confirm-delete"
+                class="flex-1 py-2.5 rounded-md bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-colors">
+                Ya, Hapus
+            </button>
+        </div>
     </div>
 </div>
 
@@ -469,21 +555,35 @@
         .catch(error => console.error('Error:', error));
     }
 
-    // ---- Fetch API: Hapus Review (Placeholder) ----
-    function deleteReview(id) {
-        if (!confirm('Yakin ingin menghapus review ini secara permanen?')) return;
-        
-        fetch(`/admin/reviews/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            window.location.reload();
-        })
-        .catch(error => console.error('Error:', error));
-    }
+   let deleteTargetId = null;
+
+function deleteReview(id, userName) {
+    deleteTargetId = id;
+    document.getElementById('delete-review-user').textContent = userName || 'pengguna ini';
+    const modal = document.getElementById('modal-delete-review');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('modal-delete-review');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    deleteTargetId = null;
+}
+
+document.getElementById('btn-confirm-delete').addEventListener('click', function () {
+    if (!deleteTargetId) return;
+
+    fetch(`/admin/reviews/${deleteTargetId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(() => window.location.reload())
+    .catch(error => console.error('Error:', error));
+});
 </script>
 @endpush

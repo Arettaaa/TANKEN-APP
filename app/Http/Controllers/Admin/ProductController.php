@@ -13,7 +13,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['stocks', 'reviews', 'galleries']);
+        $query = Product::with(['stocks', 'galleries', 'reviews' => fn($q) => $q->where('status', 'approved')]);
 
         if ($search = $request->search) {
             $query->where(function($q) use ($search) {
