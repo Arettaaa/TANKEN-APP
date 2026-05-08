@@ -8,6 +8,7 @@
 <section class="relative w-full h-56 md:h-72 overflow-hidden bg-black">
     <img src="{{ asset('images/men-home.jpg') }}" alt="Shop Banner"
         class="absolute inset-0 w-full h-full object-cover object-top opacity-50">
+    
     <div class="relative z-10 h-full flex flex-col justify-end px-8 md:px-12 pb-8">
         <p class="text-xs text-gray-300 uppercase tracking-widest mb-1 font-medium">All Collections</p>
         <h1 class="text-5xl md:text-6xl font-extrabold text-white leading-none tracking-tight">Shop</h1>
@@ -39,7 +40,18 @@
 </div>
 
 {{-- ====== MAIN CATALOG AREA ====== --}}
-<div class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
+<div class="max-w-7xl mx-auto px-6 lg:px-10 pt-6 pb-10">
+    
+    {{-- TOMBOL BACK (STANDAR E-COMMERCE) --}}
+    <div class="mb-8">
+        <a href="{{ route('pelanggan.home') }}" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-black transition-colors group">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            <span class="text-xs font-bold uppercase tracking-widest">Back</span>
+        </a>
+    </div>
+
     <div class="flex gap-10">
 
         {{-- ====== SIDEBAR FILTER ====== --}}
@@ -118,13 +130,13 @@
             </div>
         </aside>
 
-        {{-- ====== PRODUCT GRID ====== --}}
-        <div class="flex-1">
-            <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+        {{-- ====== PRODUCT GRID & EMPTY STATE ====== --}}
+        <div class="flex-1 flex flex-col">
+            <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 w-full">
                 @foreach ($products as $product)
                 <div class="product-card group cursor-pointer" data-name="{{ strtolower($product->name) }}"
-                    data-gender="{{ strtolower($product->category->name ?? 'unisex') }}" {{-- ✅ tambah strtolower --}}
-                    data-style="{{ $product->type }}" {{-- ✅ ambil dari DB --}} data-price="{{ $product->price }}">
+                    data-gender="{{ strtolower($product->category->name ?? 'unisex') }}"
+                    data-style="{{ $product->type }}" data-price="{{ $product->price }}">
 
                     <a href="{{ route('pelanggan.produk.detail', $product->slug) }}">
                         <div class="overflow-hidden rounded-lg bg-gray-100 aspect-[3/4] mb-3">
@@ -155,23 +167,20 @@
                     </a>
                 </div>
                 @endforeach
+            </div>
 
-
+            {{-- Empty state (Dibuat Center) --}}
+            <div id="empty-state" class="hidden flex-col items-center justify-center py-24 text-center w-full">
+                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-6 mx-auto">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-8 h-8 text-gray-300">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                </div>
+                <h3 class="text-sm font-bold text-black uppercase tracking-widest">Produk tidak ditemukan</h3>
+                <p class="text-xs text-gray-400 mt-2 max-w-xs mx-auto">Coba ubah filter pencarian atau kata kunci untuk menemukan produk.</p>
             </div>
         </div>
-
-        {{-- Empty state --}}
-        <div id="empty-state" class="hidden text-center py-20 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                stroke-width="1.2" width="40" height="40" class="mx-auto mb-4 opacity-40">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-            </svg>
-            <p class="text-sm font-medium">Produk tidak ditemukan</p>
-            <p class="text-xs mt-1">Coba ubah filter pencarian kamu</p>
-        </div>
     </div>
-</div>
 </div>
 
 @endsection
@@ -217,7 +226,15 @@
         });
 
         document.getElementById('result-count').textContent = visible + ' pieces found';
-        document.getElementById('empty-state').classList.toggle('hidden', visible > 0);
+        
+        const emptyState = document.getElementById('empty-state');
+        if (visible > 0) {
+            emptyState.classList.add('hidden');
+            emptyState.classList.remove('flex');
+        } else {
+            emptyState.classList.remove('hidden');
+            emptyState.classList.add('flex');
+        }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
