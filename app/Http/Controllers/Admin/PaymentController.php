@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Payment;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -11,42 +11,62 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with('order')->latest();
+        $query = Order::latest();
 
-        // Fitur Search & Filter (Akan diproses dari custom dropdown UI)
         if ($search = $request->search) {
-            $query->where('payment_id', 'like', "%{$search}%")
-                  ->orWhere('transaction_id', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%");
+            $query->where('order_number', 'like', "%{$search}%")
+                ->orWhere('customer_name', 'like', "%{$search}%")
+                ->orWhere('customer_email', 'like', "%{$search}%");
         }
         if ($status = $request->status) {
-            $query->where('status', $status);
+            $query->where('payment_status', $status);
         }
         if ($method = $request->method) {
-            $query->where('method', $method);
+            $query->where('payment_method', $method);
         }
 
         $payments = $query->paginate(15)->withQueryString();
 
-        // Data untuk Stat Cards
-        $totalRevenue        = Payment::where('status', 'completed')->sum('amount');
-        $completedCount      = Payment::where('status', 'completed')->count();
-        $pendingCount        = Payment::where('status', 'pending')->count();
-        $failedRefundedCount = Payment::whereIn('status', ['failed', 'refunded'])->count();
+        $totalRevenue        = Order::where('payment_status', 'paid')->sum('total');
+        $completedCount      = Order::where('payment_status', 'paid')->count();
+        $pendingCount        = Order::whereIn('payment_status', ['unpaid', 'waiting_confirmation'])->count();
+        $failedRefundedCount = Order::whereIn('payment_status', ['failed', 'refunded'])->count();
 
-        // Dummy Data untuk Chart (6 Bulan Terakhir) - Nantinya bisa pakai query GROUP BY
-        $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
-        $chartData   = [12500000, 15000000, 14200000, 18500000, 17000000, 21000000];
+        $revenueChart = Order::where('payment_status', 'paid')
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->select(
+                \DB::raw("DATE_FORMAT(created_at, '%b') as month"),
+                \DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month_key"),
+                \DB::raw('SUM(total) as total')
+            )
+            ->groupBy('month_key', 'month')
+            ->orderBy('month_key')
+            ->get();
+
+        $chartLabels = $revenueChart->isNotEmpty()
+            ? $revenueChart->pluck('month')->toArray()
+            : ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'];
+
+        $chartData = $revenueChart->isNotEmpty()
+            ? $revenueChart->pluck('total')->map(function ($v) {
+                return (int)$v;
+            })->toArray()
+            : [0, 0, 0, 0, 0, 0];
 
         return view('admin.payment', compact(
-            'payments', 'totalRevenue', 'completedCount', 
-            'pendingCount', 'failedRefundedCount', 'chartLabels', 'chartData'
+            'payments',
+            'totalRevenue',
+            'completedCount',
+            'pendingCount',
+            'failedRefundedCount',
+            'chartLabels',
+            'chartData'
         ));
     }
 
     public function export(Request $request)
     {
-        $payments = Payment::latest()->get();
+        $payments = Order::latest()->get();
         $filename = "Tanken_Payments_" . date('Y-m-d_H-i') . ".csv";
 
         $headers = [
@@ -59,18 +79,18 @@ class PaymentController extends Controller
 
         $columns = ['Payment ID', 'Order ID', 'Customer', 'Amount (Rp)', 'Method', 'Status', 'Date', 'Transaction ID'];
 
-        $callback = function() use($payments, $columns) {
+        $callback = function () use ($payments, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
             foreach ($payments as $pay) {
                 fputcsv($file, [
-                    $pay->payment_id,
-                    $pay->order->order_number ?? '-',
+                    $pay->id,
+                    $pay->order_number ?? '-',
                     $pay->customer_name,
-                    $pay->amount,
-                    strtoupper($pay->method),
-                    strtoupper($pay->status),
+                    $pay->total,
+                    strtoupper($pay->payment_method),
+                    strtoupper($pay->payment_status),
                     $pay->created_at->format('Y-m-d H:i'),
                     $pay->transaction_id ?? '-'
                 ]);

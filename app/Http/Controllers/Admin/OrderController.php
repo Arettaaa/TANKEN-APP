@@ -23,14 +23,20 @@ class OrderController extends Controller
 
         $orders = $query->paginate(15)->withQueryString();
 
-        // Hitung data untuk Stat Cards langsung dari database
         $totalOrders = Order::count();
         $confirmed   = Order::where('status', 'confirmed')->count();
         $shipped     = Order::where('status', 'shipped')->count();
         $delivered   = Order::where('status', 'delivered')->count();
+        $cancelled = Order::where('status', 'cancelled')->count();
 
-        // Pastikan nama view ini sesuai dengan struktur folder kamu
-        return view('admin.order', compact('orders', 'totalOrders', 'confirmed', 'shipped', 'delivered'));
+        return view('admin.order', compact(
+            'orders',
+            'totalOrders',
+            'confirmed',
+            'shipped',
+            'delivered',
+            'cancelled'
+        ));
     }
 
     public function show(Order $order)

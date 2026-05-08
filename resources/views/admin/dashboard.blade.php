@@ -125,20 +125,28 @@
 
 @endsection
 
-@push('scripts')
 @php
-    // Siapkan data di PHP dulu biar Blade parser gak bingung
-    $finalSalesLabels = (isset($salesChart) && $salesChart->count()) ? $salesChart->pluck('month') : ['Jan','Feb','Mar','Apr','Mei','Jun'];
-    $finalSalesData   = (isset($salesChart) && $salesChart->count()) ? $salesChart->pluck('total') : [12800000, 13200000, 19300000, 14300000, 21000000, 25900000];
+    $salesLabels = $salesChart->isNotEmpty() 
+        ? $salesChart->pluck('month')->toArray() 
+        : ['Jan','Feb','Mar','Apr','Mei','Jun'];
 
-    $finalBsLabels = (isset($bestSelling) && $bestSelling->count()) ? $bestSelling->pluck('product_name') : ['Athletic Flow','Sport Luxe','Cargo Pants','Joggers','Chinos'];
-    $finalBsData   = (isset($bestSelling) && $bestSelling->count()) ? $bestSelling->pluck('total_sold') : [142, 128, 110, 89, 74];
+    $salesData = $salesChart->isNotEmpty() 
+        ? $salesChart->pluck('total')->map(function($v) { return (int)$v; })->toArray()
+        : [12800000, 13200000, 19300000, 14300000, 21000000, 25900000];
+
+    $bsLabels = $bestSelling->isNotEmpty() 
+        ? $bestSelling->pluck('product_name')->toArray() 
+        : ['Athletic Flow','Sport Luxe','Cargo Pants','Joggers','Chinos'];
+
+    $bsData = $bestSelling->isNotEmpty() 
+        ? $bestSelling->pluck('total_sold')->map(function($v) { return (int)$v; })->toArray()
+        : [142, 128, 110, 89, 74];
 @endphp
 
+@push('scripts')
 <script>
-    // ---- Sales Overview (line chart) ----
-    const salesLabels = @json($finalSalesLabels);
-    const salesData   = @json($finalSalesData);
+    const salesLabels = @json($salesLabels);
+    const salesData   = @json($salesData);
 
     new Chart(document.getElementById('salesChart'), {
         type: 'line',
@@ -165,16 +173,19 @@
                     grid: { color: '#f3f4f6' },
                     ticks: {
                         font: { size: 10 },
-                        callback: v => 'Rp' + (v/1000000).toFixed(0) + 'jt'
+                        callback: v => {
+                            if (v >= 1000000) return 'Rp' + (v/1000000).toFixed(1) + 'jt';
+                            if (v >= 1000)    return 'Rp' + (v/1000).toFixed(0) + 'rb';
+                            return 'Rp' + v;
+                        }
                     }
                 }
             }
         }
     });
 
-    // ---- Best Selling (bar chart) ----
-    const bsLabels = @json($finalBsLabels);
-    const bsData   = @json($finalBsData);
+    const bsLabels = @json($bsLabels);
+    const bsData   = @json($bsData);
 
     new Chart(document.getElementById('bestSellingChart'), {
         type: 'bar',
@@ -183,7 +194,7 @@
             datasets: [{
                 data: bsData,
                 backgroundColor: '#111111',
-                borderRadius: 3, // Diubah jadi 3 biar ujung bar chart-nya sedikit lebih kotak
+                borderRadius: 3,
                 borderSkipped: false,
             }]
         },

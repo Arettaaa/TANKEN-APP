@@ -19,10 +19,11 @@ class DashboardController extends Controller
         $totalUsers  = User::where('role', 'customer')->count();
         $lowStockItems = Product::with('stocks')
             ->get()
-            ->filter(fn($p) => $p->total_stock <= 10)
+            ->filter(function($p) { 
+                return $p->stocks->sum('quantity') <= 20; 
+            })
             ->count();
 
-        // Grafik Penjualan (6 bulan terakhir)
         $salesChart = Order::where('payment_status', 'paid')
             ->where('created_at', '>=', now()->subMonths(6))
             ->select(
@@ -34,10 +35,10 @@ class DashboardController extends Controller
             ->orderBy('month_key')
             ->get();
 
-        // Produk Terlaris
         $bestSelling = DB::table('order_items')
-            ->select('product_name', DB::raw('SUM(quantity) as total_sold'))
-            ->groupBy('product_name')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->select('products.name as product_name', DB::raw('SUM(order_items.quantity) as total_sold'))
+            ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
@@ -50,8 +51,13 @@ class DashboardController extends Controller
 
         // Mengarahkan ke resources/views/admin/dashboard.blade.php
         return view('admin.dashboard', compact(
-            'totalSales', 'totalOrders', 'totalUsers', 'lowStockItems',
-            'salesChart', 'bestSelling', 'recentActivity'
+            'totalSales',
+            'totalOrders',
+            'totalUsers',
+            'lowStockItems',
+            'salesChart',
+            'bestSelling',
+            'recentActivity'
         ));
     }
 }

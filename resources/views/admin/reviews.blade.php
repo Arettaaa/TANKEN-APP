@@ -436,7 +436,6 @@
         </table>
     </div>
 
-    {{-- Empty state search --}}
     <div id="emptyState" class="hidden py-20 text-center">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
             <i class="fa-solid fa-magnifying-glass text-2xl text-gray-300"></i>
