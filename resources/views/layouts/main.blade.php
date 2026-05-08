@@ -465,7 +465,9 @@
                                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                                 <circle cx="12" cy="10" r="3" />
                             </svg>
-                            <span>123 Fashion Street, New York, NY 10001</span>
+                            <a href="https://maps.google.com/?q=Jl.+Swadaya+XIII,+RT.02/RW.021,+Jakasampurna,+Kec.+Bekasi+Bar.,+Kota+Bekasi,+Jawa+Barat+17145" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
+                                Jl. Swadaya XIII, RT.02/RW.021, Jakasampurna, Kec. Bekasi Bar., Kota Bekasi, Jawa Barat 17145.
+                            </a>
                         </div>
                         <div class="flex items-center gap-2.5">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -473,7 +475,7 @@
                                 <path
                                     d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.58a16 16 0 0 0 6 6l.95-1.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
                             </svg>
-                            <span>1-800-TANKEN-001</span>
+                            <span>0851-2123-5200</span>
                         </div>
                         <div class="flex items-center gap-2.5">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -481,7 +483,7 @@
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                                 <polyline points="22,6 12,13 2,6" />
                             </svg>
-                            <span>support@tanken.com</span>
+                            <span>explore.tanken@gmail.com</span>
                         </div>
                     </div>
                 </div>
@@ -526,7 +528,7 @@
                 <div class="w-full md:w-auto">
                     <p class="text-xs text-gray-400 mb-3 uppercase tracking-widest font-semibold">Follow us</p>
                     <div class="flex items-center gap-3">
-                        <a href="#"
+                        <a href="https://www.instagram.com/tanken_official?igsh=bjlpNzRxdjc2ZGQ5" target="_blank" rel="noopener noreferrer"
                             class="w-10 h-10 md:w-9 md:h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="1.6" width="16" height="16">
