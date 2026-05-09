@@ -17,8 +17,9 @@
         inset: 0;
         background-image: url('{{ asset("images/Nature-1.jpg") }}');
         background-size: cover;
-        background-position: center 20%;
+        background-position: center 35%;
         filter: brightness(0.45);
+        /* transform: scale(1.1); */
     }
     .hero-section:hover .hero-bg {
         /* no zoom animation */
@@ -28,13 +29,12 @@
     .hero-heading {
         font-family: 'Inter', sans-serif;
         font-weight: 800;
-        /* Ubah baris ini: ukuran minimal 2.5rem, dinamis 5vw, maksimal 4.5rem */
         font-size: clamp(2.5rem, 5vw, 4.5rem); 
-        line-height: 1.1; /* Agak dilonggarkan sedikit biar nggak terlalu numpuk */
+        line-height: 1.1; 
         letter-spacing: -0.02em;
         text-transform: uppercase;
         color: #ffffff;
-        text-shadow: 0 4px 24px rgba(0,0,0,0.4); /* Shadow disesuaikan biar teks lebih terbaca */
+        text-shadow: 0 4px 24px rgba(0,0,0,0.4); 
     }
 
     /* Collection grid */
@@ -280,7 +280,7 @@
 <div class="ticker-wrap">
     <div class="ticker-content">
         @php
-            $tickers = ['Free Shipping Over Rp500K', 'Premium Quality', 'Move With Style', 'Engineered Comfort', 'New Collection', 'Spring 2026', 'Free Shipping Over Rp500K', 'Premium Quality', 'Move With Style', 'Engineered Comfort', 'New Collection', 'Spring 2026'];
+            $tickers = ['Premium Quality', 'Move With Style', 'Engineered Comfort', 'New Collection', 'Premium Quality', 'Move With Style', 'Engineered Comfort', 'New Collection'];
         @endphp
         @foreach($tickers as $item)
             <span>{{ $item }}</span><span class="dot">·</span>

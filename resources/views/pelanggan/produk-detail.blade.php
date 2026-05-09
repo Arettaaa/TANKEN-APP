@@ -1,7 +1,5 @@
 @extends('layouts.main')
 
-{{-- DYNAMIC: title dari database --}}
-{{-- OLD: @section('title', 'Yama Crinkle Nylon Boardshorts — TANKEN') --}}
 @section('title', $product->name . ' — TANKEN')
 
 @section('content')
@@ -9,36 +7,32 @@
 {{-- ====== IMAGE POPUP ZOOM OVERLAY ====== --}}
 <div id="zoom-overlay" class="fixed inset-0 z-[60] hidden bg-black/90 backdrop-blur-sm" onclick="closeZoom(event)">
     <button class="absolute top-4 right-5 text-white/80 hover:text-white z-10 p-2" onclick="closeZoom()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-            width="28" height="28">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="28" height="28">
             <path d="M18 6 6 18M6 6l12 12" />
         </svg>
     </button>
+    
     {{-- Zoom controls --}}
     <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-        <button onclick="zoomChange(-0.3)"
-            class="bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-light transition">−</button>
+        <button onclick="zoomChange(-0.3)" class="bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-light transition">−</button>
         <span id="zoom-level-label" class="text-white/70 text-xs font-medium w-12 text-center">100%</span>
-        <button onclick="zoomChange(0.3)"
-            class="bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-light transition">+</button>
-        <button onclick="resetZoomLevel()"
-            class="bg-white/20 hover:bg-white/40 text-white rounded-full px-3 h-10 flex items-center text-xs font-medium transition">Reset</button>
+        <button onclick="zoomChange(0.3)" class="bg-white/20 hover:bg-white/40 text-white rounded-full w-10 h-10 flex items-center justify-center text-xl font-light transition">+</button>
+        <button onclick="resetZoomLevel()" class="bg-white/20 hover:bg-white/40 text-white rounded-full px-3 h-10 flex items-center text-xs font-medium transition">Reset</button>
     </div>
+
     {{-- Swipeable image container --}}
-    <div class="w-full h-full flex items-center justify-center overflow-hidden" id="zoom-container">
+    <div class="w-full h-full flex items-center justify-center overflow-hidden cursor-move" id="zoom-container">
         <img id="zoom-img" src="" alt=""
-            class="max-h-[85vh] max-w-[90vw] object-contain rounded select-none transition-transform duration-150"
-            style="transform-origin: center center; transform: scale(1);" draggable="false">
+            class="max-h-[85vh] max-w-[90vw] object-contain rounded select-none transition-transform duration-150 ease-out"
+            style="transform-origin: center center; transform: scale(1) translate(0px, 0px);" draggable="false">
     </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 pt-4 sm:pt-6 pb-16">
 
     {{-- Breadcrumb / Back --}}
-    <a href="{{ route('pelanggan.katalog') }}"
-        class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors mb-5 group">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-            width="14" height="14" class="group-hover:-translate-x-0.5 transition-transform">
+    <a href="{{ route('pelanggan.katalog') }}" class="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-black transition-colors mb-5 group">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14" class="group-hover:-translate-x-0.5 transition-transform">
             <path d="M15 18l-6-6 6-6" />
         </svg>
         BACK
@@ -49,56 +43,42 @@
 
         {{-- ====== LEFT: IMAGES ====== --}}
         <div>
-            {{-- Main image — click to open popup zoom --}}
-            <div class="relative rounded-xl bg-gray-100 overflow-hidden aspect-[4/5] mb-3 cursor-zoom-in"
-                onclick="openZoom(document.getElementById('main-product-img').src)">
-                <img id="main-product-img" {{-- OLD: src="{{ asset('images/men-home.jpg') }}" --}} {{-- DYNAMIC: gunakan
-                    main_image dari DB, fallback ke placeholder --}}
+            <div class="relative group rounded-xl bg-gray-100 overflow-hidden aspect-[4/5] mb-3">
+                {{-- Main Image (Ditambah transisi opacity untuk animasi smooth) --}}
+                <img id="main-product-img" 
                     src="{{ $product->main_image ? asset('storage/' . $product->main_image) : asset('images/men-home.jpg') }}"
-                    alt="{{ $product->name }}" class="w-full h-full object-cover object-top">
-                {{-- Hint label --}}
-                <div
-                    class="absolute bottom-3 right-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2" width="11" height="11">
-                        <circle cx="11" cy="11" r="8" />
-                        <path d="m21 21-4.35-4.35" />
-                        <line x1="11" y1="8" x2="11" y2="14" />
-                        <line x1="8" y1="11" x2="14" y2="11" />
+                    alt="{{ $product->name }}" 
+                    class="w-full h-full object-cover object-top cursor-zoom-in transition-opacity duration-200 ease-in-out opacity-100"
+                    onclick="openZoom(this.src)">
+
+                {{-- Navigation Arrows --}}
+                <button onclick="prevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <button onclick="nextImage()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+
+                <div class="absolute bottom-3 right-3 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11">
+                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
                     </svg>
                     Tap untuk perbesar
                 </div>
             </div>
 
             {{-- Thumbnails --}}
-            {{-- OLD:
-            <div class="flex gap-3">
-                <button onclick="switchImage('{{ asset('images/men-home.jpg') }}', this)"
-                    class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-black">
-                    <img src="{{ asset('images/men-home.jpg') }}" ...>
-                </button>
-                <button onclick="switchImage('{{ asset('images/men-home2.jpg') }}', this)" ...>
-                    <img src="{{ asset('images/men-home2.jpg') }}" ...>
-                </button>
-            </div>
-            --}}
-            {{-- DYNAMIC: thumbnail dari main_image + galleries --}}
-            <div class="flex gap-3 overflow-x-auto pb-1">
-                {{-- Thumbnail main image --}}
+            <div class="flex gap-3 overflow-x-auto pb-1 scrollbar-none" id="thumb-container">
                 @if($product->main_image)
-                <button onclick="switchImage('{{ asset('storage/' . $product->main_image) }}', this)"
-                    class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-black">
-                    <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}"
-                        class="w-full h-full object-cover object-top">
+                <button onclick="switchImage('{{ asset('storage/' . $product->main_image) }}', this, 0)"
+                    class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-black active-thumb">
+                    <img src="{{ asset('storage/' . $product->main_image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover object-top">
                 </button>
                 @endif
-
-                {{-- Thumbnail dari galleries --}}
-                @foreach($product->galleries as $gallery)
-                <button onclick="switchImage('{{ asset('storage/' . $gallery->image) }}', this)"
-                    class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-colors">
-                    <img src="{{ asset('storage/' . $gallery->image) }}" alt="{{ $product->name }}"
-                        class="w-full h-full object-cover object-top">
+                @foreach($product->galleries as $index => $gallery)
+                <button onclick="switchImage('{{ asset('storage/' . $gallery->image) }}', this, {{ $index + 1 }})"
+                    class="thumb-btn flex-shrink-0 w-20 h-24 sm:w-24 sm:h-28 rounded-lg overflow-hidden border-2 border-transparent hover:border-gray-300 transition-colors">
+                    <img src="{{ asset('storage/' . $gallery->image) }}" alt="{{ $product->name }}" class="w-full h-full object-cover object-top">
                 </button>
                 @endforeach
             </div>
@@ -106,302 +86,132 @@
 
         {{-- ====== RIGHT: PRODUCT INFO ====== --}}
         <div class="flex flex-col">
+            <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Celana {{ ucfirst($product->type) }}</p>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-3">{{ $product->name }}</h1>
 
-            {{-- Category badge --}}
-            {{-- OLD: <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Celana Pendek</p> --}}
-            {{-- DYNAMIC: tipe produk dari DB --}}
-            <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">
-                Celana {{ ucfirst($product->type) }}
-            </p>
-
-            {{-- Title --}}
-            {{-- OLD: <h1 ...>Yama Crinkle Nylon Boardshorts</h1> --}}
-            {{-- DYNAMIC: nama produk dari DB --}}
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-3">
-                {{ $product->name }}
-            </h1>
-
-            {{-- Price --}}
-            {{-- OLD:
-            <div ...>
-                <span ...>Rp1.249.000</span>
-                <span ...>Rp1.499.000</span>
-                <span ...>17%</span>
-            </div>
-            --}}
-            {{-- DYNAMIC: harga dari DB, original_price & diskon jika ada --}}
             <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900">
-                    Rp {{ number_format($product->price, 0, ',', '.') }}
-                </span>
+                <span class="text-xl sm:text-2xl font-bold text-gray-900">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
                 @if($product->original_price && $product->original_price > $product->price)
-                <span class="text-sm text-gray-400 line-through">
-                    Rp {{ number_format($product->original_price, 0, ',', '.') }}
-                </span>
-                <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded">
-                    {{ $product->discount_percent }}%
-                </span>
+                <span class="text-sm text-gray-400 line-through">Rp {{ number_format($product->original_price, 0, ',', '.') }}</span>
+                <span class="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded">{{ $product->discount_percent }}%</span>
                 @endif
             </div>
 
-            {{-- Rating --}}
-            {{-- OLD: rating & review count hardcoded (4.7, 3 ulasan) --}}
-            {{-- DYNAMIC: dari relasi reviews --}}
-            @php
-            $avgRating = $product->reviews->avg('rating') ?? 0;
-            $reviewCount = $product->reviews->count();
-            @endphp
+            @php $avgRating = $product->reviews->avg('rating') ?? 0; $reviewCount = $product->reviews->count(); @endphp
             @if($reviewCount > 0)
-            <div class="flex items-center gap-2 mb-3">
+            <div class="flex items-center gap-2 mb-4">
                 <div class="flex gap-0.5">
-                    @for($i = 1; $i <= 5; $i++) <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="{{ $i <= round($avgRating) ? '#f5a623' : '#e5e7eb' }}" width="14" height="14">
-                        <path
-                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        @endfor
+                    @for($i = 1; $i <= 5; $i++) 
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="{{ $i <= round($avgRating) ? '#f5a623' : '#e5e7eb' }}" width="14" height="14">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    @endfor
                 </div>
                 <span class="text-sm text-gray-600 font-medium">{{ number_format($avgRating, 1) }}</span>
                 <span class="text-sm text-gray-400">({{ $reviewCount }} ulasan)</span>
             </div>
             @endif
 
-            {{-- SKU & Stock --}}
-            {{-- OLD:
-            <span>SKU: TKN-YCB-001</span>
-            <span>✓ Stok tersedia (60 item)</span>
-            --}}
-            {{-- DYNAMIC: SKU & total stok dari DB --}}
-            @php $totalStock = $product->stocks->sum('quantity'); @endphp
-            <div class="flex flex-col gap-0.5 mb-4 text-xs text-gray-500">
-                <span><span class="font-semibold text-gray-700">SKU:</span> {{ $product->sku }}</span>
-                @if($totalStock > 0)
-                <span class="text-green-600 font-semibold">✓ Stok tersedia ({{ $totalStock }} item)</span>
-                @else
-                <span class="text-red-500 font-semibold">✗ Stok habis</span>
-                @endif
-            </div>
-
             <hr class="border-gray-100 mb-5">
 
-            {{-- COLOR --}}
-            {{-- OLD: warna hardcoded (Olive, Stone Grey, Indigo) --}}
-            {{-- DYNAMIC: dari $product->colors (JSON array) --}}
-            @php $colorsArray = is_array($product->colors) ? $product->colors : (json_decode($product->colors, true) ??
-            []); @endphp
-            @if(!empty($colorsArray))
-            <div class="mb-5">
-                <p class="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">
-                    Warna — <span id="selected-color-label"
-                        class="text-gray-900 normal-case font-semibold tracking-normal">Pilih warna</span>
-                </p>
-                <div class="flex flex-wrap gap-2" id="color-options">
-                    @foreach($colorsArray as $color)
-                    <button onclick="selectColor('{{ $color }}', this)"
-                        class="color-btn px-4 py-2 rounded border-2 border-gray-200 text-sm font-medium text-gray-700 hover:border-gray-800 transition-colors">
-                        {{ $color }}
-                    </button>
-                    @endforeach
-                </div>
-                <p id="color-error" class="text-xs text-red-500 mt-1.5 hidden">⚠ Pilih warna terlebih dahulu.</p>
-            </div>
-            @endif
-
-            {{-- SIZE --}}
-            {{-- OLD: ukuran hardcoded (XS, S, M, L, XL, XXL) --}}
-            {{-- DYNAMIC: dari $product->sizes (JSON array) --}}
-            @php $sizesArray = is_array($product->sizes) ? $product->sizes : (json_decode($product->sizes, true) ?? []);
-            @endphp
+            {{-- SIZE ONLY --}}
+            @php $sizesArray = is_array($product->sizes) ? $product->sizes : (json_decode($product->sizes, true) ?? []); @endphp
             <div class="mb-5">
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-xs font-bold tracking-widest uppercase text-gray-500">
-                        Ukuran — <span id="selected-size-label"
-                            class="text-gray-900 normal-case font-semibold tracking-normal">Pilih ukuran</span>
+                        Ukuran — <span id="selected-size-label" class="text-gray-900 normal-case font-semibold tracking-normal">Pilih ukuran</span>
                     </p>
-                    {{-- OLD: onclick="alert('Size guide modal — coming soon!')" --}}
-                    <button class="text-xs text-gray-400 underline hover:text-gray-700 transition-colors"
-                        onclick="openSizeChart()">
-                        Size Guide
-                    </button>
+                    <button class="text-xs text-gray-400 underline hover:text-gray-700 transition-colors" onclick="openSizeChart()">Size Guide</button>
                 </div>
                 <div class="flex flex-wrap gap-2" id="size-options">
                     @forelse($sizesArray as $sz)
-                    <button onclick="selectSize('{{ $sz }}', this)"
-                        class="size-btn w-11 h-11 rounded border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-800 transition-colors">
-                        {{ $sz }}
-                    </button>
+                    <button onclick="selectSize('{{ $sz }}', this)" class="size-btn w-11 h-11 rounded border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-800 transition-colors">{{ $sz }}</button>
                     @empty
-                    {{-- Fallback kalau sizes kosong --}}
                     @foreach(['XS','S','M','L','XL','XXL'] as $sz)
-                    <button onclick="selectSize('{{ $sz }}', this)"
-                        class="size-btn w-11 h-11 rounded border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-800 transition-colors">
-                        {{ $sz }}
-                    </button>
+                    <button onclick="selectSize('{{ $sz }}', this)" class="size-btn w-11 h-11 rounded border-2 border-gray-200 text-sm font-semibold text-gray-700 hover:border-gray-800 transition-colors">{{ $sz }}</button>
                     @endforeach
                     @endforelse
                 </div>
-                <p id="size-error" class="text-xs text-red-500 mt-1.5 hidden">⚠ Pilih ukuran terlebih dahulu.</p>
+                <p id="size-error" class="text-xs text-red-500 mt-2 font-medium hidden">⚠ Silakan pilih ukuran terlebih dahulu.</p>
             </div>
 
-            {{-- QUANTITY --}}
+            {{-- QUANTITY & DYNAMIC STOCK INFO --}}
             <div class="mb-6">
                 <p class="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">Jumlah</p>
-                <div class="flex items-center border border-gray-200 rounded w-fit">
-                    <button onclick="changeQty(-1)"
-                        class="w-10 h-10 text-xl font-light text-gray-600 hover:bg-gray-50 rounded-l transition-colors flex items-center justify-center">−</button>
-                    <span id="qty-display" class="w-12 text-center text-sm font-semibold text-gray-900">1</span>
-                    <button onclick="changeQty(1)"
-                        class="w-10 h-10 text-xl font-light text-gray-600 hover:bg-gray-50 rounded-r transition-colors flex items-center justify-center">+</button>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center border border-gray-200 rounded w-fit bg-white">
+                        <button onclick="changeQty(-1)" class="w-10 h-10 text-xl font-light text-gray-600 hover:bg-gray-50 rounded-l flex items-center justify-center">−</button>
+                        <span id="qty-display" class="w-12 text-center text-sm font-semibold text-gray-900">1</span>
+                        <button onclick="changeQty(1)" class="w-10 h-10 text-xl font-light text-gray-600 hover:bg-gray-50 rounded-r flex items-center justify-center">+</button>
+                    </div>
+                    <span id="stock-info" class="hidden text-xs font-semibold"></span>
                 </div>
             </div>
 
-            {{-- ADD TO CART + WISHLIST --}}
-            <div class="flex gap-3 mb-6">
-                <button onclick="addToCart()"
-                    class="flex-1 bg-black text-white text-sm font-bold uppercase tracking-wider py-4 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 active:scale-[0.98] transition-all"
-                    {{ $totalStock <=0 ? 'disabled' : '' }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                        stroke-width="2" width="16" height="16">
-                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <path d="M16 10a4 4 0 0 1-8 0" />
+            {{-- ACTION BUTTONS --}}
+            <div class="flex gap-2 sm:gap-3 mb-6">
+                <button id="btn-add-cart" onclick="addToCart()"
+                    class="flex-1 bg-white text-black border-2 border-black text-[11px] sm:text-xs font-bold uppercase tracking-wider py-3.5 rounded-lg flex items-center justify-center gap-1 sm:gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" />
                     </svg>
-                    {{ $totalStock <= 0 ? 'Stok Habis' : 'Tambah ke Keranjang' }} </button>
-                        <button id="btn-wishlist" onclick="toggleWishlist()" class="w-12 h-12 border-2 rounded-lg flex items-center justify-center transition-colors
-   {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists()
-    ? 'border-red-400 bg-white text-red-500'
-    : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400' }}">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                fill="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'none' }}"
-                                stroke="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'currentColor' }}"
-                                viewBox="0 0 24 24" stroke-width="1.8" width="18" height="18">
-                                <path
-                                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                            </svg>
-                        </button>
-            </div>
+                    Keranjang
+                </button>
 
-            {{-- Benefits grid --}}
-            <div class="grid grid-cols-2 gap-x-4 gap-y-3 pt-4 border-t border-gray-100">
-                <div class="flex items-start gap-2">
-                    <span class="text-base leading-none mt-0.5">🚚</span>
-                    <div>
-                        <p class="text-xs font-bold text-gray-800">Gratis Ongkir</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Pembelian di atas Rp500.000</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="text-base leading-none mt-0.5">↩</span>
-                    <div>
-                        <p class="text-xs font-bold text-gray-800">30-Day Returns</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Pengembalian mudah & gratis</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="text-base leading-none mt-0.5">🔒</span>
-                    <div>
-                        <p class="text-xs font-bold text-gray-800">Pembayaran Aman</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Enkripsi SSL</p>
-                    </div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="text-base leading-none mt-0.5">⭐</span>
-                    <div>
-                        <p class="text-xs font-bold text-gray-800">Kualitas Premium</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Garansi kepuasan</p>
-                    </div>
-                </div>
+                <button id="btn-buy-now" onclick="buyNow()"
+                    class="flex-1 bg-black text-white border-2 border-black text-[11px] sm:text-xs font-bold uppercase tracking-wider py-3.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-900 active:scale-[0.98] transition-all">
+                    Beli Sekarang
+                </button>
+
+                <button id="btn-wishlist" onclick="toggleWishlist()" class="w-12 h-12 sm:w-[48px] sm:h-[48px] border-2 rounded-lg flex items-center justify-center transition-colors flex-shrink-0
+                   {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'border-red-400 bg-white text-red-500' : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'none' }}" stroke="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'currentColor' }}" viewBox="0 0 24 24" stroke-width="1.8" width="18" height="18">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
 
-    {{-- ====== TABS: Description & Reviews ====== --}}
+    {{-- ====== TABS ====== --}}
     <div class="mt-14 sm:mt-16 border-t border-gray-200 pt-8">
-
-        {{-- Tab buttons --}}
         <div class="flex gap-6 sm:gap-10 border-b border-gray-200 mb-8 overflow-x-auto scrollbar-none">
-            <button onclick="switchTab('desc')" id="tab-desc"
-                class="tab-btn whitespace-nowrap pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-black border-b-2 border-black -mb-px">
-                Deskripsi
-            </button>
-            {{-- OLD: Ulasan (3) hardcoded --}}
-            {{-- DYNAMIC: jumlah ulasan dari DB --}}
-            <button onclick="switchTab('reviews')" id="tab-reviews"
-                class="tab-btn whitespace-nowrap pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors -mb-px">
-                Ulasan ({{ $reviewCount }})
-            </button>
+            <button onclick="switchTab('desc')" id="tab-desc" class="tab-btn pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-black border-b-2 border-black -mb-px">Deskripsi</button>
+            <button onclick="switchTab('reviews')" id="tab-reviews" class="tab-btn pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors -mb-px">Ulasan ({{ $reviewCount }})</button>
         </div>
-
-        {{-- Description content --}}
-        {{-- OLD: deskripsi hardcoded --}}
-        {{-- DYNAMIC: dari $product->description --}}
         <div id="content-desc" class="tab-content max-w-2xl">
-            @if($product->description)
-            <p class="text-sm text-gray-700 leading-relaxed">{{ $product->description }}</p>
-            @else
-            <p class="text-sm text-gray-400 italic">Belum ada deskripsi untuk produk ini.</p>
-            @endif
+            <p class="text-sm text-gray-700 leading-relaxed">{{ $product->description ?? 'Belum ada deskripsi.' }}</p>
         </div>
-
-        {{-- Reviews content --}}
-        {{-- OLD: reviews hardcoded array dummy --}}
-        {{-- DYNAMIC: dari relasi $product->reviews --}}
         <div id="content-reviews" class="tab-content hidden max-w-2xl space-y-6">
             @forelse($product->reviews as $review)
             <div class="border-b border-gray-100 pb-5 last:border-0">
                 <div class="flex items-center justify-between mb-1">
-                    {{-- OLD: 'Andi R.' hardcoded --}}
                     <span class="text-sm font-bold text-gray-900">{{ $review->user->name ?? 'Pengguna' }}</span>
-                    {{-- OLD: '12 Apr 2026' hardcoded --}}
                     <span class="text-xs text-gray-400">{{ $review->created_at->format('d M Y') }}</span>
                 </div>
-                <div class="flex gap-0.5 mb-2">
-                    @for($i = 1; $i <= 5; $i++) <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="{{ $i <= $review->rating ? '#f5a623' : '#e5e7eb' }}" width="13" height="13">
-                        <path
-                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        @endfor
-                </div>
-                {{-- OLD: teks review hardcoded --}}
+                <div class="flex gap-0.5 mb-2">@for($i=1;$i<=5;$i++)<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="{{$i<=$review->rating?'#f5a623':'#e5e7eb'}}" width="13" height="13"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>@endfor</div>
                 <p class="text-sm text-gray-600 leading-relaxed">{{ $review->comment }}</p>
             </div>
-            @empty
-            <p class="text-sm text-gray-400 italic">Belum ada ulasan untuk produk ini.</p>
-            @endforelse
+            @empty <p class="text-sm text-gray-400 italic">Belum ada ulasan.</p> @endforelse
         </div>
     </div>
 </div>
 
-{{-- ====== TOAST NOTIFICATION ====== --}}
-<div id="cart-toast"
-    class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl items-center gap-2 transition-all whitespace-nowrap">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
-        width="16" height="16" class="text-green-400">
-        <path d="M20 6L9 17l-5-5" />
-    </svg>
-    Produk ditambahkan ke keranjang!
+{{-- TOAST --}}
+<div id="cart-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl items-center gap-2 transition-all whitespace-nowrap">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16" class="text-green-400"><path d="M20 6L9 17l-5-5" /></svg>
+    <span>Produk ditambahkan!</span>
 </div>
 
-{{-- MODAL: Size Chart --}}
+{{-- SIZE MODAL --}}
 @if($product->size_chart_image)
-<div id="modal-sizechart"
-    class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4"
-    onclick="if(event.target===this) closeSizeChart()">
-    <div class="bg-white rounded-xl w-full max-w-lg shadow-2xl overflow-hidden">
+<div id="modal-sizechart" class="hidden fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm flex items-center justify-center px-4" onclick="if(event.target===this) closeSizeChart()">
+    <div class="bg-white rounded-xl w-full max-w-lg overflow-hidden">
         <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Size Guide</h3>
-            <button onclick="closeSizeChart()" class="text-gray-400 hover:text-gray-700 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="2" width="20" height="20">
-                    <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
-            </button>
+            <h3 class="text-sm font-bold uppercase tracking-widest">Size Guide</h3>
+            <button onclick="closeSizeChart()"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M18 6 6 18M6 6l12 12" /></svg></button>
         </div>
-        <div class="p-4">
-            <img src="{{ asset('storage/' . $product->size_chart_image) }}" alt="Size Chart {{ $product->name }}"
-                class="w-full rounded-lg object-contain max-h-[70vh]">
-        </div>
+        <div class="p-4"><img src="{{ asset('storage/' . $product->size_chart_image) }}" class="w-full rounded-lg max-h-[70vh] object-contain"></div>
     </div>
 </div>
 @endif
@@ -410,314 +220,288 @@
 
 @push('styles')
 <style>
-    .color-btn.active {
-        border-color: #111 !important;
-        background-color: #111;
-        color: #fff;
-    }
-
-    .size-btn.active {
-        border-color: #111 !important;
-        background-color: #111;
-        color: #fff;
-    }
-
-    .thumb-btn.active {
-        border-color: #111 !important;
-    }
-
-    /* Hide scrollbar on tab row */
-    .scrollbar-none {
-        scrollbar-width: none;
-    }
-
-    .scrollbar-none::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Zoom overlay shown */
-    #zoom-overlay.show {
-        display: flex !important;
-    }
+    .size-btn.active { border-color: #111 !important; background-color: #111; color: #fff; }
+    .active-thumb { border-color: #111 !important; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
 </style>
 @endpush
 
 @push('scripts')
 <script>
-    let selectedColor = null;
-    let selectedSize  = null;
+    // Data Galeri
+    const images = [
+        "{{ $product->main_image ? asset('storage/' . $product->main_image) : asset('images/men-home.jpg') }}",
+        @foreach($product->galleries as $gallery) "{{ asset('storage/' . $gallery->image) }}", @endforeach
+    ];
+    let currentImgIdx = 0;
+
+    // Data Stok
+    const stockData = {!! json_encode($product->stocks ? $product->stocks->pluck('quantity', 'size') : []) !!};
+    let maxStock = 0;
+    let selectedSize = null;
     let qty = 1;
-    let currentZoomScale = 1;
- 
-    // ── Warna ───────────────────────────────────────────────
-    function selectColor(color, btn) {
-        selectedColor = color;
-        document.getElementById('selected-color-label').textContent = color;
-        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('color-error').classList.add('hidden');
+
+    // ── Image Navigation (Smooth Fade & No Scroll Jump) ──
+    function fadeToImage(src) {
+        const img = document.getElementById('main-product-img');
+        img.style.opacity = '0'; // Pudar perlahan
+        setTimeout(() => {
+            img.src = src;
+            img.style.opacity = '1'; // Muncul perlahan
+        }, 200); // Waktu jeda sesuai dengan durasi CSS (200ms)
     }
- 
-    // ── Ukuran ──────────────────────────────────────────────
+
+    function switchImage(src, btn, index) {
+        currentImgIdx = index;
+        fadeToImage(src);
+        document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active-thumb'));
+        btn.classList.add('active-thumb');
+    }
+
+    function prevImage() {
+        currentImgIdx = (currentImgIdx === 0) ? images.length - 1 : currentImgIdx - 1;
+        updateMainImage();
+    }
+
+    function nextImage() {
+        currentImgIdx = (currentImgIdx === images.length - 1) ? 0 : currentImgIdx + 1;
+        updateMainImage();
+    }
+
+    function updateMainImage() {
+        const src = images[currentImgIdx];
+        fadeToImage(src);
+
+        const thumbs = document.querySelectorAll('.thumb-btn');
+        thumbs.forEach(b => b.classList.remove('active-thumb'));
+        
+        const activeThumb = thumbs[currentImgIdx];
+        activeThumb.classList.add('active-thumb');
+        
+        // Menggeser kontainer thumbnail HANYA secara horizontal, mencegah layar ikut loncat
+        const container = document.getElementById('thumb-container');
+        const scrollPos = activeThumb.offsetLeft - (container.clientWidth / 2) + (activeThumb.clientWidth / 2);
+        container.scrollTo({ left: scrollPos, behavior: 'smooth' });
+    }
+
+    // ── Size & Qty ──
     function selectSize(size, btn) {
         selectedSize = size;
         document.getElementById('selected-size-label').textContent = size;
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('size-error').classList.add('hidden');
+
+        maxStock = stockData[size] || 0;
+        const info = document.getElementById('stock-info');
+        info.classList.remove('hidden');
+        if(maxStock > 0) {
+            info.textContent = `✓ Stok tersedia (${maxStock} item)`;
+            info.className = 'text-xs font-semibold text-green-600';
+        } else {
+            info.textContent = `✗ Stok habis`;
+            info.className = 'text-xs font-semibold text-red-500';
+        }
+        qty = 1; document.getElementById('qty-display').textContent = 1;
     }
- 
-    // ── Jumlah ──────────────────────────────────────────────
+
     function changeQty(delta) {
-        qty = Math.max(1, qty + delta);
+        if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
+        if(maxStock <= 0) return;
+        qty = Math.max(1, Math.min(qty + delta, maxStock));
         document.getElementById('qty-display').textContent = qty;
     }
- 
-    // ── Tambah ke Keranjang ─────────────────────────────────
+
+    // ── Actions ──
     function addToCart() {
-        let valid = true;
- 
-        @if(!empty($colorsArray))
-        if (!selectedColor) {
-            document.getElementById('color-error').classList.remove('hidden');
-            valid = false;
-        }
-        @endif
- 
-        if (!selectedSize) {
+        if(!selectedSize) { 
             document.getElementById('size-error').classList.remove('hidden');
-            valid = false;
+            return; 
         }
-        if (!valid) {
-            document.querySelector('#color-error, #size-error')
-                ?.closest('div')
-                ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return;
-        }
- 
-        const btn = document.querySelector('button[onclick="addToCart()"]');
+        if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
+
+        const btn = document.getElementById('btn-add-cart');
         const originalHTML = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = `
-            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none"
-                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg>
-            Menambahkan...
+            </svg> Menambahkan...
         `;
- 
+
         fetch('{{ route("pelanggan.keranjang.store") }}', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
-            body: JSON.stringify({
-                product_id: {{ $product->id }},
-                color:      selectedColor,
-                size:       selectedSize,
-                quantity:   qty,
-            }),
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            // Varian warna sudah dihapus murni dari sini
+            body: JSON.stringify({ product_id: {{ $product->id }}, size: selectedSize, quantity: qty })
         })
-        .then(r => r.json())
-        .then(data => {
+        .then(r => r.json()).then(data => {
             btn.disabled = false;
             btn.innerHTML = originalHTML;
- 
-            if (data.success) {
-                showToast('Produk ditambahkan ke keranjang');
-                updateNavbarCartBadge(data.cart_count);
-            } else {
-                showToast(data.message || 'Gagal menambahkan produk.', true);
-            }
-        })
-        .catch(() => {
+            if(data.success) { showToast('Produk masuk keranjang!'); updateNavbarCartBadge(data.cart_count); }
+            else { showToast('Gagal menambahkan produk.', true); }
+        }).catch(() => {
             btn.disabled = false;
             btn.innerHTML = originalHTML;
-            showToast('Terjadi kesalahan. Coba lagi.', true);
+            showToast('Terjadi kesalahan.', true);
         });
     }
- 
-    // ── Toast notifikasi ────────────────────────────────────
-    function showToast(message = 'Berhasil!', isError = false) {
-        const toast = document.getElementById('cart-toast');
-        toast.className = [
-            'fixed bottom-6 left-1/2 -translate-x-1/2 z-50',
-            'text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl',
-            'flex items-center gap-2 whitespace-nowrap transition-all',
-            isError ? 'bg-red-600' : 'bg-black',
-        ].join(' ');
- 
-        toast.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor" stroke-width="2.5" width="16" height="16"
-                 class="${isError ? 'text-white' : 'text-green-400'}">
-                ${isError
-                    ? '<path d="M18 6 6 18M6 6l12 12"/>'
-                    : '<path d="M20 6L9 17l-5-5"/>'}
-            </svg>
-            ${message}
-        `;
- 
-        clearTimeout(toast._timer);
-        toast._timer = setTimeout(() => {
-            toast.classList.add('hidden');
-        }, 2500);
-    }
- 
-    // ── Badge keranjang di navbar ────────────────────────────
-    function updateNavbarCartBadge(count) {
-        const badge = document.getElementById('cart-badge');
-        if (!badge) return;
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.classList.remove('hidden');
-        } else {
-            badge.classList.add('hidden');
+
+    function buyNow() {
+        if(!selectedSize) { 
+            document.getElementById('size-error').classList.remove('hidden');
+            return; 
         }
-    }
- 
-    // ── Toast wishlist (dipanggil dari toggleWishlist) ───────
-    function showWishlistToast() {
-        showToast('Ditambahkan ke wishlist ❤️');
-    }
- 
-    // ── Update badge wishlist di navbar ──────────────────────
-    function updateNavbarWishlistBadge(delta) {
-        ['wishlist-badge-desktop', 'wishlist-badge-mobile'].forEach(id => {
-            const badge = document.getElementById(id);
-            if (!badge) return;
-            let newVal = Math.max(0, (parseInt(badge.textContent) || 0) + delta);
-            badge.textContent = newVal > 99 ? '99+' : newVal;
-            badge.classList.toggle('hidden', newVal === 0);
+        if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
+
+        const btn = document.getElementById('btn-buy-now');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `
+            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+            </svg> Memproses...
+        `;
+
+        fetch('{{ route("pelanggan.keranjang.store") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ product_id: {{ $product->id }}, size: selectedSize, quantity: qty })
+        })
+        .then(r => r.json()).then(data => {
+            if(data.success) {
+                window.location.href = '{{ route("pelanggan.checkout.index") }}';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                showToast('Gagal memproses.', true);
+            }
+        }).catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            showToast('Terjadi kesalahan.', true);
         });
     }
- 
-    // ── Toggle Wishlist ──────────────────────────────────────
-    let isWishlisted = {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'true' : 'false' }};
- 
+
+    // ── Zoom Logic (Improved for Trackpad/Gesture) ──
+    let zoomScale = 1;
+    let isDragging = false;
+    let startX, startY, translateX = 0, translateY = 0;
+
+    function openZoom(src) {
+        const overlay = document.getElementById('zoom-overlay');
+        const img = document.getElementById('zoom-img');
+        img.src = src;
+        zoomScale = 1; translateX = 0; translateY = 0;
+        applyZoom();
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeZoom(e) {
+        if(e && e.target === document.getElementById('zoom-img')) return;
+        document.getElementById('zoom-overlay').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function zoomChange(delta) {
+        zoomScale = Math.min(5, Math.max(0.5, zoomScale + delta));
+        applyZoom();
+    }
+
+    function applyZoom() {
+        const img = document.getElementById('zoom-img');
+        img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px)`;
+        document.getElementById('zoom-level-label').textContent = Math.round(zoomScale * 100) + '%';
+    }
+
+    // Wheel/Trackpad Zoom & Pan
+    document.getElementById('zoom-container').addEventListener('wheel', e => {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.15 : 0.15; // Lebih smooth untuk trackpad
+        zoomChange(delta);
+    }, { passive: false });
+
+    // Drag to Pan
+    const zoomImg = document.getElementById('zoom-img');
+    zoomImg.onmousedown = (e) => {
+        if(zoomScale <= 1) return;
+        isDragging = true;
+        startX = e.clientX - translateX; startY = e.clientY - translateY;
+    };
+    window.onmousemove = (e) => {
+        if(!isDragging) return;
+        translateX = e.clientX - startX; translateY = e.clientY - startY;
+        applyZoom();
+    };
+    window.onmouseup = () => isDragging = false;
+
+    // Gesture (Pinch) for Mobile/Trackpad
+    let initialDist = 0;
+    zoomImg.ontouchstart = (e) => {
+        if(e.touches.length === 2) initialDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    };
+    zoomImg.ontouchmove = (e) => {
+        if(e.touches.length === 2) {
+            e.preventDefault();
+            const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+            const scale = dist / initialDist;
+            zoomScale = Math.min(5, Math.max(0.5, zoomScale * scale));
+            initialDist = dist;
+            applyZoom();
+        }
+    };
+
+    function resetZoomLevel() { zoomScale = 1; translateX = 0; translateY = 0; applyZoom(); }
+
+    // Misc
+    function switchTab(tab) {
+        ['desc', 'reviews'].forEach(t => {
+            document.getElementById('content-'+t).classList.add('hidden');
+            document.getElementById('tab-'+t).classList.replace('text-black', 'text-gray-400');
+            document.getElementById('tab-'+t).classList.replace('border-black', 'border-transparent');
+        });
+        document.getElementById('content-'+tab).classList.remove('hidden');
+        document.getElementById('tab-'+tab).classList.replace('text-gray-400', 'text-black');
+        document.getElementById('tab-'+tab).classList.replace('border-transparent', 'border-black');
+    }
+
+    function showToast(msg, err=false) {
+        const t = document.getElementById('cart-toast');
+        t.classList.remove('hidden');
+        t.querySelector('span').textContent = msg;
+        t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl flex items-center gap-2 transition-all ${err?'bg-red-600':'bg-black'}`;
+        setTimeout(() => t.classList.add('hidden'), 2500);
+    }
+
     function toggleWishlist() {
         @auth
         fetch('{{ route("pelanggan.wishlist.toggle") }}', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
             body: JSON.stringify({ product_id: {{ $product->id }} })
         })
-        .then(r => r.json())
-        .then(data => {
+        .then(r => r.json()).then(data => {
             const btn = document.getElementById('btn-wishlist');
             const svg = btn.querySelector('svg');
- 
             if (data.status === 'added') {
                 btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
                 btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
-                svg.setAttribute('fill', '#ef4444');
-                svg.setAttribute('stroke', '#ef4444');
-                showWishlistToast();
-                updateNavbarWishlistBadge(+1);
+                svg.setAttribute('fill', '#ef4444'); svg.setAttribute('stroke', '#ef4444');
+                showToast('Ditambahkan ke wishlist ❤️');
             } else {
                 btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
                 btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-                svg.setAttribute('fill', 'none');
-                svg.setAttribute('stroke', 'currentColor');
-                updateNavbarWishlistBadge(-1);
+                svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
             }
         });
         @else
         window.location.href = '{{ route("login") }}';
         @endauth
     }
- 
-    // ── Thumbnail ────────────────────────────────────────────
-    function switchImage(src, btn) {
-        document.getElementById('main-product-img').src = src;
-        document.querySelectorAll('.thumb-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-    }
- 
-    // ── Zoom ─────────────────────────────────────────────────
-    function openZoom(src) {
-        const overlay = document.getElementById('zoom-overlay');
-        const img     = document.getElementById('zoom-img');
-        img.src = src;
-        currentZoomScale = 1;
-        img.style.transform = 'scale(1)';
-        document.getElementById('zoom-level-label').textContent = '100%';
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-    function closeZoom(e) {
-        if (e && e.target === document.getElementById('zoom-img')) return;
-        document.getElementById('zoom-overlay').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-    function zoomChange(delta) {
-        currentZoomScale = Math.min(4, Math.max(0.5, currentZoomScale + delta));
-        applyZoom();
-    }
-    function resetZoomLevel() { currentZoomScale = 1; applyZoom(); }
-    function applyZoom() {
-        document.getElementById('zoom-img').style.transform = `scale(${currentZoomScale})`;
-        document.getElementById('zoom-level-label').textContent = Math.round(currentZoomScale * 100) + '%';
-    }
- 
-    document.addEventListener('wheel', function(e) {
-        if (document.getElementById('zoom-overlay').style.display === 'flex') {
-            e.preventDefault();
-            zoomChange(e.deltaY < 0 ? 0.2 : -0.2);
-        }
-    }, { passive: false });
- 
-    let initDist = 0, initScale = 1;
-    document.getElementById('zoom-img')?.addEventListener('touchstart', e => {
-        if (e.touches.length === 2) {
-            initDist  = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-            initScale = currentZoomScale;
-        }
-    });
-    document.getElementById('zoom-img')?.addEventListener('touchmove', e => {
-        if (e.touches.length === 2) {
-            e.preventDefault();
-            const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-            currentZoomScale = Math.min(4, Math.max(0.5, initScale * (dist / initDist)));
-            applyZoom();
-        }
-    }, { passive: false });
- 
-    // ── Tabs ─────────────────────────────────────────────────
-    function switchTab(tab) {
-        ['desc', 'reviews'].forEach(t => {
-            document.getElementById('content-' + t).classList.add('hidden');
-            const btn = document.getElementById('tab-' + t);
-            btn.classList.remove('text-black', 'border-black');
-            btn.classList.add('text-gray-400', 'border-transparent');
-        });
-        document.getElementById('content-' + tab).classList.remove('hidden');
-        const activeBtn = document.getElementById('tab-' + tab);
-        activeBtn.classList.add('text-black', 'border-black');
-        activeBtn.classList.remove('text-gray-400', 'border-transparent');
-    }
- 
-    // ── Size Chart ───────────────────────────────────────────
-    function openSizeChart() {
-        @if($product->size_chart_image)
-        document.getElementById('modal-sizechart').classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        @else
-        alert('Size chart belum tersedia untuk produk ini.');
-        @endif
-    }
-    function closeSizeChart() {
-        document.getElementById('modal-sizechart')?.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
- 
-    // ── ESC untuk semua modal ────────────────────────────────
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') { closeSizeChart(); closeZoom(); }
-    });
+
+    function openSizeChart() { document.getElementById('modal-sizechart').classList.remove('hidden'); document.body.style.overflow='hidden'; }
+    function closeSizeChart() { document.getElementById('modal-sizechart').classList.add('hidden'); document.body.style.overflow=''; }
+    document.addEventListener('keydown', e => { if(e.key==='Escape'){ closeSizeChart(); closeZoom(); } });
 </script>
 @endpush
