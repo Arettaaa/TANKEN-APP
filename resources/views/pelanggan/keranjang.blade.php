@@ -94,15 +94,8 @@
         flex-shrink: 0;
     }
 
-    .qty-btn:hover {
-        border-color: #111;
-        background: #f9f9f9;
-    }
-
-    .qty-btn:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-    }
+    .qty-btn:hover { border-color: #111; background: #f9f9f9; }
+    .qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .qty-input {
         width: 40px;
@@ -115,10 +108,16 @@
         font-weight: 600;
         outline: none;
         transition: border-color 0.2s;
+        /* Fix angka kurang tengah untuk input number */
+        -moz-appearance: textfield; 
     }
-
-    .qty-input:focus {
-        border-color: #111;
+    .qty-input:focus { border-color: #111; }
+    
+    /* Menyembunyikan panah/spinner default browser agar angka benar-benar di tengah */
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
     }
 
     /* Delete btn */
@@ -137,10 +136,7 @@
         flex-shrink: 0;
     }
 
-    .delete-btn:hover {
-        background: #fee2e2;
-        color: #dc2626;
-    }
+    .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 
     /* Order summary card */
     .summary-card {
@@ -180,44 +176,6 @@
         background-position: center;
     }
 
-    /* Voucher input */
-    .voucher-input {
-        flex: 1;
-        padding: 8px 10px;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px 0 0 6px;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.75rem;
-        outline: none;
-        transition: border-color 0.2s;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .voucher-input:focus {
-        border-color: #111;
-    }
-
-    .voucher-apply-btn {
-        padding: 8px 14px;
-        background: #111;
-        color: #fff;
-        border: none;
-        border-radius: 0 6px 6px 0;
-        font-family: 'Inter', sans-serif;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: background 0.2s;
-        white-space: nowrap;
-    }
-
-    .voucher-apply-btn:hover {
-        background: #333;
-    }
-
     /* Divider */
     .summary-divider {
         border: none;
@@ -225,92 +183,104 @@
         margin: 14px 0;
     }
 
-    /* Color dot */
-    .color-dot {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        border: 1.5px solid rgba(0, 0, 0, 0.15);
-        flex-shrink: 0;
-    }
-
-    /* PPN info tooltip */
-    .ppn-info {
-        display: inline-flex;
+    /* ====== INLINE VOUCHER STYLES ====== */
+    .voucher-trigger {
+        width: 100%;
+        display: flex;
         align-items: center;
-        gap: 3px;
-        font-size: 0.7rem;
-        color: #9ca3af;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .voucher-trigger:hover { border-color: #111; }
+    
+    /* Custom Scrollbar for Inline Voucher List */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    /* Custom Radio for Voucher */
+    .voucher-radio-wrap {
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: #fff;
+    }
+    .voucher-radio-wrap:hover { border-color: #d1d5db; background: #f9fafb; }
+    .voucher-radio-wrap.selected { border-color: #111; background: #fafafa; }
+    
+    .custom-radio {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1.5px solid #d1d5db;
+        appearance: none;
+        cursor: pointer;
+        flex-shrink: 0;
+        margin-top: 2px;
+        position: relative;
+    }
+    .custom-radio:checked { border-color: #111; background: #111; }
+    .custom-radio:checked::after {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: white;
     }
 
-    /* Modal Styles */
+    /* Delete Modal */
     .modal-overlay {
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-
-    .modal-overlay.active {
-        opacity: 1;
-        visibility: visible;
-    }
-
+    .modal-overlay.active { opacity: 1; visibility: visible; }
     .modal-content {
-        transform: scale(0.95);
+        transform: scale(0.95) translateY(10px);
         opacity: 0;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
     }
-
-    .modal-overlay.active .modal-content {
-        transform: scale(1);
-        opacity: 1;
-    }
+    .modal-overlay.active .modal-content { transform: scale(1) translateY(0); opacity: 1; }
 </style>
 @endpush
 
 @section('content')
 
 @php
-// ============================================================
-// DATA DUMMY — ganti dengan data dari controller/session nanti
-// ============================================================
+// DATA DUMMY (Abaikan jika data dikirim dari Controller)
 $cartItems = $cartItems ?? collect([
-[
-'id' => 1,
-'name' => 'TANKEN | Celana Pendek Wanita Nylon Crinkle',
-'image' => 'men-home2.jpg',
-'size' => 'M',
-'color' => 'Black',
-'color_hex'=> '#111111',
-'price' => 129000,
-'qty' => 1,
-'checked' => true,
-],
+    [
+        'id' => 1,
+        'name' => 'Sport Active Joggers',
+        'image' => asset('images/men-home2.jpg'), // URL sudah full untuk mockup
+        'size' => 'M',
+        'price' => 799000,
+        'qty' => 1,
+        'checked' => true,
+    ],
 ]);
-
-// Konstanta
-$PPN_RATE = 0.11;
-$BIAYA_LAYANAN = 2000; // DIUBAH MENJADI 2.000
-$FREE_SHIP_MIN = 500000;
 
 // Hitung total item terpilih
 $selectedItems = collect($cartItems)->where('checked', true);
 $totalQty = $selectedItems->sum('qty');
 
-// Subtotal (harga produk × qty, BELUM termasuk PPN)
+// Subtotal murni (harga × qty)
 $subtotalBefore = $selectedItems->sum(fn($i) => $i['price'] * $i['qty']);
 
-// PPN 11% dari subtotal
-$ppn = round($subtotalBefore * $PPN_RATE);
-
-// Subtotal setelah PPN
-$subtotal = $subtotalBefore + $ppn;
-
-// Biaya layanan (flat)
-$total = $subtotal + $BIAYA_LAYANAN;
-
-// Sisa agar gratis ongkir
-$sisaFreeShip = max(0, $FREE_SHIP_MIN - $subtotal);
+// Total sementara sama dengan subtotal (PPN & Layanan dihapus)
+$total = $subtotalBefore;
 
 $totalCartCount = collect($cartItems)->sum('qty');
 @endphp
@@ -321,8 +291,8 @@ $totalCartCount = collect($cartItems)->sum('qty');
     <div class="cart-hero-content max-w-7xl mx-auto px-6 lg:px-10 w-full">
         <p class="text-xs font-bold tracking-widest uppercase text-white/50 mb-2">Pilihan Kamu</p>
         <h1 class="cart-hero-title">Keranjang Belanja</h1>
-        <p class="text-sm text-white/60 mt-2 font-medium">
-            {{ $totalCartCount }} {{ $totalCartCount == 1 ? 'item' : 'item' }} di keranjangmu
+        <p class="text-sm text-white/60 mt-2 font-medium" id="heroCartCount">
+            {{ $totalCartCount }} item di keranjangmu
         </p>
     </div>
 </section>
@@ -342,8 +312,7 @@ $totalCartCount = collect($cartItems)->sum('qty');
                     <input type="checkbox" class="custom-check" id="selectAll" onchange="toggleSelectAll(this)">
                     <label for="selectAll" class="text-sm font-semibold text-gray-700 cursor-pointer select-none">
                         Pilih Semua
-                        <span id="selectCount" class="text-gray-400 font-normal">({{ $totalQty }} dari {{
-                            $totalCartCount }} terpilih)</span>
+                        <span id="selectCount" class="text-gray-400 font-normal">({{ $totalQty }} dari {{ $totalCartCount }} terpilih)</span>
                     </label>
                     <button class="ml-auto text-xs text-red-400 font-semibold hover:text-red-600 transition-colors"
                         onclick="openDeleteModal('multiple')">
@@ -355,11 +324,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
                 <div class="flex flex-col gap-3" id="cartList">
 
                     @foreach($cartItems as $idx => $item)
-                    @php
-                    $itemPpn = round($item['price'] * $PPN_RATE);
-                    $itemTotal = ($item['price'] + $itemPpn) * $item['qty'];
-                    @endphp
-
                     <div class="cart-item-card bg-white" id="item-{{ $item['id'] }}" data-id="{{ $item['id'] }}"
                         data-price="{{ $item['price'] }}">
 
@@ -368,8 +332,15 @@ $totalCartCount = collect($cartItems)->sum('qty');
                             onchange="updateSummary()">
 
                         {{-- Gambar --}}
-                        @if(isset($item['image']) && $item['image'])
-                        <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="item-img">
+                        @php
+                            // Mendukung langsung URL/Path dari Database tanpa memodifikasinya
+                            $imgPath = $item['image'] ?? null;
+                        @endphp
+                        
+                        @if($imgPath)
+                        <img src="{{ $imgPath }}" 
+                             onerror="this.onerror=null;this.src='{{ asset('images/men-home.jpg') }}';" 
+                             alt="{{ $item['name'] }}" class="item-img">
                         @else
                         <div class="item-img-placeholder">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#d1d5db"
@@ -389,27 +360,12 @@ $totalCartCount = collect($cartItems)->sum('qty');
                                 <span>
                                     <span class="font-semibold text-gray-700">Ukuran:</span> {{ $item['size'] }}
                                 </span>
-                                <span class="flex items-center gap-1.5">
-                                    <span class="font-semibold text-gray-700">Warna:</span>
-                                    <span class="color-dot"
-                                        style="background:{{ $item['color_hex'] ?? '#111' }};"></span>
-                                    {{ $item['color'] }}
-                                </span>
                             </div>
 
-                            {{-- Harga + PPN info --}}
+                            {{-- Harga Murni (Tanpa PPN) --}}
                             <div class="mb-3">
                                 <span class="font-bold text-gray-900 text-base">
-                                    Rp {{ number_format($item['price'] + $itemPpn, 0, ',', '.') }}
-                                </span>
-                                <span class="ppn-info ml-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor" stroke-width="1.6" width="11" height="11">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <line x1="12" y1="8" x2="12" y2="12" />
-                                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                                    </svg>
-                                    sudah termasuk PPN 11%
+                                    Rp {{ number_format($item['price'], 0, ',', '.') }}
                                 </span>
                             </div>
 
@@ -463,32 +419,10 @@ $totalCartCount = collect($cartItems)->sum('qty');
                     <div class="flex flex-col gap-3 text-sm">
 
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Subtotal (<span id="summaryQty">{{ $totalQty }}</span>
-                                item)</span>
+                            <span class="text-gray-500">Subtotal (<span id="summaryQty">{{ $totalQty }}</span> item)</span>
                             <span class="font-semibold text-gray-900" id="summarySubtotal">
                                 Rp {{ number_format($subtotalBefore, 0, ',', '.') }}
                             </span>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-500 flex items-center gap-1">
-                                PPN 11%
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#9ca3af"
-                                    stroke-width="1.6" width="12" height="12">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <line x1="12" y1="8" x2="12" y2="12" />
-                                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                                </svg>
-                            </span>
-                            <span class="font-semibold text-gray-900" id="summaryPpn">
-                                Rp {{ number_format($ppn, 0, ',', '.') }}
-                            </span>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-500">Biaya Layanan</span>
-                            <span class="font-semibold text-gray-900">Rp {{ number_format($BIAYA_LAYANAN, 0, ',', '.')
-                                }}</span>
                         </div>
 
                         <div class="flex justify-between items-center">
@@ -496,103 +430,132 @@ $totalCartCount = collect($cartItems)->sum('qty');
                             <span class="font-semibold text-gray-400 text-xs italic">Dihitung saat checkout</span>
                         </div>
 
-                        {{-- Free ship progress — diupdate dinamis oleh JS --}}
-                        <div id="freeShipInfo" class="rounded-lg p-3 text-xs leading-relaxed mt-2
-    {{ $sisaFreeShip > 0 ? 'bg-gray-50 text-gray-500' : 'bg-green-50 text-green-700 font-semibold' }}">
-                            @if($sisaFreeShip > 0)
-                            Tambah <span class="font-bold text-gray-800">Rp {{ number_format($sisaFreeShip, 0, ',', '.')
-                                }}</span>
-                            lagi untuk gratis ongkir 🎉
-                            @else
-                            ✓ Kamu memenuhi syarat gratis ongkir!
-                            @endif
-                        </div>
-
-                        <hr class="summary-divider">
-
-                        {{-- VOUCHER --}}
-                        <div class="mb-5">
-                            <p
-                                class="text-[10px] font-bold tracking-widest uppercase text-gray-500 mb-2 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor" stroke-width="2" width="12" height="12">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                                </svg>
-                                Makin Hemat Pakai Promo
-                            </p>
-                            <div class="flex">
-                                <input type="text" class="voucher-input" id="voucherInput"
-                                    placeholder="Masukkan voucher">
-                                <button class="voucher-apply-btn" onclick="applyVoucher()">Pakai</button>
-                            </div>
-                            <div id="voucherMsg" class="mt-1.5 text-[11px] hidden"></div>
-
-                            {{-- Row Info Diskon Voucher --}}
-                            <div id="voucherRow"
-                                class="hidden flex justify-between items-center text-green-600 mt-2 text-sm">
-                                <span class="flex items-center gap-1">Diskon Voucher</span>
-                                <span class="font-bold" id="voucherDiscount">– Rp 0</span>
-                            </div>
-                        </div>
-
-                        {{-- Total --}}
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="font-extrabold text-gray-900 text-base">Total</span>
-                            <span class="font-extrabold text-gray-900 text-xl" id="summaryTotal">
-                                Rp {{ number_format($total, 0, ',', '.') }}
-                            </span>
-                        </div>
-
-                        <form method="POST" action="{{ route('pelanggan.checkout.simpanItem') }}" id="checkoutForm">
-                            @csrf
-                            <div id="hiddenSelectedIds"></div>
-                            <button type="submit" id="checkoutBtn"
-                                class="block w-full text-center bg-gray-900 text-white text-xs font-bold tracking-widest uppercase py-4 rounded-lg hover:bg-gray-700 transition-colors mb-3">
-                                Checkout (<span id="checkoutQty">{{ $totalQty }}</span> Item)
-                            </button>
-                        </form>
-                        {{-- Lanjut belanja --}}
-                        <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
-                            class="block w-full text-center border border-gray-300 text-gray-700 text-xs font-bold tracking-widest uppercase py-3.5 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
-                            Lanjut Belanja
-                        </a>
-
-                        {{-- Info aman --}}
-                        <div class="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.6" width="13" height="13">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                            Transaksi aman & terenkripsi
+                        {{-- Row Info Diskon Voucher --}}
+                        <div id="voucherRow" class="hidden flex justify-between items-center text-green-600">
+                            <span class="flex items-center gap-1">Diskon Voucher</span>
+                            <span class="font-bold" id="voucherDiscount">– Rp 0</span>
                         </div>
 
                     </div>
-                </div>
 
-            </div>
+                    <hr class="summary-divider">
 
-            @else
-            {{-- ===== EMPTY CART ===== --}}
-            <div class="bg-white min-h-[400px] flex flex-col items-center justify-center py-20 text-center">
-                <div class="w-24 h-24 border border-gray-200 rounded-lg flex items-center justify-center mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#d1d5db"
-                        stroke-width="1.3" width="38" height="38">
-                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <path d="M16 10a4 4 0 0 1-8 0" />
-                    </svg>
+                    {{-- VOUCHER INLINE (ACCORDION) --}}
+                    <div class="mb-6">
+                        <button type="button" class="voucher-trigger" onclick="toggleVoucherSection()">
+                            <div class="flex items-center gap-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2" width="20" height="20">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                                </svg>
+                                <div class="text-left">
+                                    <p class="text-[10px] font-bold tracking-widest uppercase text-gray-500" id="activeVoucherTitle">Promo & Voucher</p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-0.5" id="activeVoucherDesc">Makin Hemat</p>
+                                </div>
+                            </div>
+                            <svg id="voucherChevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16" class="text-gray-400 transition-transform duration-300">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {{-- Collapsible Area --}}
+                        <div id="voucherCollapsible" class="hidden mt-3 border border-gray-100 rounded-lg p-4 bg-gray-50/50">
+                            
+                            {{-- Input Manual --}}
+                            <div class="flex">
+                                <input type="text" id="manualVoucherInput" class="w-full px-3 py-2.5 border border-gray-200 rounded-l-md text-xs font-semibold uppercase outline-none focus:border-black transition-colors" placeholder="KODE VOUCHER">
+                                <button type="button" onclick="applyManualVoucher()" class="px-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-r-md hover:bg-gray-800 transition-colors whitespace-nowrap">Terapkan</button>
+                            </div>
+                            <p id="inlineVoucherMsg" class="text-[11px] font-medium hidden mt-2"></p>
+
+                            <hr class="border-gray-200 my-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-[10px] font-bold tracking-widest uppercase text-gray-500">Voucher Tersedia</p>
+                                <button onclick="clearVoucher()" class="text-[10px] font-bold text-red-500 hover:text-red-700 hidden" id="clearVoucherBtn">HAPUS</button>
+                            </div>
+                            
+                            {{-- Daftar Voucher (Radio) --}}
+                            <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+                                
+                                {{-- Mockup Voucher 1 --}}
+                                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+                                    <input type="radio" name="voucher_selection" class="custom-radio" value="TANKEN50" data-label="Diskon Spesial" data-discount="50000">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900 mb-1">Potongan Rp 50.000</p>
+                                        <p class="text-[11px] text-gray-500 leading-relaxed">Tanpa minimal belanja. Berlaku untuk semua produk.</p>
+                                    </div>
+                                </label>
+
+                                {{-- Mockup Voucher 2 --}}
+                                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+                                    <input type="radio" name="voucher_selection" class="custom-radio" value="HEMAT100" data-label="Promo Hemat" data-discount="100000">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900 mb-1">Potongan Rp 100.000</p>
+                                        <p class="text-[11px] text-gray-500 leading-relaxed">Min. belanja Rp 1.000.000. Pengguna baru.</p>
+                                    </div>
+                                </label>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Total --}}
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="font-extrabold text-gray-900 text-base">Total</span>
+                        <span class="font-extrabold text-gray-900 text-xl" id="summaryTotal">
+                            Rp {{ number_format($total, 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                    <form method="POST" action="{{ route('pelanggan.checkout.simpanItem') }}" id="checkoutForm">
+                        @csrf
+                        <div id="hiddenSelectedIds"></div>
+                        <button type="submit" id="checkoutBtn"
+                            class="block w-full text-center bg-gray-900 text-white text-xs font-bold tracking-widest uppercase py-4 rounded-lg hover:bg-gray-700 transition-colors mb-3">
+                            Checkout (<span id="checkoutQty">{{ $totalQty }}</span> Item)
+                        </button>
+                    </form>
+                    
+                    {{-- Lanjut belanja --}}
+                    <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
+                        class="block w-full text-center border border-gray-300 text-gray-700 text-xs font-bold tracking-widest uppercase py-3.5 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
+                        Lanjut Belanja
+                    </a>
+
+                    {{-- Info aman --}}
+                    <div class="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor" stroke-width="1.6" width="13" height="13">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        Transaksi aman & terenkripsi
+                    </div>
+
                 </div>
-                <h2 class="font-extrabold text-gray-900 text-xl mb-2">Keranjang kamu kosong</h2>
-                <p class="text-sm text-gray-400 mb-7">Tambahkan produk untuk memulai belanja</p>
-                <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
-                    class="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-bold tracking-widest uppercase px-8 py-3.5 rounded-md hover:bg-gray-700 transition-colors">
-                    Lanjut Belanja
-                </a>
             </div>
-            @endif
 
         </div>
+
+        @else
+        {{-- ===== EMPTY CART ===== --}}
+        <div class="bg-white min-h-[400px] flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-24 h-24 border border-gray-200 rounded-lg flex items-center justify-center mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#d1d5db"
+                    stroke-width="1.3" width="38" height="38">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+            </div>
+            <h2 class="font-extrabold text-gray-900 text-xl mb-2">Keranjang kamu kosong</h2>
+            <p class="text-sm text-gray-400 mb-7">Tambahkan produk untuk memulai belanja</p>
+            <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
+                class="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-bold tracking-widest uppercase px-8 py-3.5 rounded-md hover:bg-gray-700 transition-colors">
+                Lanjut Belanja
+            </a>
+        </div>
+        @endif
+
+    </div>
 </section>
 
 {{-- ===== MODAL KONFIRMASI HAPUS ===== --}}
@@ -624,10 +587,9 @@ $totalCartCount = collect($cartItems)->sum('qty');
 @push('scripts')
 <script>
     // ========== KONSTANTA ==========
-    const PPN_RATE      = 0.11;
-    const BIAYA_LAYANAN = 2000; // DIUBAH MENJADI 2.000
-    const FREE_SHIP_MIN = 500000;
     let currentVoucherDiscount = 0; 
+    let activeVoucherCode = '';
+    let activeVoucherLabel = '';
 
     // Harga base per item (dari PHP ke JS)
     const itemPrices = {
@@ -642,95 +604,100 @@ $totalCartCount = collect($cartItems)->sum('qty');
     }
 
     document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-    const checked = document.querySelectorAll('.item-check:checked');
-    if (checked.length === 0) {
-        e.preventDefault();
-        alert('Pilih minimal 1 produk untuk checkout.');
-        return;
-    }
-    const container = document.getElementById('hiddenSelectedIds');
-    container.innerHTML = '';
-    checked.forEach(chk => {
-        const id = chk.closest('.cart-item-card').dataset.id;
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'selected_ids[]';
-        input.value = id;
-        container.appendChild(input);
-    });
-});
-
-   function updateSummary() {
-    const checks = document.querySelectorAll('.item-check');
-    let subtotalBefore = 0;
-    let totalQty = 0;
-
-    checks.forEach(chk => {
-        const card = chk.closest('.cart-item-card');
-        card.classList.toggle('is-checked', chk.checked);
-
-        if (!chk.checked) return;
-        const id    = parseInt(card.dataset.id);
-        const qty   = parseInt(document.getElementById('qty-' + id)?.value || 1);
-        const price = itemPrices[id] || 0;
-        subtotalBefore += price * qty;
-        totalQty += qty;
+        const checked = document.querySelectorAll('.item-check:checked');
+        if (checked.length === 0) {
+            e.preventDefault();
+            alert('Pilih minimal 1 produk untuk checkout.');
+            return;
+        }
+        const container = document.getElementById('hiddenSelectedIds');
+        container.innerHTML = '';
+        checked.forEach(chk => {
+            const id = chk.closest('.cart-item-card').dataset.id;
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'selected_ids[]';
+            input.value = id;
+            container.appendChild(input);
+        });
+        
+        // Simpan nilai diskon voucher ke session storage agar bisa dibaca di halaman checkout
+        sessionStorage.setItem('tanken_voucher_discount', currentVoucherDiscount);
     });
 
-    // Semua kalkulasi SETELAH loop
-    const ppn              = Math.round(subtotalBefore * PPN_RATE);
-    const subtotalAfterPpn = subtotalBefore + ppn;
-    const sisaFreeShip     = Math.max(0, FREE_SHIP_MIN - subtotalAfterPpn);
-    let total              = subtotalAfterPpn + BIAYA_LAYANAN - currentVoucherDiscount;
-    if (total < 0) total = 0;
+    // ========== UPDATE SUMMARY (Biasa + Integrasi Navbar) ==========
+    function updateSummary() {
+        const checks = document.querySelectorAll('.item-check');
+        let subtotalBefore = 0;
+        let totalQty = 0;
 
-    // Update angka
-    document.getElementById('summaryQty').textContent      = totalQty;
-    document.getElementById('summarySubtotal').textContent = formatRp(subtotalBefore);
-    document.getElementById('summaryPpn').textContent      = formatRp(ppn);
-    document.getElementById('summaryTotal').textContent    = formatRp(total);
-    document.getElementById('checkoutQty').textContent     = totalQty;
+        checks.forEach(chk => {
+            const card = chk.closest('.cart-item-card');
+            card.classList.toggle('is-checked', chk.checked);
 
-    // Update free ship banner
-    const freeShipEl = document.getElementById('freeShipInfo');
-    if (freeShipEl) {
-        if (sisaFreeShip > 0) {
-            freeShipEl.innerHTML = `Tambah <span class="font-bold text-gray-800">${formatRp(sisaFreeShip)}</span> lagi untuk gratis ongkir 🎉`;
-            freeShipEl.className = 'bg-gray-50 rounded-lg p-3 text-xs text-gray-500 leading-relaxed mt-2';
+            if (!chk.checked) return;
+            const id    = parseInt(card.dataset.id);
+            const qty   = parseInt(document.getElementById('qty-' + id)?.value || 1);
+            const price = itemPrices[id] || 0;
+            subtotalBefore += price * qty;
+            totalQty += qty;
+        });
+
+        // Hitung total murni dikurangi voucher (PPN dan Layanan dihapus)
+        let total = subtotalBefore - currentVoucherDiscount;
+        if (total < 0) total = 0;
+
+        // Update angka di Ringkasan Pesanan
+        document.getElementById('summaryQty').textContent      = totalQty;
+        document.getElementById('summarySubtotal').textContent = formatRp(subtotalBefore);
+        document.getElementById('summaryTotal').textContent    = formatRp(total);
+        document.getElementById('checkoutQty').textContent     = totalQty;
+
+        // Update teks Select All & Hero Banner (jumlah macam item)
+        const checkedCount = Array.from(checks).filter(c => c.checked).length;
+        const allCount     = checks.length;
+        
+        if (document.getElementById('selectCount')) {
+            document.getElementById('selectCount').textContent = '(' + checkedCount + ' dari ' + allCount + ' terpilih)';
+        }
+        
+        // Update hero banner subtitle (jumlah macam item di keranjang)
+        if (document.getElementById('heroCartCount')) {
+            document.getElementById('heroCartCount').textContent = allCount + ' item di keranjangmu';
+        }
+
+        // Checkout button state
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (totalQty === 0) {
+            checkoutBtn.classList.add('opacity-40', 'pointer-events-none');
         } else {
-            freeShipEl.innerHTML = '✓ Kamu memenuhi syarat gratis ongkir!';
-            freeShipEl.className = 'bg-green-50 rounded-lg p-3 text-xs text-green-700 font-semibold mt-2';
+            checkoutBtn.classList.remove('opacity-40', 'pointer-events-none');
+        }
+
+        // Master checkbox state
+        const masterChk = document.getElementById('selectAll');
+        if (masterChk) {
+            masterChk.checked       = checkedCount === allCount && allCount > 0;
+            masterChk.indeterminate = checkedCount > 0 && checkedCount < allCount;
+        }
+
+        // ==========================================
+        // UPDATE BADGE NAVBAR REAL-TIME 🔥
+        // ==========================================
+        const navbarBadge = document.getElementById('cart-badge');
+        if (navbarBadge) {
+            if (allCount > 0) {
+                // Tampilkan badge kalau ada barang (menampilkan jumlah macam barang)
+                navbarBadge.textContent = allCount > 99 ? '99+' : allCount;
+                navbarBadge.classList.remove('hidden');
+                navbarBadge.style.display = ''; // fallback
+            } else {
+                // Sembunyikan badge kalau keranjang kosong murni
+                navbarBadge.classList.add('hidden');
+                navbarBadge.style.display = 'none'; // fallback
+            }
         }
     }
-
-    // Update selectCount — pakai jumlah CARD, bukan qty
-    const checkedCount = Array.from(checks).filter(c => c.checked).length;
-    const allCount     = checks.length;
-
-    if (document.getElementById('selectCount')) {
-        document.getElementById('selectCount').textContent =
-            '(' + checkedCount + ' dari ' + allCount + ' terpilih)';
-    }
-
-    // Checkout button
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (totalQty === 0) {
-        checkoutBtn.classList.add('opacity-40', 'pointer-events-none');
-    } else {
-        checkoutBtn.classList.remove('opacity-40', 'pointer-events-none');
-    }
-
-    // Select all master checkbox
-    const masterChk = document.getElementById('selectAll');
-    if (masterChk) {
-        masterChk.checked       = checkedCount === allCount && allCount > 0;
-        masterChk.indeterminate = checkedCount > 0 && checkedCount < allCount;
-    }
-}
-
-function getTotalAllQty() {
-    return document.querySelectorAll('.cart-item-card').length;
-}
 
     // ========== QTY ==========
     function changeQty(id, delta) {
@@ -740,7 +707,7 @@ function getTotalAllQty() {
         if (val > 99) val = 99;
         input.value = val;
 
-        const card    = document.getElementById('item-' + id);
+        const card = document.getElementById('item-' + id);
         const minusBtn = card.querySelectorAll('.qty-btn')[0];
         minusBtn.disabled = val <= 1;
 
@@ -768,7 +735,7 @@ function getTotalAllQty() {
         }).catch(() => {});
     }
 
-    // ========== MODAL LOGIC UNTUK HAPUS ==========
+    // ========== MODAL HAPUS ==========
     let deleteMode = ''; 
     let deleteId = null;
 
@@ -781,12 +748,11 @@ function getTotalAllQty() {
         
         if (mode === 'multiple') {
             const count = document.querySelectorAll('.item-check:checked').length;
-            if(count === 0) return; // Cegah modal kebuka kalau ga ada yg dicentang
+            if(count === 0) return;
             text.textContent = `Yakin ingin menghapus ${count} produk terpilih dari keranjang?`;
         } else {
             text.textContent = `Yakin ingin menghapus produk ini dari keranjang?`;
         }
-        
         modal.classList.add('active');
     }
 
@@ -796,11 +762,8 @@ function getTotalAllQty() {
 
     function executeDelete() {
         closeDeleteModal();
-        if (deleteMode === 'single' && deleteId) {
-            performSingleDelete(deleteId);
-        } else if (deleteMode === 'multiple') {
-            performMultipleDelete();
-        }
+        if (deleteMode === 'single' && deleteId) performSingleDelete(deleteId);
+        else if (deleteMode === 'multiple') performMultipleDelete();
     }
 
     function performSingleDelete(id) {
@@ -808,12 +771,12 @@ function getTotalAllQty() {
         card.style.transition = 'opacity 0.3s, transform 0.3s, max-height 0.35s';
         card.style.opacity = '0';
         card.style.transform = 'translateX(10px)';
-        setTimeout(() => {
-            card.remove();
-            updateSummary();
-            checkEmptyState();
+        setTimeout(() => { 
+            card.remove(); 
+            updateSummary(); 
+            checkEmptyState(); 
         }, 300);
-
+        
         fetch('/keranjang/' + id, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
@@ -827,7 +790,12 @@ function getTotalAllQty() {
             const id   = parseInt(card.dataset.id);
             card.style.transition = 'opacity 0.25s';
             card.style.opacity = '0';
-            setTimeout(() => { card.remove(); updateSummary(); checkEmptyState(); }, 250);
+            setTimeout(() => { 
+                card.remove(); 
+                updateSummary(); 
+                checkEmptyState(); 
+            }, 250);
+            
             fetch('/keranjang/' + id, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
@@ -835,84 +803,125 @@ function getTotalAllQty() {
         });
     }
 
-    // ========== SELECT ALL ==========
     function toggleSelectAll(masterChk) {
         document.querySelectorAll('.item-check').forEach(c => c.checked = masterChk.checked);
         updateSummary();
     }
 
-    // ========== VOUCHER ==========
-    function applyVoucher() {
-        const code = document.getElementById('voucherInput').value.toUpperCase().trim();
-        const msg  = document.getElementById('voucherMsg');
-        
-        if (!code) { 
-            msg.textContent = 'Masukkan kode voucher terlebih dahulu.'; 
-            msg.className = 'mt-1.5 text-[11px] text-red-500 font-medium'; 
-            msg.classList.remove('hidden'); 
-            
-            currentVoucherDiscount = 0;
-            document.getElementById('voucherRow').classList.add('hidden');
-            updateSummary();
-            return; 
-        }
-
-        const btn = document.querySelector('.voucher-apply-btn');
-        const oldText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-        btn.disabled = true;
-
-        fetch('/voucher/check', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            },
-            body: JSON.stringify({ code }),
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.innerHTML = oldText;
-            btn.disabled = false;
-
-            if (data.valid) {
-                msg.textContent = '✓ Voucher berhasil dipakai: ' + data.label;
-                msg.className   = 'mt-1.5 text-[11px] text-green-600 font-bold';
-                
-                currentVoucherDiscount = data.discount;
-                document.getElementById('voucherRow').classList.remove('hidden');
-                document.getElementById('voucherDiscount').textContent = '– ' + formatRp(data.discount);
-            } else {
-                msg.textContent = data.message || 'Kode voucher tidak valid.';
-                msg.className   = 'mt-1.5 text-[11px] text-red-500 font-medium';
-                
-                currentVoucherDiscount = 0;
-                document.getElementById('voucherRow').classList.add('hidden');
-            }
-            msg.classList.remove('hidden');
-            updateSummary(); 
-        })
-        .catch(() => {
-            btn.innerHTML = oldText;
-            btn.disabled = false;
-            
-            msg.textContent = 'Gagal memvalidasi voucher.';
-            msg.className   = 'mt-1.5 text-[11px] text-red-500 font-medium';
-            msg.classList.remove('hidden');
-            
-            currentVoucherDiscount = 0;
-            document.getElementById('voucherRow').classList.add('hidden');
-            updateSummary();
-        });
-    }
-
-    // ========== EMPTY CHECK ==========
     function checkEmptyState() {
         const remaining = document.querySelectorAll('.cart-item-card').length;
         if (remaining === 0) window.location.reload();
     }
 
-    // Init
+    // ========== VOUCHER INLINE (ACCORDION) ==========
+    function toggleVoucherSection() {
+        const coll = document.getElementById('voucherCollapsible');
+        const chev = document.getElementById('voucherChevron');
+        
+        if (coll.classList.contains('hidden')) {
+            coll.classList.remove('hidden');
+            chev.style.transform = 'rotate(180deg)';
+        } else {
+            coll.classList.add('hidden');
+            chev.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function selectVoucherRadio(labelEl) {
+        // Hilangkan styling active dari semua radio wrapper
+        document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+        // Tambahkan ke yang diklik
+        labelEl.classList.add('selected');
+        // Bersihkan manual input
+        document.getElementById('manualVoucherInput').value = '';
+        document.getElementById('inlineVoucherMsg').classList.add('hidden');
+        
+        // Langsung terapkan voucher saat di-klik
+        confirmVoucherSelection(labelEl.querySelector('input'));
+    }
+
+    function applyManualVoucher() {
+        const input = document.getElementById('manualVoucherInput');
+        const code = input.value.toUpperCase().trim();
+        const msg = document.getElementById('inlineVoucherMsg');
+        
+        // Bersihkan radio buttons jika user mengetik manual
+        document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
+        document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+
+        if(!code) {
+            msg.textContent = 'Masukkan kode voucher terlebih dahulu.';
+            msg.className = 'mt-2 text-[11px] text-red-500 font-medium block';
+            return;
+        }
+
+        // Mockup Check untuk input manual
+        if(code === 'TANKEN50') {
+            msg.textContent = '✓ Voucher diterapkan: Potongan Rp 50.000';
+            msg.className = 'mt-2 text-[11px] text-green-600 font-bold block';
+            
+            confirmVoucherSelection(null, { code: 'TANKEN50', discount: 50000, label: 'Diskon Spesial' });
+        } else {
+            msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
+            msg.className = 'mt-2 text-[11px] text-red-500 font-medium block';
+        }
+    }
+
+    function confirmVoucherSelection(radioElement = null, manualData = null) {
+        let discount = 0;
+        let label = '';
+        let code = '';
+
+        if (manualData) {
+            discount = manualData.discount;
+            label = manualData.label;
+            code = manualData.code;
+        } else if (radioElement) {
+            discount = parseInt(radioElement.dataset.discount);
+            label = radioElement.dataset.label;
+            code = radioElement.value;
+        } else {
+            return;
+        }
+
+        // Terapkan ke UI luar
+        currentVoucherDiscount = discount;
+        activeVoucherCode = code;
+        activeVoucherLabel = label;
+
+        document.getElementById('activeVoucherTitle').textContent = code;
+        document.getElementById('activeVoucherDesc').textContent = 'Diskon berhasil dipakai';
+        document.getElementById('activeVoucherDesc').classList.replace('text-gray-900', 'text-green-600');
+        
+        document.getElementById('voucherRow').classList.remove('hidden');
+        document.getElementById('voucherDiscount').textContent = '– ' + formatRp(discount);
+        document.getElementById('clearVoucherBtn').classList.remove('hidden');
+
+        updateSummary();
+    }
+
+    function clearVoucher() {
+        currentVoucherDiscount = 0;
+        activeVoucherCode = '';
+        activeVoucherLabel = '';
+
+        document.getElementById('activeVoucherTitle').textContent = 'Promo & Voucher';
+        document.getElementById('activeVoucherDesc').textContent = 'Makin Hemat';
+        document.getElementById('activeVoucherDesc').classList.replace('text-green-600', 'text-gray-900');
+        
+        document.getElementById('voucherRow').classList.add('hidden');
+        document.getElementById('clearVoucherBtn').classList.add('hidden');
+        
+        // Reset inputs
+        document.getElementById('manualVoucherInput').value = '';
+        document.getElementById('inlineVoucherMsg').classList.add('hidden');
+        document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
+        document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+
+        updateSummary();
+    }
+
+    // Init update summary pertama kali halaman di-load
     updateSummary();
 </script>
 @endpush
