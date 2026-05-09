@@ -28,12 +28,13 @@
     .hero-heading {
         font-family: 'Inter', sans-serif;
         font-weight: 800;
-        font-size: clamp(4rem, 10vw, 9rem);
-        line-height: 0.9;
-        letter-spacing: -0.03em;
+        /* Ubah baris ini: ukuran minimal 2.5rem, dinamis 5vw, maksimal 4.5rem */
+        font-size: clamp(2.5rem, 5vw, 4.5rem); 
+        line-height: 1.1; /* Agak dilonggarkan sedikit biar nggak terlalu numpuk */
+        letter-spacing: -0.02em;
         text-transform: uppercase;
         color: #ffffff;
-        text-shadow: 0 4px 32px rgba(0,0,0,0.3);
+        text-shadow: 0 4px 24px rgba(0,0,0,0.4); /* Shadow disesuaikan biar teks lebih terbaca */
     }
 
     /* Collection grid */
@@ -243,11 +244,8 @@
 
     <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 w-full">
         <div class="max-w-2xl">
-            <p class="text-xs font-heading font-semibold tracking-widest uppercase text-white/60 mb-5">
-                Spring Collection 2026
-            </p>
-            <h1 class="hero-heading mb-8">
-                Define<br>Your<br>Motion.
+            <h1 class="hero-heading mb-6 max-w-lg">
+                Comfort To<br>Explore.
             </h1>
             <div class="flex flex-wrap items-center gap-3">
                 {{-- Shop Now --}}
@@ -426,7 +424,7 @@
 </section>
 
 {{-- ===== 5. STATS BAR ===== --}}
-<section class="bg-white border-y border-gray-100 py-10">
+<!-- <section class="bg-white border-y border-gray-100 py-10">
     <div class="max-w-7xl mx-auto px-6 lg:px-10">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
             @php
@@ -445,7 +443,7 @@
             @endforeach
         </div>
     </div>
-</section>
+</section> -->
 
 {{-- ===== 6. EXCLUSIVE VOUCHERS ===== --}}
 <section class="bg-gray-50 py-16 md:py-20">
