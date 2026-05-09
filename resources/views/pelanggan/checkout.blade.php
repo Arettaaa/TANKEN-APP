@@ -337,7 +337,7 @@ $shippingOptions = [
 
                     {{-- Saved address --}}
                     {{-- Pilih Alamat --}}
-                    @if($addresses->count() > 0)
+                    @if(isset($addresses) && $addresses->count() > 0)
                     <div class="mb-6">
                         <label class="form-label mb-2">Pilih Alamat Tersimpan</label>
                         <div class="flex flex-col gap-2" id="addressOptions">
@@ -381,7 +381,7 @@ $shippingOptions = [
                         <input type="hidden" name="shipping_days" id="shippingDaysInput" value="">
 
                         {{-- Form alamat baru (hidden kalau ada alamat tersimpan) --}}
-                        <div id="newAddressForm" class="{{ $addresses->count() > 0 ? 'hidden' : '' }}">
+                        <div id="newAddressForm" class="{{ (isset($addresses) && $addresses->count() > 0) ? 'hidden' : '' }}">
 
                             {{-- Nama & Email (read only dari user) --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -532,7 +532,7 @@ $shippingOptions = [
                         <div class="flex justify-between">
                             <span class="text-gray-500">Ongkos Kirim</span>
                             <span class="font-semibold text-gray-800" id="summaryShipping">
-                                {{ $defaultAddress ? '...' : 'Pilih alamat dulu' }}
+                                {{ isset($defaultAddress) ? '...' : 'Pilih alamat dulu' }}
                             </span>
                         </div>
                         <div class="flex justify-between">
@@ -553,7 +553,6 @@ $shippingOptions = [
             </div>
         </div>
     </div>
-</div>
 </div>
 
 @endsection
@@ -636,29 +635,30 @@ $shippingOptions = [
     }
 
     function selectShipping(el, id, price, days) {
-    // Loop reset semua — TANPA days di sini
-    document.querySelectorAll('.ship-option').forEach(o => {
-        o.classList.remove('active');
-        o.querySelector('.ship-name').classList.replace('text-white', 'text-gray-900');
-        o.querySelector('.ship-days').classList.remove('text-white/55');
-        o.querySelector('.ship-days').classList.add('text-gray-400');
-        o.querySelector('.ship-price').classList.replace('text-white', 'text-gray-900');
-    });
+        // Loop reset semua
+        document.querySelectorAll('.ship-option').forEach(o => {
+            o.classList.remove('active');
+            o.querySelector('.ship-name').classList.replace('text-white', 'text-gray-900');
+            o.querySelector('.ship-days').classList.remove('text-white/55');
+            o.querySelector('.ship-days').classList.add('text-gray-400');
+            o.querySelector('.ship-price').classList.replace('text-white', 'text-gray-900');
+        });
 
-    // Set active ke yang dipilih
-    el.classList.add('active');
-    el.querySelector('.ship-name').classList.replace('text-gray-900', 'text-white');
-    el.querySelector('.ship-days').classList.add('text-white/55');
-    el.querySelector('.ship-days').classList.remove('text-gray-400');
-    el.querySelector('.ship-price').classList.replace('text-gray-900', 'text-white');
+        // Set active ke yang dipilih
+        el.classList.add('active');
+        el.querySelector('.ship-name').classList.replace('text-gray-900', 'text-white');
+        el.querySelector('.ship-days').classList.add('text-white/55');
+        el.querySelector('.ship-days').classList.remove('text-gray-400');
+        el.querySelector('.ship-price').classList.replace('text-gray-900', 'text-white');
 
-    // Update hidden inputs & summary — days baru dipakai di sini
-    document.getElementById('shippingMethodInput').value   = id;
-    document.getElementById('shippingCostInput').value     = price;
-    document.getElementById('shippingDaysInput').value     = days;
-    document.getElementById('summaryShipping').textContent = formatRp(price);
-    document.getElementById('summaryTotal').textContent    = formatRp(subtotalBase + ppnBase + price);
-}
+        // Update hidden inputs & summary
+        document.getElementById('shippingMethodInput').value   = id;
+        document.getElementById('shippingCostInput').value     = price;
+        document.getElementById('shippingDaysInput').value     = days;
+        document.getElementById('summaryShipping').textContent = formatRp(price);
+        document.getElementById('summaryTotal').textContent    = formatRp(subtotalBase + ppnBase + price);
+    }
+
     // ===== PILIH ALAMAT TERSIMPAN =====
     function selectAddress(el, id, cityId) {
         document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));
@@ -677,6 +677,24 @@ $shippingOptions = [
         kec:  {id:'', name:''},
         kel:  {id:'', name:''}
     };
+
+    // Fungsi untuk memperbarui teks yang tampil di dropdown trigger secara dinamis (DIBALIK: PROV, KOTA, KEC, KEL)
+    function updateRegionDisplayText() {
+        const parts = [];
+        if (regionState.prov.id) parts.push(regionState.prov.name);
+        if (regionState.kota.id) parts.push(regionState.kota.name);
+        if (regionState.kec.id) parts.push(regionState.kec.name);
+        if (regionState.kel.id) parts.push(regionState.kel.name);
+
+        const displayText = document.getElementById('regionDisplayText');
+        if (parts.length > 0) {
+            displayText.innerText = parts.join(', ');
+            displayText.classList.replace('text-gray-400', 'text-gray-900');
+        } else {
+            displayText.innerText = 'Pilih Provinsi, Kota, Kecamatan, Kelurahan';
+            displayText.classList.replace('text-gray-900', 'text-gray-400');
+        }
+    }
 
     window.toggleRegionDropdown = function() {
         const dd = document.getElementById('regionDropdown');
@@ -740,23 +758,29 @@ $shippingOptions = [
 
     function handleSelectRegion(item) {
         document.getElementById('regionSearchInput').value = '';
+        
         if (currentStep === 0) {
             regionState.prov = item;
             regionState.kota = regionState.kec = regionState.kel = {id:'', name:''};
+            updateRegionDisplayText();
             currentStep = 1;
         } else if (currentStep === 1) {
             regionState.kota = item;
             regionState.kec  = regionState.kel = {id:'', name:''};
+            updateRegionDisplayText();
             currentStep = 2;
         } else if (currentStep === 2) {
             regionState.kec = item;
             regionState.kel = {id:'', name:''};
+            updateRegionDisplayText();
             currentStep = 3;
         } else if (currentStep === 3) {
             regionState.kel = item;
+            updateRegionDisplayText();
             finishRegionSelection();
             return;
         }
+        
         updateTabsUI();
         loadStepData(currentStep);
     }
@@ -765,6 +789,7 @@ $shippingOptions = [
         if (step === 1 && !regionState.prov.id) return;
         if (step === 2 && !regionState.kota.id) return;
         if (step === 3 && !regionState.kec.id)  return;
+        
         currentStep = step;
         document.getElementById('regionSearchInput').value = '';
         updateTabsUI();
@@ -780,35 +805,34 @@ $shippingOptions = [
         }
     }
 
-   function finishRegionSelection() {
-    const full = `${regionState.kel.name}, ${regionState.kec.name}, ${regionState.kota.name}, ${regionState.prov.name}`;
-    document.getElementById('regionDisplayText').innerText = full;
-    document.getElementById('regionDisplayText').classList.replace('text-gray-400', 'text-gray-900');
-    document.getElementById('newAddrRegion').value  = full;
-    document.getElementById('newAddrCityId').value  = 'dist_' + regionState.kec.id;
-    document.getElementById('checkoutCityId').value = 'dist_' + regionState.kec.id;
+    function finishRegionSelection() {
+        // String dikirim ke database: PROV, KOTA, KEC, KEL
+        const full = `${regionState.prov.name}, ${regionState.kota.name}, ${regionState.kec.name}, ${regionState.kel.name}`;
+        
+        document.getElementById('newAddrRegion').value  = full;
+        document.getElementById('newAddrCityId').value  = 'dist_' + regionState.kec.id;
+        document.getElementById('checkoutCityId').value = 'dist_' + regionState.kec.id;
 
-    // Auto-isi kode pos dari kelurahan
-    fetchKodePos(regionState.kel.id);
+        fetchKodePos(regionState.kel.id);
 
-    document.getElementById('selectedAddressId').value = '';
-    document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));
+        document.getElementById('selectedAddressId').value = '';
+        document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));
 
-    closeRegionDropdown();
-    loadOngkir('dist_' + regionState.kec.id);
-}
-
-async function fetchKodePos(kelurahanId) {
-    try {
-        const res  = await fetch(`/wilayah?type=kelurahan_detail&id=${kelurahanId}`);
-        const json = await res.json();
-        if (json.value && json.value[0] && json.value[0].postal_code) {
-            document.getElementById('zip_code_input').value = json.value[0].postal_code;
-        }
-    } catch(e) {
-        // Biarkan user isi manual kalau gagal
+        closeRegionDropdown();
+        loadOngkir('dist_' + regionState.kec.id);
     }
-}
+
+    async function fetchKodePos(kelurahanId) {
+        try {
+            const res  = await fetch(`/wilayah?type=kelurahan_detail&id=${kelurahanId}`);
+            const json = await res.json();
+            if (json.value && json.value[0] && json.value[0].postal_code) {
+                document.getElementById('zip_code_input').value = json.value[0].postal_code;
+            }
+        } catch(e) {
+            // Biarkan user isi manual kalau gagal
+        }
+    }
 
     function toggleNewAddressForm() {
         const form = document.getElementById('newAddressForm');
@@ -820,6 +844,12 @@ async function fetchKodePos(kelurahanId) {
             document.getElementById('shippingOptions').innerHTML = '';
             document.getElementById('shippingPlaceholder').classList.remove('hidden');
             document.getElementById('shippingPlaceholder').textContent = 'Pilih alamat tujuan dulu untuk melihat opsi pengiriman';
+            
+            // Reset region picker jika membuka form baru
+            regionState = { prov: {id:'', name:''}, kota: {id:'', name:''}, kec: {id:'', name:''}, kel: {id:'', name:''} };
+            currentStep = 0;
+            updateTabsUI();
+            updateRegionDisplayText();
         }
     }
 
