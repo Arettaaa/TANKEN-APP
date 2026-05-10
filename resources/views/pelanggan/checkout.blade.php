@@ -279,47 +279,43 @@
 @section('content')
 
 @php
-// Data dummy
+// Data dummy (Jika data dari controller belum ada)
 $cartItems = $cartItems ?? collect([
-['id'=>1,'name'=>'Sport Active
-Joggers','sku'=>'TKN-002','image'=>'men-home2.jpg','size'=>'XS','qty'=>1,'price'=>799000],
+    ['id'=>1, 'name'=>'Sport Active Joggers', 'sku'=>'TKN-002', 'image'=>'men-home2.jpg', 'size'=>'XS', 'qty'=>1, 'price'=>799000],
 ]);
-$PPN_RATE = 0.11;
+
 $shippingCost = 130000; // default SiCepat
 $subtotal = collect($cartItems)->sum(fn($i) => $i['price'] * $i['qty']);
-$ppn = round($subtotal * $PPN_RATE);
-$total = $subtotal + $ppn + $shippingCost;
 
-$shippingOptions = [
-['id'=>'jne', 'name'=>'JNE Regular', 'days'=>'2-3 hari', 'price'=>150000],
-['id'=>'jnt', 'name'=>'J&T Express', 'days'=>'2-4 hari', 'price'=>120000],
-['id'=>'sicepat','name'=>'SiCepat Reguler', 'days'=>'2-3 hari', 'price'=>130000, 'default'=>true],
-['id'=>'anteraja','name'=>'AnterAja Standard','days'=>'3-4 hari', 'price'=>110000],
+// Total hanya Subtotal + Ongkir
+$total = $subtotal + $shippingCost;
+
+$shippingOptions = $shippingOptions ?? [
+    ['id'=>'jne', 'name'=>'JNE Regular', 'days'=>'2-3 hari', 'price'=>150000],
+    ['id'=>'jnt', 'name'=>'J&T Express', 'days'=>'2-4 hari', 'price'=>120000],
+    ['id'=>'sicepat','name'=>'SiCepat Reguler', 'days'=>'2-3 hari', 'price'=>130000, 'default'=>true],
+    ['id'=>'anteraja','name'=>'AnterAja Standard','days'=>'3-4 hari', 'price'=>110000],
 ];
 @endphp
 
 <div class="bg-white min-h-screen">
     <div class="max-w-7xl mx-auto px-6 lg:px-10 py-10">
 
-        {{-- Breadcrumb --}}
         <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">Pembelian</p>
         <h1 class="text-3xl font-extrabold text-gray-900 mb-8">Checkout</h1>
 
         {{-- ===== STEP INDICATOR ===== --}}
         <div class="flex items-start mb-10">
-            {{-- Step 1 --}}
             <div class="step-item">
                 <div class="step-circle active">1</div>
                 <span class="step-label active">Pengiriman</span>
             </div>
             <div class="step-line flex-1 mx-2"></div>
-            {{-- Step 2 --}}
             <div class="step-item">
                 <div class="step-circle">2</div>
                 <span class="step-label">Pembayaran</span>
             </div>
             <div class="step-line flex-1 mx-2"></div>
-            {{-- Step 3 --}}
             <div class="step-item">
                 <div class="step-circle">3</div>
                 <span class="step-label">Peninjauan</span>
@@ -335,8 +331,6 @@ $shippingOptions = [
                     <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Langkah 1</p>
                     <h2 class="text-lg font-extrabold text-gray-900 mb-6">Informasi Pengiriman</h2>
 
-                    {{-- Saved address --}}
-                    {{-- Pilih Alamat --}}
                     @if(isset($addresses) && $addresses->count() > 0)
                     <div class="mb-6">
                         <label class="form-label mb-2">Pilih Alamat Tersimpan</label>
@@ -372,18 +366,14 @@ $shippingOptions = [
                     @endif
                     <form action="{{ route('pelanggan.checkout.proses') }}" method="POST" id="checkoutForm">
                         @csrf
-                        <input type="hidden" name="address_id" id="selectedAddressId"
-                            value="{{ $defaultAddress->id ?? '' }}">
+                        <input type="hidden" name="address_id" id="selectedAddressId" value="{{ $defaultAddress->id ?? '' }}">
                         <input type="hidden" name="shipping_method" id="shippingMethodInput" value="">
                         <input type="hidden" name="shipping_cost" id="shippingCostInput" value="">
-                        <input type="hidden" name="city_id" id="checkoutCityId"
-                            value="{{ $defaultAddress->city_id ?? '' }}">
+                        <input type="hidden" name="city_id" id="checkoutCityId" value="{{ $defaultAddress->city_id ?? '' }}">
                         <input type="hidden" name="shipping_days" id="shippingDaysInput" value="">
+                        <input type="hidden" name="voucher_discount" id="voucherDiscountInput" value="0">
 
-                        {{-- Form alamat baru (hidden kalau ada alamat tersimpan) --}}
                         <div id="newAddressForm" class="{{ (isset($addresses) && $addresses->count() > 0) ? 'hidden' : '' }}">
-
-                            {{-- Nama & Email (read only dari user) --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="form-label">Nama Lengkap</label>
@@ -397,65 +387,46 @@ $shippingOptions = [
                                 </div>
                             </div>
 
-                            {{-- Telepon (read only) --}}
                             <div class="mb-4">
                                 <label class="form-label">Nomor Telepon</label>
                                 <input type="tel" name="phone" class="form-input bg-gray-50 cursor-not-allowed"
                                     value="{{ auth()->user()->phone ?? '' }}" readonly>
                             </div>
 
-                            {{-- Alamat jalan --}}
                             <div class="mb-4">
                                 <label class="form-label">Alamat <span class="text-red-400">*</span></label>
                                 <input type="text" name="address" class="form-input" value="{{ old('address') }}"
                                     placeholder="Nama jalan, nomor rumah, RT/RW">
                             </div>
 
-                            {{-- Wilayah Picker --}}
                             <div class="mb-4 relative">
                                 <label class="form-label">Wilayah <span class="text-red-400">*</span></label>
-                                <div id="regionTrigger"
-                                    class="form-input cursor-pointer flex justify-between items-center"
-                                    onclick="toggleRegionDropdown()">
-                                    <span id="regionDisplayText" class="text-gray-400 truncate pr-4">
-                                        Pilih Provinsi, Kota, Kecamatan, Kelurahan
-                                    </span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke="currentColor" stroke-width="2" width="14" height="14"
-                                        class="flex-shrink-0 text-gray-400">
+                                <div id="regionTrigger" class="form-input cursor-pointer flex justify-between items-center" onclick="toggleRegionDropdown()">
+                                    <span id="regionDisplayText" class="text-gray-400 truncate pr-4">Pilih Provinsi, Kota, Kecamatan, Kelurahan</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14" class="flex-shrink-0 text-gray-400">
                                         <path d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </div>
                                 <input type="hidden" id="newAddrRegion" name="new_region" value="">
                                 <input type="hidden" id="newAddrCityId" name="new_city_id" value="">
 
-                                {{-- Dropdown wilayah --}}
                                 <div id="regionDropdown" class="region-dropdown">
                                     <div class="region-search-wrapper relative">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2" width="13" height="13"
-                                            class="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400">
-                                            <circle cx="11" cy="11" r="8" />
-                                            <path d="m21 21-4.35-4.35" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13" class="absolute left-7 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                                         </svg>
-                                        <input type="text" id="regionSearchInput" class="region-search-input"
-                                            placeholder="Cari wilayah..." oninput="handleSearch(this.value)">
+                                        <input type="text" id="regionSearchInput" class="region-search-input" placeholder="Cari wilayah..." oninput="handleSearch(this.value)">
                                     </div>
                                     <div class="flex border-b border-gray-100 bg-gray-50/50">
-                                        <button type="button" class="region-tab active" id="tab-0"
-                                            onclick="changeStep(0)">Provinsi</button>
-                                        <button type="button" class="region-tab" id="tab-1" onclick="changeStep(1)"
-                                            disabled>Kota</button>
-                                        <button type="button" class="region-tab" id="tab-2" onclick="changeStep(2)"
-                                            disabled>Kecamatan</button>
-                                        <button type="button" class="region-tab" id="tab-3" onclick="changeStep(3)"
-                                            disabled>Kelurahan</button>
+                                        <button type="button" class="region-tab active" id="tab-0" onclick="changeStep(0)">Provinsi</button>
+                                        <button type="button" class="region-tab" id="tab-1" onclick="changeStep(1)" disabled>Kota</button>
+                                        <button type="button" class="region-tab" id="tab-2" onclick="changeStep(2)" disabled>Kecamatan</button>
+                                        <button type="button" class="region-tab" id="tab-3" onclick="changeStep(3)" disabled>Kelurahan</button>
                                     </div>
                                     <div class="p-1 max-h-48 overflow-y-auto" id="regionListContainer"></div>
                                 </div>
                             </div>
 
-                            {{-- Kode Pos --}}
                             <div class="mb-7">
                                 <label class="form-label">Kode Pos <span class="text-red-400">*</span></label>
                                 <input type="text" name="zip_code" id="zip_code_input" class="form-input"
@@ -463,30 +434,23 @@ $shippingOptions = [
                             </div>
                         </div>
 
-                        {{-- Metode Pengiriman — SELALU tampil --}}
                         <div class="mt-4">
                             <label class="form-label mb-3">Metode Pengiriman</label>
-
                             <div id="shippingLoading" class="hidden text-xs text-gray-400 py-3 text-center">
                                 <svg class="animate-spin inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                        stroke-width="4" />
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                                 </svg>
                                 Menghitung ongkos kirim...
                             </div>
-
-                            <div id="shippingPlaceholder"
-                                class="text-xs text-gray-400 border border-dashed border-gray-200 rounded-lg py-4 text-center">
+                            <div id="shippingPlaceholder" class="text-xs text-gray-400 border border-dashed border-gray-200 rounded-lg py-4 text-center">
                                 Pilih alamat tujuan dulu untuk melihat opsi pengiriman
                             </div>
-
                             <div class="flex flex-col gap-2" id="shippingOptions"></div>
                         </div>
 
                         <button type="submit" class="continue-btn mt-8">Lanjutkan</button>
                     </form>
-
                 </div>
             </div>
 
@@ -496,12 +460,9 @@ $shippingOptions = [
                     <p class="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">Ringkasan</p>
                     <h2 class="font-extrabold text-gray-900 text-base mb-5">Ringkasan Pesanan</h2>
 
-                    {{-- Items --}}
                     <div class="flex flex-col gap-3 mb-4">
                         @foreach($cartItems as $item)
-                        @php
-                        $imgPath = $item['image'] ?? null;
-                        @endphp
+                        @php $imgPath = $item['image'] ?? null; @endphp
                         <div class="flex items-center gap-3">
                             @if($imgPath)
                             <img src="{{ $imgPath }}" alt="{{ $item['name'] }}"
@@ -510,8 +471,7 @@ $shippingOptions = [
                             <div class="w-12 h-14 rounded-md bg-gray-100 flex-shrink-0"></div>
                             @endif
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 leading-snug truncate">{{ $item['name'] }}
-                                </p>
+                                <p class="text-sm font-semibold text-gray-900 leading-snug truncate">{{ $item['name'] }}</p>
                                 <p class="text-xs text-gray-400 mt-0.5">{{ $item['size'] }} × {{ $item['qty'] }}</p>
                             </div>
                             <span class="text-sm font-bold text-gray-900 flex-shrink-0">
@@ -526,8 +486,7 @@ $shippingOptions = [
                     <div class="flex flex-col gap-2.5 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-500">Subtotal ({{ collect($cartItems)->sum('qty') }} item)</span>
-                            <span class="font-semibold text-gray-800">Rp {{ number_format($subtotal, 0, ',', '.')
-                                }}</span>
+                            <span class="font-semibold text-gray-800">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-500">Ongkos Kirim</span>
@@ -535,9 +494,11 @@ $shippingOptions = [
                                 {{ isset($defaultAddress) ? '...' : 'Pilih alamat dulu' }}
                             </span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">PPN (11%)</span>
-                            <span class="font-semibold text-gray-800">Rp {{ number_format($ppn, 0, ',', '.') }}</span>
+                        
+                        {{-- Row Diskon Voucher dari Session --}}
+                        <div class="flex justify-between items-center hidden" id="checkoutVoucherRow">
+                            <span class="text-green-600 font-medium">Diskon Voucher</span>
+                            <span class="font-bold text-green-600" id="checkoutVoucherDiscount">– Rp 0</span>
                         </div>
                     </div>
 
@@ -560,10 +521,34 @@ $shippingOptions = [
 @push('scripts')
 <script>
     const subtotalBase = {{ $subtotal }};
-    const ppnBase      = {{ $ppn }};
+    let currentShippingPrice = 0;
+    let voucherDiscount = 0;
 
     function formatRp(val) {
         return 'Rp ' + Math.round(val).toLocaleString('id-ID');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ambil data voucher dari keranjang sebelumnya yang tersimpan di browser
+        const savedDiscount = sessionStorage.getItem('tanken_voucher_discount');
+        if (savedDiscount && !isNaN(savedDiscount) && parseInt(savedDiscount) > 0) {
+            voucherDiscount = parseInt(savedDiscount);
+            
+            // Tampilkan baris diskon
+            document.getElementById('checkoutVoucherRow').classList.remove('hidden');
+            document.getElementById('checkoutVoucherDiscount').textContent = '– ' + formatRp(voucherDiscount);
+            
+            // Simpan ke input hidden untuk dikirim ke backend
+            document.getElementById('voucherDiscountInput').value = voucherDiscount;
+        }
+
+        updateTotalSummary();
+    });
+
+    function updateTotalSummary() {
+        let finalTotal = subtotalBase + currentShippingPrice - voucherDiscount;
+        if (finalTotal < 0) finalTotal = 0;
+        document.getElementById('summaryTotal').textContent = formatRp(finalTotal);
     }
 
     // ===== LOAD ONGKIR DARI API =====
@@ -575,8 +560,10 @@ $shippingOptions = [
         document.getElementById('shippingOptions').innerHTML = '';
         document.getElementById('shippingMethodInput').value = '';
         document.getElementById('shippingCostInput').value   = '';
+        
+        currentShippingPrice = 0;
         document.getElementById('summaryShipping').textContent = '...';
-        document.getElementById('summaryTotal').textContent   = '...';
+        updateTotalSummary();
 
         try {
             const res  = await fetch(`/akun/checkout/ongkir?city_id=${cityId}`);
@@ -627,15 +614,16 @@ $shippingOptions = [
             if (isFirst) {
                 document.getElementById('shippingMethodInput').value = `${opt.courier}-${opt.service}`;
                 document.getElementById('shippingCostInput').value   = opt.price;
-                document.getElementById('summaryShipping').textContent = formatRp(opt.price);
-                document.getElementById('summaryTotal').textContent    = formatRp(subtotalBase + ppnBase + opt.price);
                 document.getElementById('shippingDaysInput').value   = opt.days;
+                
+                currentShippingPrice = opt.price;
+                document.getElementById('summaryShipping').textContent = formatRp(opt.price);
+                updateTotalSummary();
             }
         });
     }
 
     function selectShipping(el, id, price, days) {
-        // Loop reset semua
         document.querySelectorAll('.ship-option').forEach(o => {
             o.classList.remove('active');
             o.querySelector('.ship-name').classList.replace('text-white', 'text-gray-900');
@@ -644,22 +632,21 @@ $shippingOptions = [
             o.querySelector('.ship-price').classList.replace('text-white', 'text-gray-900');
         });
 
-        // Set active ke yang dipilih
         el.classList.add('active');
         el.querySelector('.ship-name').classList.replace('text-gray-900', 'text-white');
         el.querySelector('.ship-days').classList.add('text-white/55');
         el.querySelector('.ship-days').classList.remove('text-gray-400');
         el.querySelector('.ship-price').classList.replace('text-gray-900', 'text-white');
 
-        // Update hidden inputs & summary
         document.getElementById('shippingMethodInput').value   = id;
         document.getElementById('shippingCostInput').value     = price;
         document.getElementById('shippingDaysInput').value     = days;
+        
+        currentShippingPrice = price;
         document.getElementById('summaryShipping').textContent = formatRp(price);
-        document.getElementById('summaryTotal').textContent    = formatRp(subtotalBase + ppnBase + price);
+        updateTotalSummary();
     }
 
-    // ===== PILIH ALAMAT TERSIMPAN =====
     function selectAddress(el, id, cityId) {
         document.querySelectorAll('.saved-address-box').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
@@ -668,7 +655,6 @@ $shippingOptions = [
         loadOngkir(cityId);
     }
 
-    // ===== WILAYAH PICKER (untuk alamat baru) =====
     let currentStep     = 0;
     let currentListData = [];
     let regionState     = {
@@ -678,7 +664,6 @@ $shippingOptions = [
         kel:  {id:'', name:''}
     };
 
-    // Fungsi untuk memperbarui teks yang tampil di dropdown trigger secara dinamis (DIBALIK: PROV, KOTA, KEC, KEL)
     function updateRegionDisplayText() {
         const parts = [];
         if (regionState.prov.id) parts.push(regionState.prov.name);
@@ -806,7 +791,6 @@ $shippingOptions = [
     }
 
     function finishRegionSelection() {
-        // String dikirim ke database: PROV, KOTA, KEC, KEL
         const full = `${regionState.prov.name}, ${regionState.kota.name}, ${regionState.kec.name}, ${regionState.kel.name}`;
         
         document.getElementById('newAddrRegion').value  = full;
@@ -829,9 +813,7 @@ $shippingOptions = [
             if (json.value && json.value[0] && json.value[0].postal_code) {
                 document.getElementById('zip_code_input').value = json.value[0].postal_code;
             }
-        } catch(e) {
-            // Biarkan user isi manual kalau gagal
-        }
+        } catch(e) {}
     }
 
     function toggleNewAddressForm() {
@@ -845,7 +827,6 @@ $shippingOptions = [
             document.getElementById('shippingPlaceholder').classList.remove('hidden');
             document.getElementById('shippingPlaceholder').textContent = 'Pilih alamat tujuan dulu untuk melihat opsi pengiriman';
             
-            // Reset region picker jika membuka form baru
             regionState = { prov: {id:'', name:''}, kota: {id:'', name:''}, kec: {id:'', name:''}, kel: {id:'', name:''} };
             currentStep = 0;
             updateTabsUI();
@@ -853,7 +834,6 @@ $shippingOptions = [
         }
     }
 
-    // Auto load ongkir kalau ada default address
     const defaultCityId = '{{ $defaultAddress->city_id ?? "" }}';
     if (defaultCityId) loadOngkir(defaultCityId);
 </script>

@@ -44,14 +44,12 @@
         {{-- ====== LEFT: IMAGES ====== --}}
         <div>
             <div class="relative group rounded-xl bg-gray-100 overflow-hidden aspect-[4/5] mb-3">
-                {{-- Main Image (Ditambah transisi opacity untuk animasi smooth) --}}
                 <img id="main-product-img" 
                     src="{{ $product->main_image ? asset('storage/' . $product->main_image) : asset('images/men-home.jpg') }}"
                     alt="{{ $product->name }}" 
                     class="w-full h-full object-cover object-top cursor-zoom-in transition-opacity duration-200 ease-in-out opacity-100"
                     onclick="openZoom(this.src)">
 
-                {{-- Navigation Arrows --}}
                 <button onclick="prevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M15 19l-7-7 7-7"/></svg>
                 </button>
@@ -67,7 +65,6 @@
                 </div>
             </div>
 
-            {{-- Thumbnails --}}
             <div class="flex gap-3 overflow-x-auto pb-1 scrollbar-none" id="thumb-container">
                 @if($product->main_image)
                 <button onclick="switchImage('{{ asset('storage/' . $product->main_image) }}', this, 0)"
@@ -114,7 +111,6 @@
 
             <hr class="border-gray-100 mb-5">
 
-            {{-- SIZE ONLY --}}
             @php $sizesArray = is_array($product->sizes) ? $product->sizes : (json_decode($product->sizes, true) ?? []); @endphp
             <div class="mb-5">
                 <div class="flex items-center justify-between mb-2">
@@ -135,7 +131,6 @@
                 <p id="size-error" class="text-xs text-red-500 mt-2 font-medium hidden">⚠ Silakan pilih ukuran terlebih dahulu.</p>
             </div>
 
-            {{-- QUANTITY & DYNAMIC STOCK INFO --}}
             <div class="mb-6">
                 <p class="text-xs font-bold tracking-widest uppercase text-gray-500 mb-2">Jumlah</p>
                 <div class="flex items-center gap-4">
@@ -148,7 +143,6 @@
                 </div>
             </div>
 
-            {{-- ACTION BUTTONS --}}
             <div class="flex gap-2 sm:gap-3 mb-6">
                 <button id="btn-add-cart" onclick="addToCart()"
                     class="flex-1 bg-white text-black border-2 border-black text-[11px] sm:text-xs font-bold uppercase tracking-wider py-3.5 rounded-lg flex items-center justify-center gap-1 sm:gap-2 hover:bg-gray-50 active:scale-[0.98] transition-all">
@@ -163,7 +157,7 @@
                     Beli Sekarang
                 </button>
 
-                <button id="btn-wishlist" onclick="toggleWishlist()" class="w-12 h-12 sm:w-[48px] sm:h-[48px] border-2 rounded-lg flex items-center justify-center transition-colors flex-shrink-0
+                <button id="btn-wishlist" onclick="toggleWishlist()" class="w-12 h-12 border-2 rounded-lg flex items-center justify-center transition-colors flex-shrink-0
                    {{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? 'border-red-400 bg-white text-red-500' : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-400' }}">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'none' }}" stroke="{{ auth()->check() && auth()->user()->wishlists()->where('product_id', $product->id)->exists() ? '#ef4444' : 'currentColor' }}" viewBox="0 0 24 24" stroke-width="1.8" width="18" height="18">
                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -199,8 +193,8 @@
 
 {{-- TOAST --}}
 <div id="cart-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-black text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl items-center gap-2 transition-all whitespace-nowrap">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16" class="text-green-400"><path d="M20 6L9 17l-5-5" /></svg>
-    <span>Produk ditambahkan!</span>
+    <div id="toast-icon"></div>
+    <span id="toast-msg">Produk ditambahkan!</span>
 </div>
 
 {{-- SIZE MODAL --}}
@@ -228,27 +222,21 @@
 
 @push('scripts')
 <script>
-    // Data Galeri
     const images = [
         "{{ $product->main_image ? asset('storage/' . $product->main_image) : asset('images/men-home.jpg') }}",
         @foreach($product->galleries as $gallery) "{{ asset('storage/' . $gallery->image) }}", @endforeach
     ];
     let currentImgIdx = 0;
 
-    // Data Stok
     const stockData = {!! json_encode($product->stocks ? $product->stocks->pluck('quantity', 'size') : []) !!};
     let maxStock = 0;
     let selectedSize = null;
     let qty = 1;
 
-    // ── Image Navigation (Smooth Fade & No Scroll Jump) ──
     function fadeToImage(src) {
         const img = document.getElementById('main-product-img');
-        img.style.opacity = '0'; // Pudar perlahan
-        setTimeout(() => {
-            img.src = src;
-            img.style.opacity = '1'; // Muncul perlahan
-        }, 200); // Waktu jeda sesuai dengan durasi CSS (200ms)
+        img.style.opacity = '0';
+        setTimeout(() => { img.src = src; img.style.opacity = '1'; }, 200);
     }
 
     function switchImage(src, btn, index) {
@@ -271,27 +259,21 @@
     function updateMainImage() {
         const src = images[currentImgIdx];
         fadeToImage(src);
-
         const thumbs = document.querySelectorAll('.thumb-btn');
         thumbs.forEach(b => b.classList.remove('active-thumb'));
-        
         const activeThumb = thumbs[currentImgIdx];
         activeThumb.classList.add('active-thumb');
-        
-        // Menggeser kontainer thumbnail HANYA secara horizontal, mencegah layar ikut loncat
         const container = document.getElementById('thumb-container');
         const scrollPos = activeThumb.offsetLeft - (container.clientWidth / 2) + (activeThumb.clientWidth / 2);
         container.scrollTo({ left: scrollPos, behavior: 'smooth' });
     }
 
-    // ── Size & Qty ──
     function selectSize(size, btn) {
         selectedSize = size;
         document.getElementById('selected-size-label').textContent = size;
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('size-error').classList.add('hidden');
-
         maxStock = stockData[size] || 0;
         const info = document.getElementById('stock-info');
         info.classList.remove('hidden');
@@ -312,149 +294,100 @@
         document.getElementById('qty-display').textContent = qty;
     }
 
-    // ── Actions ──
     function addToCart() {
-        if(!selectedSize) { 
-            document.getElementById('size-error').classList.remove('hidden');
-            return; 
-        }
+        if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
         if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
 
         const btn = document.getElementById('btn-add-cart');
         const originalHTML = btn.innerHTML;
         btn.disabled = true;
-        btn.innerHTML = `
-            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg> Menambahkan...
-        `;
-
-        fetch('{{ route("pelanggan.keranjang.store") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            // Varian warna sudah dihapus murni dari sini
-            body: JSON.stringify({ product_id: {{ $product->id }}, size: selectedSize, quantity: qty })
-        })
-        .then(r => r.json()).then(data => {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            if(data.success) { showToast('Produk masuk keranjang!'); updateNavbarCartBadge(data.cart_count); }
-            else { showToast('Gagal menambahkan produk.', true); }
-        }).catch(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            showToast('Terjadi kesalahan.', true);
-        });
-    }
-
-    function buyNow() {
-        if(!selectedSize) { 
-            document.getElementById('size-error').classList.remove('hidden');
-            return; 
-        }
-        if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
-
-        const btn = document.getElementById('btn-buy-now');
-        const originalHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = `
-            <svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-            </svg> Memproses...
-        `;
+        btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Menambahkan...`;
 
         fetch('{{ route("pelanggan.keranjang.store") }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
             body: JSON.stringify({ product_id: {{ $product->id }}, size: selectedSize, quantity: qty })
         })
-        .then(r => r.json()).then(data => {
-            if(data.success) {
-                window.location.href = '{{ route("pelanggan.checkout.index") }}';
-            } else {
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-                showToast('Gagal memproses.', true);
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            if(data.success) { 
+                showToast('Produk masuk keranjang!'); 
+                if (typeof updateCartBadge === 'function') updateCartBadge(data.cart_count);
             }
+            else showToast('Gagal menambahkan produk.', true);
         }).catch(() => {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
+            btn.disabled = false; btn.innerHTML = originalHTML;
             showToast('Terjadi kesalahan.', true);
         });
     }
 
-    // ── Zoom Logic (Improved for Trackpad/Gesture) ──
-    let zoomScale = 1;
-    let isDragging = false;
-    let startX, startY, translateX = 0, translateY = 0;
+    // ====== LOGIKA "BELI SEKARANG" LANGSUNG KE CHECKOUT ======
+    function buyNow() {
+        if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
+        if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
+        
+        const btn = document.getElementById('btn-buy-now');
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Memproses...`;
 
+        // Redirect langsung via URL parameter (TANPA API ke keranjang)
+        window.location.href = `{{ route('pelanggan.checkout.index') }}?buy_now=1&product_id={{ $product->id }}&size=${selectedSize}&qty=${qty}`;
+    }
+
+    function toggleWishlist() {
+        @auth
+        fetch('{{ route("pelanggan.wishlist.toggle") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            body: JSON.stringify({ product_id: {{ $product->id }} })
+        })
+        .then(r => r.json())
+        .then(data => {
+            const btn = document.getElementById('btn-wishlist');
+            const svg = btn.querySelector('svg');
+            if (data.status === 'added') {
+                btn.classList.replace('border-gray-200', 'border-red-400');
+                btn.classList.replace('text-gray-400', 'text-red-500');
+                btn.classList.add('bg-white');
+                svg.setAttribute('fill', '#ef4444'); svg.setAttribute('stroke', '#ef4444');
+                showToast('Ditambahkan ke wishlist ❤️');
+            } else {
+                btn.classList.replace('border-red-400', 'border-gray-200');
+                btn.classList.replace('text-red-500', 'text-gray-400');
+                btn.classList.remove('bg-white');
+                svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
+                showToast('Dihapus dari wishlist 🗑️');
+            }
+            if (typeof updateWishlistBadge === 'function') {
+                updateWishlistBadge(data.wishlist_count);
+            }
+        });
+        @else
+        window.location.href = '{{ route("login") }}';
+        @endauth
+    }
+
+    let zoomScale = 1, isDragging = false, startX, startY, translateX = 0, translateY = 0;
     function openZoom(src) {
-        const overlay = document.getElementById('zoom-overlay');
-        const img = document.getElementById('zoom-img');
-        img.src = src;
-        zoomScale = 1; translateX = 0; translateY = 0;
-        applyZoom();
-        overlay.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        const overlay = document.getElementById('zoom-overlay'), img = document.getElementById('zoom-img');
+        img.src = src; zoomScale = 1; translateX = 0; translateY = 0;
+        applyZoom(); overlay.style.display = 'flex'; document.body.style.overflow = 'hidden';
     }
-
-    function closeZoom(e) {
-        if(e && e.target === document.getElementById('zoom-img')) return;
-        document.getElementById('zoom-overlay').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-
-    function zoomChange(delta) {
-        zoomScale = Math.min(5, Math.max(0.5, zoomScale + delta));
-        applyZoom();
-    }
-
-    function applyZoom() {
-        const img = document.getElementById('zoom-img');
-        img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px)`;
-        document.getElementById('zoom-level-label').textContent = Math.round(zoomScale * 100) + '%';
-    }
-
-    // Wheel/Trackpad Zoom & Pan
-    document.getElementById('zoom-container').addEventListener('wheel', e => {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.15 : 0.15; // Lebih smooth untuk trackpad
-        zoomChange(delta);
-    }, { passive: false });
-
-    // Drag to Pan
+    function closeZoom(e) { if(e && e.target === document.getElementById('zoom-img')) return; document.getElementById('zoom-overlay').style.display = 'none'; document.body.style.overflow = ''; }
+    function zoomChange(delta) { zoomScale = Math.min(5, Math.max(0.5, zoomScale + delta)); applyZoom(); }
+    function applyZoom() { const img = document.getElementById('zoom-img'); img.style.transform = `scale(${zoomScale}) translate(${translateX}px, ${translateY}px)`; document.getElementById('zoom-level-label').textContent = Math.round(zoomScale * 100) + '%'; }
+    document.getElementById('zoom-container').addEventListener('wheel', e => { e.preventDefault(); zoomChange(e.deltaY > 0 ? -0.15 : 0.15); }, { passive: false });
     const zoomImg = document.getElementById('zoom-img');
-    zoomImg.onmousedown = (e) => {
-        if(zoomScale <= 1) return;
-        isDragging = true;
-        startX = e.clientX - translateX; startY = e.clientY - translateY;
-    };
-    window.onmousemove = (e) => {
-        if(!isDragging) return;
-        translateX = e.clientX - startX; translateY = e.clientY - startY;
-        applyZoom();
-    };
+    zoomImg.onmousedown = (e) => { if(zoomScale <= 1) return; isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; };
+    window.onmousemove = (e) => { if(!isDragging) return; translateX = e.clientX - startX; translateY = e.clientY - startY; applyZoom(); };
     window.onmouseup = () => isDragging = false;
-
-    // Gesture (Pinch) for Mobile/Trackpad
     let initialDist = 0;
-    zoomImg.ontouchstart = (e) => {
-        if(e.touches.length === 2) initialDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    };
-    zoomImg.ontouchmove = (e) => {
-        if(e.touches.length === 2) {
-            e.preventDefault();
-            const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-            const scale = dist / initialDist;
-            zoomScale = Math.min(5, Math.max(0.5, zoomScale * scale));
-            initialDist = dist;
-            applyZoom();
-        }
-    };
-
+    zoomImg.ontouchstart = (e) => { if(e.touches.length === 2) initialDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); };
+    zoomImg.ontouchmove = (e) => { if(e.touches.length === 2) { e.preventDefault(); const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); zoomScale = Math.min(5, Math.max(0.5, zoomScale * (dist / initialDist))); initialDist = dist; applyZoom(); } };
     function resetZoomLevel() { zoomScale = 1; translateX = 0; translateY = 0; applyZoom(); }
 
-    // Misc
     function switchTab(tab) {
         ['desc', 'reviews'].forEach(t => {
             document.getElementById('content-'+t).classList.add('hidden');
@@ -467,37 +400,17 @@
     }
 
     function showToast(msg, err=false) {
-        const t = document.getElementById('cart-toast');
+        const t = document.getElementById('cart-toast'), iconContainer = document.getElementById('toast-icon');
+        if(err) {
+            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16" class="text-white"><path d="M6 18L18 6M6 6l12 12" /></svg>`;
+            t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl flex items-center gap-2 transition-all whitespace-nowrap bg-red-600`;
+        } else {
+            iconContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="16" height="16" class="text-green-400"><path d="M20 6L9 17l-5-5" /></svg>`;
+            t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl flex items-center gap-2 transition-all whitespace-nowrap bg-black`;
+        }
+        document.getElementById('toast-msg').textContent = msg;
         t.classList.remove('hidden');
-        t.querySelector('span').textContent = msg;
-        t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-50 text-white text-sm font-medium px-5 py-3 rounded-full shadow-xl flex items-center gap-2 transition-all ${err?'bg-red-600':'bg-black'}`;
-        setTimeout(() => t.classList.add('hidden'), 2500);
-    }
-
-    function toggleWishlist() {
-        @auth
-        fetch('{{ route("pelanggan.wishlist.toggle") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ product_id: {{ $product->id }} })
-        })
-        .then(r => r.json()).then(data => {
-            const btn = document.getElementById('btn-wishlist');
-            const svg = btn.querySelector('svg');
-            if (data.status === 'added') {
-                btn.classList.remove('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-                btn.classList.add('border-red-400', 'bg-white', 'text-red-500');
-                svg.setAttribute('fill', '#ef4444'); svg.setAttribute('stroke', '#ef4444');
-                showToast('Ditambahkan ke wishlist ❤️');
-            } else {
-                btn.classList.remove('border-red-400', 'bg-white', 'text-red-500');
-                btn.classList.add('border-gray-200', 'text-gray-400', 'hover:border-red-300', 'hover:text-red-400');
-                svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor');
-            }
-        });
-        @else
-        window.location.href = '{{ route("login") }}';
-        @endauth
+        clearTimeout(t.timer); t.timer = setTimeout(() => t.classList.add('hidden'), 2500);
     }
 
     function openSizeChart() { document.getElementById('modal-sizechart').classList.remove('hidden'); document.body.style.overflow='hidden'; }

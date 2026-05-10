@@ -5,44 +5,74 @@ namespace App\Http\Controllers\Pelanggan;
 use App\Http\Controllers\Controller;
 use App\Models\CartItem;
 use App\Models\Address;
+use App\Models\Product; // Ditambahkan untuk fitur Beli Sekarang
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-
 class CheckoutController extends Controller
 {
     // GET /checkout
-    public function index()
+    public function index(Request $request)
     {
-        $selectedIds = session('checkout_ids', []);
-
-        if (empty($selectedIds)) {
-            return redirect()->route('pelanggan.keranjang.index')
-                ->with('error', 'Pilih minimal 1 produk untuk checkout.');
-        }
-
-        $cartItems = CartItem::whereIn('id', $selectedIds)
-            ->where('user_id', auth()->id())
-            ->with('product')
-            ->get()
-            ->map(fn($item) => [
-                'id'    => $item->id,
-                'name'  => $item->product->name,
-                'image' => $item->product->main_image
-                    ? asset('storage/' . $item->product->main_image)
+        // ===== LOGIKA BELI SEKARANG (BYPASS KERANJANG) =====
+        if ($request->has('buy_now')) {
+            $product = Product::findOrFail($request->product_id);
+            
+            // Buat item keranjang virtual (tidak disimpan di database cart)
+            $cartItems = collect([[
+                'id'    => 'buy_now', 
+                'name'  => $product->name,
+                'image' => $product->main_image
+                    ? asset('storage/' . $product->main_image)
                     : null,
-                'size'  => $item->size,
-                'qty'   => $item->quantity,
-                'price' => $item->product->price,
-            ]);
+                'size'  => $request->size,
+                'qty'   => (int) $request->qty,
+                'price' => $product->price,
+            ]]);
+
+            // Simpan ke session untuk dilanjutkan ke proses pembayaran nanti
+            session(['buy_now_item' => [
+                'product_id' => $product->id,
+                'size'       => $request->size,
+                'qty'        => (int) $request->qty,
+                'price'      => $product->price,
+            ]]);
+            session()->forget('checkout_ids');
+
+        } else {
+            // ===== LOGIKA CHECKOUT NORMAL DARI KERANJANG =====
+            session()->forget('buy_now_item');
+            $selectedIds = session('checkout_ids', []);
+
+            if (empty($selectedIds)) {
+                return redirect()->route('pelanggan.keranjang.index')
+                    ->with('error', 'Pilih minimal 1 produk untuk checkout.');
+            }
+
+            $cartItems = CartItem::whereIn('id', $selectedIds)
+                ->where('user_id', auth()->id())
+                ->with('product')
+                ->get()
+                ->map(fn($item) => [
+                    'id'    => $item->id,
+                    'name'  => $item->product->name,
+                    'image' => $item->product->main_image
+                        ? asset('storage/' . $item->product->main_image)
+                        : null,
+                    'size'  => $item->size,
+                    'qty'   => $item->quantity,
+                    'price' => $item->product->price,
+                ]);
+        }
 
         $addresses      = auth()->user()->addresses()->orderByDesc('is_default')->get();
         $defaultAddress = $addresses->firstWhere('is_default', true);
 
-        $PPN_RATE     = 0.11;
-        $subtotal     = $cartItems->sum(fn($i) => $i['price'] * $i['qty']);
-        $ppn          = round($subtotal * $PPN_RATE);
+        // Menghitung Subtotal
+        $subtotal = $cartItems->sum(fn($i) => $i['price'] * $i['qty']);
+
+        // ===== PPN DIHAPUS TOTAL =====
 
         $shippingOptions = [
             ['id' => 'jne',      'name' => 'JNE Regular',      'days' => '2-3 hari', 'price' => 150000],
@@ -52,14 +82,15 @@ class CheckoutController extends Controller
         ];
 
         $shippingCost = 130000;
-        $total        = $subtotal + $ppn + $shippingCost;
+        
+        // Total Murni = Subtotal + Ongkir
+        $total = $subtotal + $shippingCost;
 
         return view('pelanggan.checkout', compact(
             'cartItems',
             'addresses',
             'defaultAddress',
             'subtotal',
-            'ppn',
             'shippingCost',
             'total',
             'shippingOptions'
@@ -125,6 +156,7 @@ class CheckoutController extends Controller
 
         return redirect()->route('pelanggan.checkout.payment');
     }
+
     public function getOngkir(Request $request)
     {
         $distId  = $request->city_id;

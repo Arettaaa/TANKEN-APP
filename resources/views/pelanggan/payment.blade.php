@@ -70,14 +70,6 @@
 
 @section('content')
 
-@php
-    $PPN_RATE = 0.11;
-    $subtotal     = $subtotal ?? 0;
-    $ppn          = $ppn ?? 0;
-    $shippingCost = $shippingCost ?? 0;
-    $total        = $total ?? ($subtotal + $ppn + $shippingCost);
-@endphp
-
 <div class="bg-white min-h-screen">
     <div class="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 py-6 sm:py-10">
 
@@ -125,7 +117,7 @@
                         <div>
                             <p class="text-xs font-bold text-gray-900">{{ $address->name }}</p>
                             <p class="text-xs text-gray-500 mt-0.5">{{ $address->street }}, {{ $address->region }} {{ $address->postal }}</p>
-                            <p class="text-xs text-gray-400 mt-0.5">Kurir: <span class="font-semibold text-gray-700">{{ $shipping }}</span> · Ongkir: <span class="font-semibold text-gray-700">Rp {{ number_format($shippingCost, 0, ',', '.') }}</span></p>
+                            <p class="text-xs text-gray-400 mt-0.5">Kurir: <span class="font-semibold text-gray-700">{{ strtoupper($shipping) }}</span> · Ongkir: <span class="font-semibold text-gray-700">Rp {{ number_format($shippingCost, 0, ',', '.') }}</span></p>
                         </div>
                     </div>
 
@@ -153,8 +145,8 @@
                                 <select name="bank_provider" id="bankProvider" class="form-select">
                                     <option value="" disabled selected>-- Pilih Bank --</option>
                                     @foreach($banks as $bank)
-                                    <option value="{{ $bank['value'] }}">
-                                        {{ $bank['label'] }} — {{ $bank['number'] }} a.n {{ $bank['name'] }}
+                                    <option value="{{ is_array($bank) ? $bank['value'] : $bank->value }}">
+                                        {{ is_array($bank) ? $bank['label'] : $bank->label }} — {{ is_array($bank) ? $bank['number'] : $bank->number }} a.n {{ is_array($bank) ? $bank['name'] : $bank->name }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -180,7 +172,7 @@
                         {{-- FORM: QRIS --}}
                         <div id="form-qris" class="payment-block hidden">
                             <div class="flex flex-col items-center py-4">
-                                {{-- QR Placeholder transparan / dummy --}}
+                                {{-- QR Placeholder --}}
                                 <div class="qris-placeholder mb-3">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" stroke-width="1.2" width="48" height="48">
                                         <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
@@ -252,18 +244,25 @@
 
                     <div class="flex flex-col gap-3 mb-4">
                         @foreach($cartItems as $item)
+                        @php
+                            $itemName = is_array($item) ? $item['name'] : $item->name;
+                            $itemImg  = is_array($item) ? $item['image'] : $item->image;
+                            $itemSize = is_array($item) ? $item['size'] : $item->size;
+                            $itemQty  = is_array($item) ? $item['qty'] : $item->qty;
+                            $itemPrice = is_array($item) ? $item['price'] : $item->price;
+                        @endphp
                         <div class="flex items-center gap-3">
-                            @if($item['image'])
-                                <img src="{{ $item['image'] }}" alt="{{ $item['name'] }}" class="w-12 h-14 object-cover rounded-md bg-gray-100 flex-shrink-0">
+                            @if($itemImg)
+                                <img src="{{ $itemImg }}" onerror="this.onerror=null;this.src='{{ asset('images/men-home.jpg') }}';" alt="{{ $itemName }}" class="w-12 h-14 object-cover rounded-md bg-gray-100 flex-shrink-0">
                             @else
                                 <div class="w-12 h-14 rounded-md bg-gray-100 flex-shrink-0"></div>
                             @endif
                             <div class="flex-1 min-w-0">
-                                <p class="text-sm font-semibold text-gray-900 leading-snug truncate">{{ $item['name'] }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $item['size'] }} × {{ $item['qty'] }}</p>
+                                <p class="text-sm font-semibold text-gray-900 leading-snug truncate">{{ $itemName }}</p>
+                                <p class="text-xs text-gray-400 mt-0.5">{{ $itemSize }} × {{ $itemQty }}</p>
                             </div>
                             <span class="text-sm font-bold text-gray-900 flex-shrink-0">
-                                Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
+                                Rp {{ number_format($itemPrice * $itemQty, 0, ',', '.') }}
                             </span>
                         </div>
                         @endforeach
@@ -280,10 +279,13 @@
                             <span class="text-gray-500">Ongkos Kirim</span>
                             <span class="font-semibold text-gray-800">Rp {{ number_format($shippingCost, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">PPN (11%)</span>
-                            <span class="font-semibold text-gray-800">Rp {{ number_format($ppn, 0, ',', '.') }}</span>
+                        
+                        @if($voucherDiscount > 0)
+                        <div class="flex justify-between items-center text-green-600">
+                            <span class="font-medium">Diskon Voucher</span>
+                            <span class="font-bold">– Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
                         </div>
+                        @endif
                     </div>
 
                     <hr class="summary-divider">
@@ -318,11 +320,16 @@
 
     // Tampilkan detail rekening saat bank dipilih
     document.getElementById('bankProvider').addEventListener('change', function () {
-        const selected = bankData.find(b => b.value === this.value);
+        const selected = bankData.find(b => {
+            // Support object or array parsing
+            const val = typeof b === 'object' && b !== null && b.value ? b.value : b['value'];
+            return val === this.value;
+        });
+        
         if (selected) {
-            document.getElementById('bankDetailName').textContent   = selected.label;
-            document.getElementById('bankDetailNumber').textContent = selected.number;
-            document.getElementById('bankDetailHolder').textContent = selected.name;
+            document.getElementById('bankDetailName').textContent   = selected.label || selected['label'];
+            document.getElementById('bankDetailNumber').textContent = selected.number || selected['number'];
+            document.getElementById('bankDetailHolder').textContent = selected.name || selected['name'];
             document.getElementById('bankDetail').classList.remove('hidden');
             this.classList.remove('is-invalid');
             document.getElementById('bankErrorMsg').classList.add('hidden');
@@ -390,7 +397,15 @@
             uploadZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        if (valid) this.submit();
+        if (valid) {
+            // Animasi Loading
+            const btn = this.querySelector('.continue-btn');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengunggah...';
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+            
+            this.submit();
+        }
     });
 </script>
 @endpush

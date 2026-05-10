@@ -50,35 +50,13 @@
 
 @section('content')
 
-@php
-// Data dummy (Menyesuaikan dengan inputan user dari form sebelumnya nanti)
-$cartItems = collect([
-    ['id'=>1,'name'=>'TANKEN | Celana Pendek Wanita Nylon Crinkle','sku'=>'TKN-190','image'=>'men-home2.jpg','size'=>'M', 'color'=>'Black', 'qty'=>1,'price'=>129000],
-]);
-$shippingAddress = [
-    'name' => 'Aretta',
-    'address' => 'Bitung Sari',
-    'city_zip' => 'Bogor, Indonesia 12720',
-    'phone' => '0896661119737'
-];
-
-$PPN_RATE      = 0.11;
-$shippingCost  = 130000; 
-$biayaLayanan  = 2000;   
-
-$subtotal      = collect($cartItems)->sum(fn($i) => $i['price'] * $i['qty']);
-$ppn           = round($subtotal * $PPN_RATE);
-$total         = $subtotal + $ppn + $shippingCost + $biayaLayanan;
-@endphp
-
 <div class="bg-white min-h-screen">
     <div class="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 py-6 sm:py-10">
 
-        {{-- Breadcrumb --}}
         <p class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-400 mb-1 sm:mb-2">Pembelian</p>
         <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6 sm:mb-8">Checkout</h1>
 
-        {{-- ===== STEP INDICATOR (SESUAI SCREENSHOT PAYMENT SEBELUMNYA) ===== --}}
+        {{-- ===== STEP INDICATOR ===== --}}
         <div class="flex items-start mb-10 w-full">
             <div class="step-item">
                 <div class="step-box done"><i class="fa-solid fa-check"></i></div>
@@ -119,16 +97,15 @@ $total         = $subtotal + $ppn + $shippingCost + $biayaLayanan;
                     <div class="review-box">
                         <div class="flex flex-col gap-4">
                             @foreach($cartItems as $item)
-                            @php $imgPath = isset($item['image']) ? asset('images/'.$item['image']) : null; @endphp
                             <div class="flex items-center gap-4">
-                                @if($imgPath)
-                                    <img src="{{ $imgPath }}" alt="{{ $item['name'] }}" class="w-16 h-20 object-cover rounded-md bg-gray-100 flex-shrink-0">
+                                @if(isset($item['image']) && $item['image'])
+                                    <img src="{{ $item['image'] }}" onerror="this.onerror=null;this.src='{{ asset('images/men-home.jpg') }}';" alt="{{ $item['name'] }}" class="w-16 h-20 object-cover rounded-md bg-gray-100 flex-shrink-0">
                                 @else
                                     <div class="w-16 h-20 rounded-md bg-gray-100 flex-shrink-0"></div>
                                 @endif
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-gray-900 leading-snug truncate">{{ $item['name'] }}</p>
-                                    <p class="text-xs text-gray-400 mt-1">{{ $item['size'] }} / {{ $item['color'] }} × {{ $item['qty'] }}</p>
+                                    <p class="text-xs text-gray-400 mt-1">Ukuran: {{ $item['size'] }} × {{ $item['qty'] }}</p>
                                 </div>
                                 <span class="text-sm font-bold text-gray-900 flex-shrink-0">
                                     Rp {{ number_format($item['price'] * $item['qty'], 0, ',', '.') }}
@@ -140,10 +117,10 @@ $total         = $subtotal + $ppn + $shippingCost + $biayaLayanan;
                     </div>
 
                     {{-- BUTTONS ACTION --}}
-                    <form action="{{ route('checkout.place-order') }}" method="POST">
+                    <form action="{{ route('pelanggan.checkout.place-order') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-2 gap-3 sm:gap-4 mt-8">
-                            <a href="{{ route('checkout.payment') }}" class="back-btn flex items-center justify-center gap-2">
+                            <a href="{{ route('pelanggan.checkout.payment') }}" class="back-btn flex items-center justify-center gap-2">
                                 <i class="fa-solid fa-arrow-left text-xs hidden sm:inline-block"></i> Kembali
                             </a>
                             <button type="submit" class="continue-btn">
@@ -163,10 +140,9 @@ $total         = $subtotal + $ppn + $shippingCost + $biayaLayanan;
 
                     <div class="flex flex-col gap-3 mb-4">
                         @foreach($cartItems as $item)
-                        @php $imgPath = isset($item['image']) ? asset('images/'.$item['image']) : null; @endphp
                         <div class="flex items-center gap-3">
-                            @if($imgPath)
-                                <img src="{{ $imgPath }}" alt="{{ $item['name'] }}" class="w-10 h-12 sm:w-12 sm:h-14 object-cover rounded-md bg-gray-100 flex-shrink-0">
+                            @if(isset($item['image']) && $item['image'])
+                                <img src="{{ $item['image'] }}" onerror="this.onerror=null;this.src='{{ asset('images/men-home.jpg') }}';" alt="{{ $item['name'] }}" class="w-10 h-12 sm:w-12 sm:h-14 object-cover rounded-md bg-gray-100 flex-shrink-0">
                             @else
                                 <div class="w-10 h-12 sm:w-12 sm:h-14 rounded-md bg-gray-100 flex-shrink-0"></div>
                             @endif
@@ -192,14 +168,14 @@ $total         = $subtotal + $ppn + $shippingCost + $biayaLayanan;
                             <span class="text-gray-500">Ongkos Kirim</span>
                             <span class="font-semibold text-gray-800">Rp {{ number_format($shippingCost, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">Biaya Layanan</span>
-                            <span class="font-semibold text-gray-800">Rp {{ number_format($biayaLayanan, 0, ',', '.') }}</span>
+                        
+                        {{-- Row Info Diskon Voucher --}}
+                        @if($voucherDiscount > 0)
+                        <div class="flex justify-between items-center text-green-600">
+                            <span class="font-medium">Diskon Voucher</span>
+                            <span class="font-bold">– Rp {{ number_format($voucherDiscount, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500">PPN (11%)</span>
-                            <span class="font-semibold text-gray-800">Rp {{ number_format($ppn, 0, ',', '.') }}</span>
-                        </div>
+                        @endif
                     </div>
 
                     <hr class="summary-divider">

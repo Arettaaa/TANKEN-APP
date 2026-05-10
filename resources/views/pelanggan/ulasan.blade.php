@@ -91,13 +91,16 @@
                         <label class="text-[10px] font-bold tracking-widest uppercase text-gray-400 block mb-2">
                             Komentar <span class="font-normal text-gray-300">(opsional)</span>
                         </label>
+                        {{-- ID dtambahkan untuk target JS, maxlength diubah ke 100 --}}
                         <textarea
+                            id="comment-{{ $loop->index }}"
                             name="reviews[{{ $loop->index }}][comment]"
                             rows="3"
-                            maxlength="500"
+                            maxlength="100"
                             placeholder="Ceritakan pengalamanmu dengan produk ini..."
                             class="w-full border border-gray-200 rounded-md px-4 py-3 text-sm text-gray-700 focus:outline-none focus:border-gray-900 resize-none transition-colors placeholder:text-gray-300"></textarea>
-                        <p class="text-[10px] text-gray-300 text-right mt-1">Maks. 500 karakter</p>
+                        {{-- Tempat tampil counter karakter dinamis --}}
+                        <p id="char-count-{{ $loop->index }}" class="text-[10px] text-gray-400 text-right mt-1 font-medium">0/100 karakter</p>
                     </div>
                 </div>
                 @else
@@ -185,6 +188,27 @@ document.querySelectorAll('[id^="stars-"]').forEach(container => {
                 l.querySelector('i').classList.toggle('text-gray-200', j > val);
             });
         });
+    });
+});
+
+// Character Counter Dynamic
+document.querySelectorAll('textarea[id^="comment-"]').forEach(textarea => {
+    const index = textarea.id.split('-')[1];
+    const counter = document.getElementById(`char-count-${index}`);
+
+    // Inisialisasi awal kalau-kalau ada value bawaan
+    counter.textContent = `${textarea.value.length}/100 karakter`;
+
+    // Event listener setiap kali pengguna mengetik
+    textarea.addEventListener('input', function() {
+        counter.textContent = `${this.value.length}/100 karakter`;
+        
+        // Opsional: Bikin teks jadi merah kalau udah mentok 100
+        if (this.value.length >= 100) {
+            counter.classList.replace('text-gray-400', 'text-red-500');
+        } else {
+            counter.classList.replace('text-red-500', 'text-gray-400');
+        }
     });
 });
 </script>

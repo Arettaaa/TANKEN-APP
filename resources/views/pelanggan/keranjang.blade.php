@@ -108,12 +108,10 @@
         font-weight: 600;
         outline: none;
         transition: border-color 0.2s;
-        /* Fix angka kurang tengah untuk input number */
         -moz-appearance: textfield; 
     }
     .qty-input:focus { border-color: #111; }
     
-    /* Menyembunyikan panah/spinner default browser agar angka benar-benar di tengah */
     .qty-input::-webkit-outer-spin-button,
     .qty-input::-webkit-inner-spin-button {
         -webkit-appearance: none;
@@ -198,12 +196,10 @@
     }
     .voucher-trigger:hover { border-color: #111; }
     
-    /* Custom Scrollbar for Inline Voucher List */
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-    /* Custom Radio for Voucher */
     .voucher-radio-wrap {
         border: 1.5px solid #e5e7eb;
         border-radius: 8px;
@@ -259,18 +255,7 @@
 @section('content')
 
 @php
-// DATA DUMMY (Abaikan jika data dikirim dari Controller)
-$cartItems = $cartItems ?? collect([
-    [
-        'id' => 1,
-        'name' => 'Sport Active Joggers',
-        'image' => asset('images/men-home2.jpg'), // URL sudah full untuk mockup
-        'size' => 'M',
-        'price' => 799000,
-        'qty' => 1,
-        'checked' => true,
-    ],
-]);
+$cartItems = $cartItems ?? collect([]);
 
 // Hitung total item terpilih
 $selectedItems = collect($cartItems)->where('checked', true);
@@ -278,11 +263,10 @@ $totalQty = $selectedItems->sum('qty');
 
 // Subtotal murni (harga × qty)
 $subtotalBefore = $selectedItems->sum(fn($i) => $i['price'] * $i['qty']);
-
-// Total sementara sama dengan subtotal (PPN & Layanan dihapus)
 $total = $subtotalBefore;
 
-$totalCartCount = collect($cartItems)->sum('qty');
+// Total absolute qty (seluruh item)
+$absoluteTotalQty = collect($cartItems)->sum('qty');
 @endphp
 
 {{-- ===== HERO BANNER ===== --}}
@@ -292,7 +276,7 @@ $totalCartCount = collect($cartItems)->sum('qty');
         <p class="text-xs font-bold tracking-widest uppercase text-white/50 mb-2">Pilihan Kamu</p>
         <h1 class="cart-hero-title">Keranjang Belanja</h1>
         <p class="text-sm text-white/60 mt-2 font-medium" id="heroCartCount">
-            {{ $totalCartCount }} item di keranjangmu
+            {{ $absoluteTotalQty }} item di keranjangmu
         </p>
     </div>
 </section>
@@ -307,12 +291,11 @@ $totalCartCount = collect($cartItems)->sum('qty');
             {{-- ===== KIRI: ITEM LIST ===== --}}
             <div class="flex-1 min-w-0">
 
-                {{-- Select All bar --}}
                 <div class="bg-white border border-gray-200 rounded-lg px-4 py-3 mb-4 flex items-center gap-3">
                     <input type="checkbox" class="custom-check" id="selectAll" onchange="toggleSelectAll(this)">
                     <label for="selectAll" class="text-sm font-semibold text-gray-700 cursor-pointer select-none">
                         Pilih Semua
-                        <span id="selectCount" class="text-gray-400 font-normal">({{ $totalQty }} dari {{ $totalCartCount }} terpilih)</span>
+                        <span id="selectCount" class="text-gray-400 font-normal">({{ $totalQty }} terpilih)</span>
                     </label>
                     <button class="ml-auto text-xs text-red-400 font-semibold hover:text-red-600 transition-colors"
                         onclick="openDeleteModal('multiple')">
@@ -320,23 +303,16 @@ $totalCartCount = collect($cartItems)->sum('qty');
                     </button>
                 </div>
 
-                {{-- Item cards --}}
                 <div class="flex flex-col gap-3" id="cartList">
 
                     @foreach($cartItems as $idx => $item)
                     <div class="cart-item-card bg-white" id="item-{{ $item['id'] }}" data-id="{{ $item['id'] }}"
                         data-price="{{ $item['price'] }}">
 
-                        {{-- Checkbox kiri --}}
                         <input type="checkbox" class="custom-check item-check" {{ $item['checked'] ? 'checked' : '' }}
                             onchange="updateSummary()">
 
-                        {{-- Gambar --}}
-                        @php
-                            // Mendukung langsung URL/Path dari Database tanpa memodifikasinya
-                            $imgPath = $item['image'] ?? null;
-                        @endphp
-                        
+                        @php $imgPath = $item['image'] ?? null; @endphp
                         @if($imgPath)
                         <img src="{{ $imgPath }}" 
                              onerror="this.onerror=null;this.src='{{ asset('images/men-home.jpg') }}';" 
@@ -352,24 +328,19 @@ $totalCartCount = collect($cartItems)->sum('qty');
                         </div>
                         @endif
 
-                        {{-- Info --}}
                         <div class="flex-1 min-w-0">
                             <h3 class="font-bold text-gray-900 text-sm leading-snug mb-2">{{ $item['name'] }}</h3>
 
                             <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-3">
-                                <span>
-                                    <span class="font-semibold text-gray-700">Ukuran:</span> {{ $item['size'] }}
-                                </span>
+                                <span><span class="font-semibold text-gray-700">Ukuran:</span> {{ $item['size'] }}</span>
                             </div>
 
-                            {{-- Harga Murni (Tanpa PPN) --}}
                             <div class="mb-3">
                                 <span class="font-bold text-gray-900 text-base">
                                     Rp {{ number_format($item['price'], 0, ',', '.') }}
                                 </span>
                             </div>
 
-                            {{-- Qty stepper --}}
                             <div class="flex items-center gap-2">
                                 <button class="qty-btn" onclick="changeQty({{ $item['id'] }}, -1)" {{ $item['qty'] <=1
                                     ? 'disabled' : '' }}>
@@ -391,18 +362,13 @@ $totalCartCount = collect($cartItems)->sum('qty');
                             </div>
                         </div>
 
-                        {{-- Delete --}}
                         <button class="delete-btn" onclick="openDeleteModal('single', {{ $item['id'] }})" title="Hapus">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" width="16" height="16">
                                 <polyline points="3 6 5 6 21 6" />
                                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                                <path d="M10 11v6" />
-                                <path d="M14 11v6" />
-                                <path d="M9 6V4h6v2" />
+                                <path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4h6v2" />
                             </svg>
                         </button>
-
                     </div>
                     @endforeach
 
@@ -412,35 +378,28 @@ $totalCartCount = collect($cartItems)->sum('qty');
             {{-- ===== KANAN: ORDER SUMMARY ===== --}}
             <div class="w-full lg:w-80 flex-shrink-0">
                 <div class="summary-card bg-white">
-
                     <h2 class="font-extrabold text-gray-900 text-lg mb-5">Ringkasan Pesanan</h2>
 
-                    {{-- Rows --}}
                     <div class="flex flex-col gap-3 text-sm">
-
                         <div class="flex justify-between items-center">
                             <span class="text-gray-500">Subtotal (<span id="summaryQty">{{ $totalQty }}</span> item)</span>
                             <span class="font-semibold text-gray-900" id="summarySubtotal">
                                 Rp {{ number_format($subtotalBefore, 0, ',', '.') }}
                             </span>
                         </div>
-
                         <div class="flex justify-between items-center">
                             <span class="text-gray-500">Ongkos Kirim</span>
                             <span class="font-semibold text-gray-400 text-xs italic">Dihitung saat checkout</span>
                         </div>
-
-                        {{-- Row Info Diskon Voucher --}}
                         <div id="voucherRow" class="hidden flex justify-between items-center text-green-600">
                             <span class="flex items-center gap-1">Diskon Voucher</span>
                             <span class="font-bold" id="voucherDiscount">– Rp 0</span>
                         </div>
-
                     </div>
 
                     <hr class="summary-divider">
 
-                    {{-- VOUCHER INLINE (ACCORDION) --}}
+                    {{-- VOUCHER INLINE --}}
                     <div class="mb-6">
                         <button type="button" class="voucher-trigger" onclick="toggleVoucherSection()">
                             <div class="flex items-center gap-3">
@@ -457,10 +416,7 @@ $totalCartCount = collect($cartItems)->sum('qty');
                             </svg>
                         </button>
 
-                        {{-- Collapsible Area --}}
                         <div id="voucherCollapsible" class="hidden mt-3 border border-gray-100 rounded-lg p-4 bg-gray-50/50">
-                            
-                            {{-- Input Manual --}}
                             <div class="flex">
                                 <input type="text" id="manualVoucherInput" class="w-full px-3 py-2.5 border border-gray-200 rounded-l-md text-xs font-semibold uppercase outline-none focus:border-black transition-colors" placeholder="KODE VOUCHER">
                                 <button type="button" onclick="applyManualVoucher()" class="px-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-r-md hover:bg-gray-800 transition-colors whitespace-nowrap">Terapkan</button>
@@ -473,10 +429,7 @@ $totalCartCount = collect($cartItems)->sum('qty');
                                 <button onclick="clearVoucher()" class="text-[10px] font-bold text-red-500 hover:text-red-700 hidden" id="clearVoucherBtn">HAPUS</button>
                             </div>
                             
-                            {{-- Daftar Voucher (Radio) --}}
                             <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-                                
-                                {{-- Mockup Voucher 1 --}}
                                 <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
                                     <input type="radio" name="voucher_selection" class="custom-radio" value="TANKEN50" data-label="Diskon Spesial" data-discount="50000">
                                     <div class="flex-1">
@@ -484,8 +437,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
                                         <p class="text-[11px] text-gray-500 leading-relaxed">Tanpa minimal belanja. Berlaku untuk semua produk.</p>
                                     </div>
                                 </label>
-
-                                {{-- Mockup Voucher 2 --}}
                                 <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
                                     <input type="radio" name="voucher_selection" class="custom-radio" value="HEMAT100" data-label="Promo Hemat" data-discount="100000">
                                     <div class="flex-1">
@@ -493,12 +444,10 @@ $totalCartCount = collect($cartItems)->sum('qty');
                                         <p class="text-[11px] text-gray-500 leading-relaxed">Min. belanja Rp 1.000.000. Pengguna baru.</p>
                                     </div>
                                 </label>
-
                             </div>
                         </div>
                     </div>
 
-                    {{-- Total --}}
                     <div class="flex justify-between items-center mb-6">
                         <span class="font-extrabold text-gray-900 text-base">Total</span>
                         <span class="font-extrabold text-gray-900 text-xl" id="summaryTotal">
@@ -515,16 +464,13 @@ $totalCartCount = collect($cartItems)->sum('qty');
                         </button>
                     </form>
                     
-                    {{-- Lanjut belanja --}}
                     <a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}"
                         class="block w-full text-center border border-gray-300 text-gray-700 text-xs font-bold tracking-widest uppercase py-3.5 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors">
                         Lanjut Belanja
                     </a>
 
-                    {{-- Info aman --}}
                     <div class="flex items-center justify-center gap-1.5 mt-4 text-xs text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.6" width="13" height="13">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="13" height="13">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
                         Transaksi aman & terenkripsi
@@ -532,11 +478,9 @@ $totalCartCount = collect($cartItems)->sum('qty');
 
                 </div>
             </div>
-
         </div>
 
         @else
-        {{-- ===== EMPTY CART ===== --}}
         <div class="bg-white min-h-[400px] flex flex-col items-center justify-center py-20 text-center">
             <div class="w-24 h-24 border border-gray-200 rounded-lg flex items-center justify-center mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#d1d5db"
@@ -563,21 +507,16 @@ $totalCartCount = collect($cartItems)->sum('qty');
     class="modal-overlay fixed inset-0 z-[150] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
     <div class="modal-content w-full max-w-[340px] bg-white rounded-2xl shadow-2xl p-6 text-center">
         <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                stroke-width="2" class="w-6 h-6 text-red-500">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-red-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-2">Hapus Produk?</h3>
         <p class="text-sm text-gray-500 mb-6" id="deleteModalText">Yakin ingin menghapus produk ini dari keranjang?</p>
 
         <div class="flex gap-3">
-            <button onclick="closeDeleteModal()"
-                class="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Batal</button>
-            <button onclick="executeDelete()"
-                class="flex-1 py-2.5 bg-red-600 rounded-lg text-sm font-semibold text-white hover:bg-red-700 transition-colors">Ya,
-                Hapus</button>
+            <button onclick="closeDeleteModal()" class="flex-1 py-2.5 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Batal</button>
+            <button onclick="executeDelete()" class="flex-1 py-2.5 bg-red-600 rounded-lg text-sm font-semibold text-white hover:bg-red-700 transition-colors">Ya, Hapus</button>
         </div>
     </div>
 </div>
@@ -586,24 +525,21 @@ $totalCartCount = collect($cartItems)->sum('qty');
 
 @push('scripts')
 <script>
-    // ========== KONSTANTA ==========
     let currentVoucherDiscount = 0; 
     let activeVoucherCode = '';
     let activeVoucherLabel = '';
 
-    // Harga base per item (dari PHP ke JS)
     const itemPrices = {
         @foreach($cartItems as $item)
         {{ $item['id'] }}: {{ $item['price'] }},
         @endforeach
     };
 
-    // ========== FORMAT RUPIAH ==========
     function formatRp(val) {
         return 'Rp ' + Math.round(val).toLocaleString('id-ID');
     }
 
-    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
         const checked = document.querySelectorAll('.item-check:checked');
         if (checked.length === 0) {
             e.preventDefault();
@@ -621,52 +557,52 @@ $totalCartCount = collect($cartItems)->sum('qty');
             container.appendChild(input);
         });
         
-        // Simpan nilai diskon voucher ke session storage agar bisa dibaca di halaman checkout
+        // Simpan nilai diskon voucher ke session storage
         sessionStorage.setItem('tanken_voucher_discount', currentVoucherDiscount);
     });
 
-    // ========== UPDATE SUMMARY (Biasa + Integrasi Navbar) ==========
+    // ========== UPDATE SUMMARY ==========
     function updateSummary() {
         const checks = document.querySelectorAll('.item-check');
         let subtotalBefore = 0;
         let totalQty = 0;
+        let absoluteTotalQty = 0; // Total dari seluruh qty, terlepas dari ceklis (untuk hero banner)
 
         checks.forEach(chk => {
             const card = chk.closest('.cart-item-card');
             card.classList.toggle('is-checked', chk.checked);
 
-            if (!chk.checked) return;
             const id    = parseInt(card.dataset.id);
             const qty   = parseInt(document.getElementById('qty-' + id)?.value || 1);
+            
+            absoluteTotalQty += qty; // Selalu dihitung untuk hero banner
+
+            if (!chk.checked) return;
             const price = itemPrices[id] || 0;
             subtotalBefore += price * qty;
             totalQty += qty;
         });
 
-        // Hitung total murni dikurangi voucher (PPN dan Layanan dihapus)
         let total = subtotalBefore - currentVoucherDiscount;
         if (total < 0) total = 0;
 
-        // Update angka di Ringkasan Pesanan
         document.getElementById('summaryQty').textContent      = totalQty;
         document.getElementById('summarySubtotal').textContent = formatRp(subtotalBefore);
         document.getElementById('summaryTotal').textContent    = formatRp(total);
         document.getElementById('checkoutQty').textContent     = totalQty;
 
-        // Update teks Select All & Hero Banner (jumlah macam item)
         const checkedCount = Array.from(checks).filter(c => c.checked).length;
-        const allCount     = checks.length;
+        const allCount     = checks.length; // Jumlah baris (macam barang)
         
         if (document.getElementById('selectCount')) {
-            document.getElementById('selectCount').textContent = '(' + checkedCount + ' dari ' + allCount + ' terpilih)';
+            document.getElementById('selectCount').textContent = '(' + totalQty + ' terpilih)';
         }
         
-        // Update hero banner subtitle (jumlah macam item di keranjang)
+        // Hero banner = jumlah seluruh QTY barang (misal 5 + 1 = 6)
         if (document.getElementById('heroCartCount')) {
-            document.getElementById('heroCartCount').textContent = allCount + ' item di keranjangmu';
+            document.getElementById('heroCartCount').textContent = absoluteTotalQty + ' item di keranjangmu';
         }
 
-        // Checkout button state
         const checkoutBtn = document.getElementById('checkoutBtn');
         if (totalQty === 0) {
             checkoutBtn.classList.add('opacity-40', 'pointer-events-none');
@@ -674,32 +610,26 @@ $totalCartCount = collect($cartItems)->sum('qty');
             checkoutBtn.classList.remove('opacity-40', 'pointer-events-none');
         }
 
-        // Master checkbox state
         const masterChk = document.getElementById('selectAll');
         if (masterChk) {
             masterChk.checked       = checkedCount === allCount && allCount > 0;
             masterChk.indeterminate = checkedCount > 0 && checkedCount < allCount;
         }
 
-        // ==========================================
-        // UPDATE BADGE NAVBAR REAL-TIME 🔥
-        // ==========================================
+        // Navbar badge = hanya jumlah baris / varian (misal ada 2 macam ukuran/tipe)
         const navbarBadge = document.getElementById('cart-badge');
         if (navbarBadge) {
             if (allCount > 0) {
-                // Tampilkan badge kalau ada barang (menampilkan jumlah macam barang)
                 navbarBadge.textContent = allCount > 99 ? '99+' : allCount;
                 navbarBadge.classList.remove('hidden');
-                navbarBadge.style.display = ''; // fallback
+                navbarBadge.style.display = '';
             } else {
-                // Sembunyikan badge kalau keranjang kosong murni
                 navbarBadge.classList.add('hidden');
-                navbarBadge.style.display = 'none'; // fallback
+                navbarBadge.style.display = 'none';
             }
         }
     }
 
-    // ========== QTY ==========
     function changeQty(id, delta) {
         const input = document.getElementById('qty-' + id);
         let val = parseInt(input.value) + delta;
@@ -735,7 +665,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
         }).catch(() => {});
     }
 
-    // ========== MODAL HAPUS ==========
     let deleteMode = ''; 
     let deleteId = null;
 
@@ -813,7 +742,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
         if (remaining === 0) window.location.reload();
     }
 
-    // ========== VOUCHER INLINE (ACCORDION) ==========
     function toggleVoucherSection() {
         const coll = document.getElementById('voucherCollapsible');
         const chev = document.getElementById('voucherChevron');
@@ -828,15 +756,10 @@ $totalCartCount = collect($cartItems)->sum('qty');
     }
 
     function selectVoucherRadio(labelEl) {
-        // Hilangkan styling active dari semua radio wrapper
         document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
-        // Tambahkan ke yang diklik
         labelEl.classList.add('selected');
-        // Bersihkan manual input
         document.getElementById('manualVoucherInput').value = '';
         document.getElementById('inlineVoucherMsg').classList.add('hidden');
-        
-        // Langsung terapkan voucher saat di-klik
         confirmVoucherSelection(labelEl.querySelector('input'));
     }
 
@@ -845,7 +768,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
         const code = input.value.toUpperCase().trim();
         const msg = document.getElementById('inlineVoucherMsg');
         
-        // Bersihkan radio buttons jika user mengetik manual
         document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
         document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
 
@@ -855,11 +777,9 @@ $totalCartCount = collect($cartItems)->sum('qty');
             return;
         }
 
-        // Mockup Check untuk input manual
         if(code === 'TANKEN50') {
             msg.textContent = '✓ Voucher diterapkan: Potongan Rp 50.000';
             msg.className = 'mt-2 text-[11px] text-green-600 font-bold block';
-            
             confirmVoucherSelection(null, { code: 'TANKEN50', discount: 50000, label: 'Diskon Spesial' });
         } else {
             msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
@@ -884,7 +804,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
             return;
         }
 
-        // Terapkan ke UI luar
         currentVoucherDiscount = discount;
         activeVoucherCode = code;
         activeVoucherLabel = label;
@@ -912,7 +831,6 @@ $totalCartCount = collect($cartItems)->sum('qty');
         document.getElementById('voucherRow').classList.add('hidden');
         document.getElementById('clearVoucherBtn').classList.add('hidden');
         
-        // Reset inputs
         document.getElementById('manualVoucherInput').value = '';
         document.getElementById('inlineVoucherMsg').classList.add('hidden');
         document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
@@ -921,7 +839,8 @@ $totalCartCount = collect($cartItems)->sum('qty');
         updateSummary();
     }
 
-    // Init update summary pertama kali halaman di-load
-    updateSummary();
+    if (document.getElementById('cartList')) {
+        updateSummary();
+    }
 </script>
 @endpush
