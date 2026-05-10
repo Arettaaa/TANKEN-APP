@@ -77,26 +77,6 @@
         background-color: #fef2f2;
     }
 
-    .label-pill {
-        padding: 8px 20px;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        border: 1px solid #e5e7eb;
-        color: #6b7280;
-        background: #fff;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .label-pill.active {
-        background: #111;
-        border-color: #111;
-        color: #fff;
-    }
-
     .region-dropdown {
         display: none;
         position: absolute;
@@ -233,11 +213,6 @@
                     <span
                         class="bg-black text-white text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded">Utama</span>
                     @endif
-                    @if($addr->label)
-                    <span
-                        class="border border-gray-300 text-gray-600 text-[9px] font-bold tracking-widest uppercase px-2 py-1 rounded">{{
-                        $addr->label }}</span>
-                    @endif
                 </div>
             </div>
 
@@ -294,18 +269,7 @@
                 <input type="hidden" id="addrCityId" value="">
                 <input type="hidden" id="addrId">
 
-                <div class="mb-8">
-                    <label class="input-label mb-3 block">Simpan Sebagai</label>
-                    <div class="flex items-center gap-3">
-                        <button type="button" onclick="setLabel('Rumah')" id="btnLabelRumah"
-                            class="label-pill">Rumah</button>
-                        <button type="button" onclick="setLabel('Kantor')" id="btnLabelKantor"
-                            class="label-pill">Kantor</button>
-                    </div>
-                    <input type="hidden" id="addrLabel" value="">
-                </div>
-
-                <div class="mb-8">
+                <div class="mb-8 mt-2">
                     <h4
                         class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2 border-b border-gray-100 pb-2">
                         <i class="fa-regular fa-address-book text-gray-400"></i> Informasi Kontak
@@ -337,9 +301,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
                         <div class="input-group md:col-span-2 relative">
                             <label class="input-label">Provinsi, Kota, Kecamatan, Kelurahan</label>
+                            {{-- Ditambahkan (event) pada onclick --}}
                             <div id="regionTrigger"
                                 class="form-input-box cursor-pointer flex justify-between items-center"
-                                onclick="toggleRegionDropdown()">
+                                onclick="toggleRegionDropdown(event)">
                                 <span id="regionDisplayText" class="text-gray-400 truncate pr-4">Pilih Wilayah</span>
                                 <i class="fa-solid fa-chevron-down text-gray-400 text-xs"></i>
                             </div>
@@ -385,7 +350,7 @@
                                 class="fa-solid fa-circle-exclamation mr-1"></i>Jalan/Gedung wajib diisi.</p>
                     </div>
 
-                    <div class="input-group">
+                    <div class="input-group mb-8">
                         <label class="input-label">Detail Lainnya (Opsional)</label>
                         <input type="text" id="addrDetails" class="form-input-box"
                             placeholder="Contoh: Patokan dekat minimarket, pagar hitam">
@@ -446,8 +411,16 @@
         });
     });
 
+    // Menutup modal jika klik di luar modal-content
     window.addEventListener('click', function(event) {
         if (event.target == modal) closeModal();
+    });
+
+    // Event listener global untuk menutup Dropdown Wilayah jika klik di area kosong
+    document.addEventListener('click', (e) => {
+        if (regionDropdown.classList.contains('show') && !regionTrigger.contains(e.target) && !regionDropdown.contains(e.target)) {
+            closeRegionDropdown();
+        }
     });
 
     function openModal(mode, data = null) {
@@ -457,7 +430,6 @@
 
         form.reset();
         document.getElementById('addrId').value = '';
-        setLabel('');
         closeRegionDropdown();
 
         currentStep = 0; currentListData = [];
@@ -477,7 +449,6 @@
             document.getElementById('regionDisplayText').classList.replace('text-gray-400', 'text-gray-900');
             document.getElementById('addrStreet').value  = data.street;
             document.getElementById('addrDetails').value = data.details || '';
-            if(data.label) setLabel(data.label);
         } else {
             document.getElementById('modalTitle').innerText = 'Tambah Alamat Baru';
             document.getElementById('regionDisplayText').innerText = 'Pilih Wilayah';
@@ -536,7 +507,6 @@
         formData.append('postal',  document.getElementById('addrPostal').value);
         formData.append('street',  document.getElementById('addrStreet').value);
         formData.append('details', document.getElementById('addrDetails').value);
-        formData.append('label',   document.getElementById('addrLabel').value);
         formData.append('city_id', document.getElementById('addrCityId').value);
 
         btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> MENYIMPAN...';
@@ -577,7 +547,26 @@
     let regionState = { prov: {id:'', name:''}, kota: {id:'', name:''}, kec: {id:'', name:''}, kel: {id:'', name:''} };
     let currentListData = [];
 
-    window.toggleRegionDropdown = function() {
+    // Fungsi untuk Update Text yang Muncul (Real-time update kaya di Checkout)
+    function updateRegionDisplayText() {
+        const parts = [];
+        if (regionState.prov.id) parts.push(regionState.prov.name);
+        if (regionState.kota.id) parts.push(regionState.kota.name);
+        if (regionState.kec.id) parts.push(regionState.kec.name);
+        if (regionState.kel.id) parts.push(regionState.kel.name);
+
+        const displayText = document.getElementById('regionDisplayText');
+        if (parts.length > 0) {
+            displayText.innerText = parts.join(', ');
+            displayText.classList.replace('text-gray-400', 'text-gray-900');
+        } else {
+            displayText.innerText = 'Pilih Wilayah';
+            displayText.classList.replace('text-gray-900', 'text-gray-400');
+        }
+    }
+
+    window.toggleRegionDropdown = function(e) {
+        if(e) e.stopPropagation(); // Mencegah bubbling event click ke window
         if (regionDropdown.classList.contains('show')) closeRegionDropdown();
         else openRegionDropdown();
     };
@@ -596,32 +585,31 @@
     }
 
     async function loadStepData(step) {
-    listContainer.innerHTML = '<div class="p-6 text-center">Loading...</div>';
+        listContainer.innerHTML = '<div class="p-6 text-center text-xs text-gray-400">Loading...</div>';
 
-    let type = '';
-    let id   = '';
+        let type = '';
+        let id   = '';
 
-    if (step === 0) type = 'provinsi';
-    if (step === 1) { type = 'kota'; id = regionState.prov.id; }
-    if (step === 2) { type = 'kecamatan'; id = regionState.kota.id; }
-    if (step === 3) { type = 'kelurahan'; id = regionState.kec.id; }
+        if (step === 0) type = 'provinsi';
+        if (step === 1) { type = 'kota'; id = regionState.prov.id; }
+        if (step === 2) { type = 'kecamatan'; id = regionState.kota.id; }
+        if (step === 3) { type = 'kelurahan'; id = regionState.kec.id; }
 
-    try {
-        const res = await fetch(`/wilayah?type=${type}&id=${id}`);
-        const json = await res.json();
+        try {
+            const res = await fetch(`/wilayah?type=${type}&id=${id}`);
+            const json = await res.json();
 
-        currentListData = json.value.map(item => ({
-            id: item.id,
-            name: item.name.toUpperCase()
-        }));
+            currentListData = json.value.map(item => ({
+                id: item.id,
+                name: item.name.toUpperCase()
+            }));
 
-        renderList(currentListData);
+            renderList(currentListData);
 
-    } catch (err) {
-        listContainer.innerHTML = `<p class="p-3 text-red-500 text-center">Gagal load data</p>`;
+        } catch (err) {
+            listContainer.innerHTML = `<p class="p-3 text-red-500 text-center text-xs">Gagal load data</p>`;
+        }
     }
-}
-
 
     function renderList(data) {
         listContainer.innerHTML = '';
@@ -633,7 +621,11 @@
             const div = document.createElement('div');
             div.className = 'region-list-item';
             div.innerText = item.name;
-            div.onclick = () => handleSelectRegion(item);
+            // Gunakan e.stopPropagation() untuk mencegah list hilang memicu event penutupan dropdown
+            div.onclick = (e) => {
+                e.stopPropagation(); 
+                handleSelectRegion(item);
+            };
             listContainer.appendChild(div);
         });
     }
@@ -648,17 +640,21 @@
         if (currentStep === 0) {
             regionState.prov = item;
             regionState.kota = {id:'', name:''}; regionState.kec = {id:'', name:''}; regionState.kel = {id:'', name:''};
+            updateRegionDisplayText();
             currentStep = 1; loadStepData(currentStep);
         } else if (currentStep === 1) {
             regionState.kota = item;
             regionState.kec = {id:'', name:''}; regionState.kel = {id:'', name:''};
+            updateRegionDisplayText();
             currentStep = 2; loadStepData(currentStep);
         } else if (currentStep === 2) {
             regionState.kec = item;
             regionState.kel = {id:'', name:''};
+            updateRegionDisplayText();
             currentStep = 3; loadStepData(currentStep);
         } else if (currentStep === 3) {
             regionState.kel = item;
+            updateRegionDisplayText();
             finishRegionSelection();
             return;
         }
@@ -686,26 +682,15 @@
         }
     }
 
-   function finishRegionSelection() {
-    const fullString = `${regionState.kel.name}, ${regionState.kec.name}, ${regionState.kota.name}, ${regionState.prov.name}`;
-    const displayTxt = document.getElementById('regionDisplayText');
-    displayTxt.innerText = fullString;
-    displayTxt.classList.replace('text-gray-400', 'text-gray-900');
-    document.getElementById('addrRegion').value = fullString;
-    document.getElementById('addrCityId').value = 'dist_' + regionState.kec.id;
-    clearError('addrRegion');
-    closeRegionDropdown();
-}
-
-    form.addEventListener('click', (e) => {
-        if(!regionTrigger.contains(e.target) && !regionDropdown.contains(e.target)) closeRegionDropdown();
-    });
-
-    window.setLabel = function(label) {
-        document.getElementById('addrLabel').value = label;
-        document.getElementById('btnLabelRumah').classList.toggle('active', label === 'Rumah');
-        document.getElementById('btnLabelKantor').classList.toggle('active', label === 'Kantor');
-    };
+    function finishRegionSelection() {
+        // Text sudah diset sama updateRegionDisplayText()
+        const fullString = `${regionState.prov.name}, ${regionState.kota.name}, ${regionState.kec.name}, ${regionState.kel.name}`;
+        
+        document.getElementById('addrRegion').value = fullString;
+        document.getElementById('addrCityId').value = 'dist_' + regionState.kec.id;
+        clearError('addrRegion');
+        closeRegionDropdown();
+    }
 
     window.clearError = function(inputId) {
         if (inputId === 'addrRegion') {
