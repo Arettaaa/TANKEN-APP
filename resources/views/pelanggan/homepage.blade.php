@@ -173,7 +173,7 @@
         justify-content: space-between;
         gap: 8px;
     }
-    .copy-btn {
+    .claim-btn {
         cursor: pointer;
         background: #111;
         color: #fff;
@@ -187,8 +187,9 @@
         text-transform: uppercase;
         transition: background 0.2s;
     }
-    .copy-btn:hover { background: #333; }
-    .copy-btn:active { transform: scale(0.95); }
+    .claim-btn:hover:not(:disabled) { background: #333; }
+    .claim-btn:active:not(:disabled) { transform: scale(0.95); }
+    .claim-btn:disabled { cursor: not-allowed; opacity: 0.9; }
 
     /* Spring collection dark section */
     .spring-section {
@@ -423,28 +424,6 @@
     </div>
 </section>
 
-{{-- ===== 5. STATS BAR ===== --}}
-<!-- <section class="bg-white border-y border-gray-100 py-10">
-    <div class="max-w-7xl mx-auto px-6 lg:px-10">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-            @php
-            $stats = [
-                ['num'=>'50K+',  'label'=>'Happy Customers'],
-                ['num'=>'4.9',   'label'=>'Average Rating'],
-                ['num'=>'100%',  'label'=>'Premium Quality'],
-                ['num'=>'24/7',  'label'=>'Customer Support'],
-            ];
-            @endphp
-            @foreach($stats as $stat)
-            <div class="text-center py-4 md:py-0 reveal">
-                <div class="stat-number">{{ $stat['num'] }}</div>
-                <p class="text-xs font-heading font-semibold tracking-widest uppercase text-gray-400 mt-1">{{ $stat['label'] }}</p>
-            </div>
-            @endforeach
-        </div>
-    </div>
-</section> -->
-
 {{-- ===== 6. EXCLUSIVE VOUCHERS ===== --}}
 <section class="bg-gray-50 py-16 md:py-20">
     <div class="max-w-7xl mx-auto px-6 lg:px-10">
@@ -478,7 +457,7 @@
                 <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
                 <div class="code-box">
                     <span>WELCOME20</span>
-                    <button class="copy-btn" onclick="copyCode(this, 'WELCOME20')">COPY</button>
+                    <button class="claim-btn" onclick="claimVoucher(this, 'WELCOME20')">CLAIM</button>
                 </div>
                 <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Dec 31, 2026. T&C apply.</p>
             </div>
@@ -502,7 +481,7 @@
                 <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
                 <div class="code-box">
                     <span>FREESHIP100</span>
-                    <button class="copy-btn" onclick="copyCode(this, 'FREESHIP100')">COPY</button>
+                    <button class="claim-btn" onclick="claimVoucher(this, 'FREESHIP100')">CLAIM</button>
                 </div>
                 <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Dec 31, 2026. T&C apply.</p>
             </div>
@@ -526,7 +505,7 @@
                 <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
                 <div class="code-box">
                     <span>SPRING30</span>
-                    <button class="copy-btn" onclick="copyCode(this, 'SPRING30')">COPY</button>
+                    <button class="claim-btn" onclick="claimVoucher(this, 'SPRING30')">CLAIM</button>
                 </div>
                 <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Jun 30, 2026. T&C apply.</p>
             </div>
@@ -614,32 +593,14 @@
 
 @push('scripts')
 <script>
-    // Copy voucher code
-    function copyCode(btn, code) {
-        navigator.clipboard.writeText(code).then(() => {
-            const orig = btn.textContent;
-            btn.textContent = 'COPIED!';
-            btn.style.background = '#2d7a3a';
-            setTimeout(() => {
-                btn.textContent = orig;
-                btn.style.background = '';
-            }, 1800);
-        }).catch(() => {
-            // Fallback
-            const el = document.createElement('textarea');
-            el.value = code;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            const orig = btn.textContent;
-            btn.textContent = 'COPIED!';
-            btn.style.background = '#2d7a3a';
-            setTimeout(() => {
-                btn.textContent = orig;
-                btn.style.background = '';
-            }, 1800);
-        });
+    // Claim voucher mockup (Frontend only)
+    function claimVoucher(btn, code) {
+        // Nanti di sini bisa sisipkan fetch() ke Backend API untuk memvalidasi klaim
+        
+        // Ubah UI tombol menjadi sukses
+        btn.textContent = 'CLAIMED!';
+        btn.style.background = '#2d7a3a';
+        btn.disabled = true; // Biar tidak diklik berulang kali
     }
 
     // Scroll reveal
