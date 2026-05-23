@@ -518,14 +518,14 @@
 <section class="spring-section">
     <div class="spring-bg"></div>
     <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 py-20 w-full">
-        <p class="text-xs font-semibold tracking-widest uppercase text-white/40 mb-4">Limited Edition</p>
+        <!-- <p class="text-xs font-semibold tracking-widest uppercase text-white/40 mb-4">Limited Edition</p> -->
         <h2 class="spring-heading mb-4 text-left">
-            Spring<br>Collection<br>2026
+            Made to<br>move with<br>You
         </h2>
         <p class="text-sm text-white/60 max-w-sm leading-relaxed mb-8">
-            New styles, same premium quality. Up to 30% off select pieces for a limited time.
+            We are here to move with you. Discover premium gear built for absolute freedom.
         </p>
-        <a href="#"
+        <a href="{{ route('pelanggan.katalog') }}"
            class="inline-flex items-center gap-2 border border-white text-white px-7 py-3 text-xs font-heading font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-colors">
             Shop Collection
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" width="12" height="12">
