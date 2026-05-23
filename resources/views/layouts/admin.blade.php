@@ -446,7 +446,7 @@
                             <p class="text-xs text-gray-400 truncate">{{ auth()->user()->email ?? 'admin@tanken.com' }}
                             </p>
                         </div>
-                        <a href="#"
+                        <a href="{{ route('admin.edit-akun') }}"
                             class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="1.8" width="15" height="15">
