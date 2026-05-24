@@ -60,6 +60,10 @@ class PromoController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'value' => preg_replace('/\D/', '', $request->value)
+        ]);
+
         $validated = $request->validate([
             'code'         => 'required|string|unique:vouchers,code',
             'type'         => 'required|in:percentage,fixed',
@@ -80,6 +84,10 @@ class PromoController extends Controller
 
     public function update(Request $request, Voucher $promo)
     {
+        $request->merge([
+            'value' => preg_replace('/\D/', '', $request->value)
+        ]);
+        
         $validated = $request->validate([
             'code'         => 'required|string|unique:vouchers,code,' . $promo->id,
             'type'         => 'required|in:percentage,fixed',

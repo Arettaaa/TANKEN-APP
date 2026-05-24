@@ -174,7 +174,7 @@
             <button onclick="switchTab('reviews')" id="tab-reviews" class="tab-btn pb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-gray-400 border-b-2 border-transparent hover:text-gray-700 transition-colors -mb-px">Ulasan ({{ $reviewCount }})</button>
         </div>
         <div id="content-desc" class="tab-content max-w-2xl">
-            <p class="text-sm text-gray-700 leading-relaxed">{{ $product->description ?? 'Belum ada deskripsi.' }}</p>
+            <p class="text-sm text-gray-700 leading-relaxed">{!! nl2br(e($product->description ?? 'Belum ada deskripsi.')) !!}</p>
         </div>
         <div id="content-reviews" class="tab-content hidden max-w-2xl space-y-6">
             @forelse($product->reviews as $review)
