@@ -7,23 +7,43 @@ use Illuminate\Database\Eloquent\Model;
 class Voucher extends Model
 {
     protected $fillable = [
-        'code', 'description', 'type', 'value', 'min_purchase',
-        'max_discount', 'usage_limit', 'used_count', 'starts_at',
-        'expires_at', 'is_active',
+        'code',
+        'description',
+        'type',
+        'value',
+        'min_purchase',
+        'max_discount',
+        'usage_limit',
+        'quota',
+        'used_count',
+        'starts_at',
+        'expires_at',
+        'is_active',
+         'is_welcome',
+
     ];
 
     protected $casts = [
+        'is_active'  => 'boolean',
         'starts_at'  => 'datetime',
         'expires_at' => 'datetime',
-        'is_active'  => 'boolean',
+        'is_welcome' => 'boolean',
     ];
 
-    public function isValid(): bool
+    public function userVouchers()
     {
-        if (!$this->is_active) return false;
-        if ($this->usage_limit && $this->used_count >= $this->usage_limit) return false;
-        if ($this->starts_at && now()->lt($this->starts_at)) return false;
-        if ($this->expires_at && now()->gt($this->expires_at)) return false;
-        return true;
+        return $this->hasMany(UserVoucher::class);
+    }
+
+    // Sisa kuota yang belum diklaim
+    public function getRemainingQuotaAttribute(): ?int
+    {
+        if (is_null($this->quota)) return null;
+        return max(0, $this->quota - $this->userVouchers()->count());
+    }
+
+    public function getIsExpiredAttribute(): bool
+    {
+        return $this->expires_at && now()->gt($this->expires_at);
     }
 }

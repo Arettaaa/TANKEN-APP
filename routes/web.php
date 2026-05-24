@@ -24,6 +24,7 @@ use App\Http\Controllers\Pelanggan\AddressController;
 use App\Http\Controllers\Pelanggan\WishlistController;
 use App\Http\Controllers\Pelanggan\CartController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
+use App\Http\Controllers\Pelanggan\VoucherController;
 use App\Http\Controllers\Pelanggan\PaymentController as PelangganPaymentController;
 use App\Http\Controllers\Pelanggan\CustomerOrderController;
 use App\Http\Controllers\Pelanggan\ReviewController as PelangganReviewController;
@@ -110,6 +111,9 @@ Route::name('pelanggan.')->group(function () {
         Route::put('/alamat/{address}', [AddressController::class, 'update'])->name('alamat.update');
         Route::delete('/alamat/{address}', [AddressController::class, 'destroy'])->name('alamat.destroy');
         Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
+        
+        Route::get('/voucher', [VoucherController::class, 'index'])->name('profil-voucher');
+
 
         // ==== PAYMENT & REVIEW ====
         Route::get('/checkout/payment',         [PelangganPaymentController::class, 'index'])->name('checkout.payment');

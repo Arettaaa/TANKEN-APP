@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class PromoController extends Controller
 {
@@ -13,21 +12,18 @@ class PromoController extends Controller
     {
         $query = Voucher::query();
 
-        // 1. Search
         if ($search = $request->search) {
             $query->where('code', 'like', "%{$search}%");
         }
 
-        // 2. Filter Tipe
         if ($type = $request->type) {
             $query->where('type', $type);
         }
 
-        // 3. Filter Status (Active, Disabled, Expired)
         if ($status = $request->status) {
             $now = now();
             if ($status === 'active') {
-                $query->where('is_active', true)->where(function($q) use ($now) {
+                $query->where('is_active', true)->where(function ($q) use ($now) {
                     $q->whereNull('expires_at')->orWhere('expires_at', '>', $now);
                 });
             } elseif ($status === 'disabled') {
@@ -37,31 +33,24 @@ class PromoController extends Controller
             }
         }
 
-        $vouchers = $query->latest()->paginate(15)->withQueryString();
+        $vouchers = $query->withCount('userVouchers')->latest()->paginate(15)->withQueryString();
 
-        // KPI Stats
-        $now = now();
-        $activePromos  = Voucher::where('is_active', true)->where(function($q) use ($now) {
+        $now           = now();
+        $activePromos  = Voucher::where('is_active', true)->where(function ($q) use ($now) {
             $q->whereNull('expires_at')->orWhere('expires_at', '>', $now);
         })->count();
-        
         $expiredPromos = Voucher::where('is_active', true)->whereNotNull('expires_at')->where('expires_at', '<=', $now)->count();
-        
         $totalUsage    = Voucher::sum('used_count');
-        
-        // Estimasi kasar total diskon diberikan (dari voucher fixed)
-        $totalDiscount = Voucher::where('type', 'fixed')->get()->sum(function($v) {
-            return $v->used_count * $v->value;
-        });
+        $totalDiscount = Voucher::where('type', 'fixed')->get()->sum(fn($v) => $v->used_count * $v->value);
 
-        // Nama view menyesuaikan dengan file kamu
         return view('admin.promo-voucher', compact('vouchers', 'activePromos', 'expiredPromos', 'totalUsage', 'totalDiscount'));
     }
 
     public function store(Request $request)
     {
         $request->merge([
-            'value' => preg_replace('/\D/', '', $request->value)
+            'value'        => preg_replace('/\D/', '', $request->value),
+            'min_purchase' => preg_replace('/\D/', '', $request->min_purchase ?? '0'),
         ]);
 
         $validated = $request->validate([
@@ -69,14 +58,15 @@ class PromoController extends Controller
             'type'         => 'required|in:percentage,fixed',
             'value'        => 'required|numeric|min:1',
             'min_purchase' => 'nullable|numeric|min:0',
-            'usage_limit'  => 'nullable|numeric|min:1',
+            'quota'        => 'nullable|integer|min:1',
             'expires_at'   => 'nullable|date',
             'description'  => 'nullable|string',
             'is_active'    => 'required|boolean',
+            'is_welcome'   => 'nullable|boolean',
         ]);
 
-        // Default value jika kosong
         $validated['min_purchase'] = $validated['min_purchase'] ?? 0;
+        $validated['is_welcome']   = $request->boolean('is_welcome');
 
         Voucher::create($validated);
         return response()->json(['success' => true]);
@@ -85,21 +75,24 @@ class PromoController extends Controller
     public function update(Request $request, Voucher $promo)
     {
         $request->merge([
-            'value' => preg_replace('/\D/', '', $request->value)
+            'value'        => preg_replace('/\D/', '', $request->value),
+            'min_purchase' => preg_replace('/\D/', '', $request->min_purchase ?? '0'),
         ]);
-        
+
         $validated = $request->validate([
             'code'         => 'required|string|unique:vouchers,code,' . $promo->id,
             'type'         => 'required|in:percentage,fixed',
             'value'        => 'required|numeric|min:1',
             'min_purchase' => 'nullable|numeric|min:0',
-            'usage_limit'  => 'nullable|numeric|min:1',
+            'quota'        => 'nullable|integer|min:1',
             'expires_at'   => 'nullable|date',
             'description'  => 'nullable|string',
             'is_active'    => 'required|boolean',
+            'is_welcome'   => 'nullable|boolean',
         ]);
 
         $validated['min_purchase'] = $validated['min_purchase'] ?? 0;
+        $validated['is_welcome']   = $request->boolean('is_welcome');
 
         $promo->update($validated);
         return response()->json(['success' => true]);

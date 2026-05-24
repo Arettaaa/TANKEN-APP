@@ -87,6 +87,10 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                             Alamat
                         </a>
+                        <a href="{{ route('pelanggan.profil-voucher') }}" class="menu-item {{ request()->routeIs('pelanggan.profil-voucher') ? 'active' : '' }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h.02a2 2 0 012 2M9 5a2 2 0 00-1.712-1.938l-.02-.004a2.001 2.001 0 00-1.814.78M15.612 4.288a2.001 2.001 0 012.814.78l.02.004a2.001 2.001 0 001.814-.78M9.26 17A1.994 1.994 0 0113.28 15h3.44a1.994 1.994 0 012.02 1v1a1.994 1.994 0 01-1.994 1H11.28A1.994 1.994 0 019.26 17z"/></svg>
+                            Voucher
+                        </a>
                         <hr class="border-gray-100 my-1 hidden lg:block">
                         <a href="{{ route('logout') }}" class="menu-item logout hidden lg:flex" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
