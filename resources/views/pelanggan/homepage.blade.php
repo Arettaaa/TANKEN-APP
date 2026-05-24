@@ -438,77 +438,31 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-            {{-- Voucher 1: 20% Off --}}
-            <div class="voucher-card bg-white p-7 reveal">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <span class="voucher-discount">20% OFF</span>
-                        <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
-                            For new customers on their first order above Rp500K
-                        </p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
-                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
-                        </svg>
-                    </div>
+           @forelse($activeVouchers as $v)
+        <div class="voucher-card bg-white p-7 reveal">
+            <div class="flex items-start justify-between mb-3">
+                <div>
+                    <span class="voucher-discount">
+                        {{ $v->type === 'percentage' ? $v->value.'% OFF' : 'Rp '.number_format($v->value,0,',','.').' OFF' }}
+                    </span>
+                    <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
+                        {{ $v->description ?: 'Gunakan kode ini untuk mendapatkan diskon.' }}
+                    </p>
                 </div>
-                <hr class="border-dashed border-gray-200 my-4">
-                <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
-                <div class="code-box">
-                    <span>WELCOME20</span>
-                    <button class="claim-btn" onclick="claimVoucher(this, 'WELCOME20')">CLAIM</button>
-                </div>
-                <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Dec 31, 2026. T&C apply.</p>
             </div>
-
-            {{-- Voucher 2: Free Ship --}}
-            <div class="voucher-card bg-white p-7 reveal">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <span class="voucher-discount">FREE SHIP</span>
-                        <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
-                            Free shipping on all orders over Rp500K, no minimum
-                        </p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
-                            <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-                        </svg>
-                    </div>
-                </div>
-                <hr class="border-dashed border-gray-200 my-4">
-                <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
-                <div class="code-box">
-                    <span>FREESHIP100</span>
-                    <button class="claim-btn" onclick="claimVoucher(this, 'FREESHIP100')">CLAIM</button>
-                </div>
-                <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Dec 31, 2026. T&C apply.</p>
+            <hr class="border-dashed border-gray-200 my-4">
+            <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
+            <div class="code-box">
+                <span>{{ $v->code }}</span>
+                <button class="claim-btn" onclick="claimVoucher(this, '{{ $v->code }}')">CLAIM</button>
             </div>
-
-            {{-- Voucher 3: 30% Off --}}
-            <div class="voucher-card bg-white p-7 reveal">
-                <div class="flex items-start justify-between mb-3">
-                    <div>
-                        <span class="voucher-discount">30% OFF</span>
-                        <p class="text-xs font-body text-gray-500 mt-1 leading-relaxed">
-                            Valid on selected Spring Collection 2026 items
-                        </p>
-                    </div>
-                    <div class="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" width="16" height="16">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-                        </svg>
-                    </div>
-                </div>
-                <hr class="border-dashed border-gray-200 my-4">
-                <p class="text-[0.65rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-2">Promo Code</p>
-                <div class="code-box">
-                    <span>SPRING30</span>
-                    <button class="claim-btn" onclick="claimVoucher(this, 'SPRING30')">CLAIM</button>
-                </div>
-                <p class="text-[0.6rem] text-gray-400 mt-2 font-body">Valid until Jun 30, 2026. T&C apply.</p>
-            </div>
+            <p class="text-[0.6rem] text-gray-400 mt-2 font-body">
+                {{ $v->expires_at ? 'Valid until '.$v->expires_at->format('M d, Y').'. T&C apply.' : 'Tanpa batas waktu.' }}
+            </p>
+        </div>
+        @empty
+        <p class="text-sm text-gray-400">Tidak ada voucher aktif saat ini.</p>
+        @endforelse
 
         </div>
     </div>
@@ -594,14 +548,40 @@
 @push('scripts')
 <script>
     // Claim voucher mockup (Frontend only)
-    function claimVoucher(btn, code) {
-        // Nanti di sini bisa sisipkan fetch() ke Backend API untuk memvalidasi klaim
-        
-        // Ubah UI tombol menjadi sukses
-        btn.textContent = 'CLAIMED!';
-        btn.style.background = '#2d7a3a';
-        btn.disabled = true; // Biar tidak diklik berulang kali
-    }
+   function claimVoucher(btn, code) {
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    fetch('{{ route("pelanggan.voucher.claim") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ code })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            btn.textContent = 'CLAIMED!';
+            btn.style.background = '#2d7a3a';
+        } else {
+            btn.textContent = data.message;
+            btn.style.background = '#dc2626';
+            btn.style.fontSize = '0.55rem';
+            setTimeout(() => {
+                btn.textContent = 'CLAIM';
+                btn.style.background = '#111';
+                btn.style.fontSize = '';
+                btn.disabled = false;
+            }, 2500);
+        }
+    })
+    .catch(() => {
+        btn.textContent = 'Error';
+        btn.disabled = false;
+    });
+}
 
     // Scroll reveal
     const revealEls = document.querySelectorAll('.reveal');

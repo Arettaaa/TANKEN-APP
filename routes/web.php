@@ -58,7 +58,13 @@ Route::redirect('/', '/beranda');
 Route::name('pelanggan.')->group(function () {
 
     Route::get('/beranda', function () {
-        return view('pelanggan.homepage');
+        $activeVouchers = \App\Models\Voucher::where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->get();
+
+        return view('pelanggan.homepage', compact('activeVouchers'));
     })->name('home');
 
     Route::get('/katalog', function () {
@@ -113,6 +119,7 @@ Route::name('pelanggan.')->group(function () {
         Route::post('/alamat/{address}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
         
         Route::get('/voucher', [VoucherController::class, 'index'])->name('profil-voucher');
+        Route::post('/voucher/claim', [VoucherController::class, 'claim'])->name('voucher.claim');
 
 
         // ==== PAYMENT & REVIEW ====
