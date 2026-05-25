@@ -246,6 +246,38 @@
                             <p class="text-xs text-gray-700 font-medium">{{ $order['payment'] }}</p>
                         </div>
                     </div>
+
+                    {{-- Resi Card --}}
+@if($order['status'] !== 'cancelled' && $order['tracking'] && $order['tracking'] !== '-')
+@php
+    $cn = strtolower($order['courier'] ?? '');
+    $trackUrl = str_contains($cn, 'jne') ? 'https://www.jne.co.id/id/tracking/trace'
+        : (str_contains($cn, 'j&t') || str_contains($cn, 'jnt') ? 'https://www.jet.co.id/track'
+        : (str_contains($cn, 'sicepat') ? 'https://www.sicepat.com/checkAwb'
+        : 'https://cekresi.com/?noresi=' . $order['tracking']));
+@endphp
+<div class="border border-gray-200 rounded-lg p-4 bg-gray-50/50 mb-4">
+    <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">Nomor Resi</p>
+    <div class="flex items-center justify-between gap-3">
+        <span class="font-mono font-extrabold text-base text-gray-900 tracking-widest">{{ $order['tracking'] }}</span>
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="copyResi('{{ $order['tracking'] }}', this)"
+                class="text-[10px] font-bold tracking-widest uppercase px-3 py-2 border border-gray-200 rounded-md hover:bg-white hover:border-gray-400 transition-colors flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="11" height="11">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Salin
+            </button>
+            <a href="{{ $trackUrl }}" target="_blank"
+                class="text-[10px] font-bold tracking-widest uppercase px-3 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                Lacak
+            </a>
+        </div>
+    </div>
+</div>
+@endif
+
                     {{-- Tombol Aksi Dinamis (Berubah sesuai status pesanan) --}}
                     <div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-gray-100">
                     <form action="{{ route('pelanggan.pesanan.beli-lagi', $order['db_id']) }}" method="POST" class="w-full sm:w-1/2">

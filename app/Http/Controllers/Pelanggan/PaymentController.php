@@ -263,6 +263,20 @@ class PaymentController extends Controller
                 'tanken_voucher_discount'
             ]);
 
+            if ($voucherDiscount > 0) {
+                \App\Models\UserVoucher::where('user_id', auth()->id())
+                    ->where('is_used', false)
+                    ->whereHas('voucher', function ($q) use ($voucherDiscount) {
+                        $q->where('is_active', true);
+                    })
+                    ->latest()
+                    ->first()
+                    ?->update([
+                        'is_used' => true,
+                        'used_at' => now(),
+                    ]);
+            }
+
             DB::commit();
 
             return redirect()->route('pelanggan.checkout.success')

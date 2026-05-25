@@ -173,13 +173,14 @@ class CheckoutController extends Controller
             $addressId = $request->address_id;
         }
 
-        session([
-            'checkout_address_id'    => $addressId,
-            'checkout_shipping'      => $request->shipping_method,
-            'checkout_shipping_cost' => $request->shipping_cost,
-            'checkout_shipping_days' => $request->shipping_days ?? '2-3 hari',
-            'tanken_voucher_discount' => (int) $request->voucher_discount, // tambah ini
-        ]);
+      session([
+        'checkout_address_id'     => $addressId,
+        'checkout_shipping'       => $request->shipping_method,
+        'checkout_shipping_cost'  => $request->shipping_cost,
+        'checkout_shipping_days'  => $request->shipping_days ?? '2-3 hari',
+        'tanken_voucher_discount' => (int) $request->voucher_discount,
+        'tanken_voucher_code'     => $request->voucher_code ?? session('tanken_voucher_code'), 
+    ]);
 
         return redirect()->route('pelanggan.checkout.payment');
     }
