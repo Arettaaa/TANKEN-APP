@@ -18,7 +18,6 @@ class ReportController extends Controller
         $period = $request->period ?? 'this_month';
         $now = now();
 
-        // 1. Tentukan Range Tanggal (Current Period)
         switch ($period) {
             case 'today':      $start = $now->copy()->startOfDay(); $end = $now->copy()->endOfDay(); $label = 'Hari Ini'; break;
             case 'this_week':  $start = $now->copy()->startOfWeek(); $end = $now->copy()->endOfWeek(); $label = 'Minggu Ini'; break;

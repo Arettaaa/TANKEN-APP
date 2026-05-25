@@ -12,29 +12,38 @@ class CartController extends Controller
     // ─────────────────────────────────────────────────────────
     // GET /keranjang — tampilkan halaman keranjang
     // ─────────────────────────────────────────────────────────
-    public function index()
-    {
-        $cartItems = CartItem::where('user_id', auth()->id())
-            ->with('product')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'id'        => $item->id,
-                    'name'      => $item->product->name,
-                    'image' => $item->product->main_image
-                        ? asset('storage/' . $item->product->main_image)
-                        : null,
-                    'size'      => $item->size,
-                    'color'     => $item->color,
-                    'color_hex' => $this->colorToHex($item->color),
-                    'price'     => $item->product->price,
-                    'qty'       => $item->quantity,
-                    'checked'   => true,
-                ];
-            });
+public function index()
+{
+    $cartItems = CartItem::where('user_id', auth()->id())
+        ->with('product')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id'        => $item->id,
+                'name'      => $item->product->name,
+                'image'     => $item->product->main_image
+                    ? asset('storage/' . $item->product->main_image)
+                    : null,
+                'size'      => $item->size,
+                'color'     => $item->color,
+                'color_hex' => $this->colorToHex($item->color),
+                'price'     => $item->product->price,
+                'qty'       => $item->quantity,
+                'checked'   => true,
+            ];
+        });
 
-        return view('pelanggan.keranjang', compact('cartItems'));
-    }
+    $userVouchers = auth()->user()
+        ->userVouchers()
+        ->with('voucher')
+        ->where('is_used', false)
+        ->whereHas('voucher', fn($q) => $q->where('is_active', true)
+            ->where(fn($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+        )
+        ->get();
+
+    return view('pelanggan.keranjang', compact('cartItems', 'userVouchers'));
+}
 
     // POST /keranjang — tambah item ke keranjang
     // Kalau kombinasi (product + color + size) sudah ada → tambah qty

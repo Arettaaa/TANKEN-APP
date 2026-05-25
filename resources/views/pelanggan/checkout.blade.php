@@ -273,6 +273,60 @@
     .region-search-input:focus {
         border-color: #111;
     }
+
+
+    .voucher-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.voucher-trigger:hover { border-color: #111; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.voucher-radio-wrap {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #fff;
+}
+.voucher-radio-wrap:hover { border-color: #d1d5db; background: #f9fafb; }
+.voucher-radio-wrap.selected { border-color: #111; background: #fafafa; }
+
+.custom-radio {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid #d1d5db;
+    appearance: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    position: relative;
+}
+.custom-radio:checked { border-color: #111; background: #111; }
+.custom-radio:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: white;
+}
 </style>
 @endpush
 
@@ -494,6 +548,77 @@ $shippingOptions = $shippingOptions ?? [
                                 {{ isset($defaultAddress) ? '...' : 'Pilih alamat dulu' }}
                             </span>
                         </div>
+
+                        {{-- VOUCHER INLINE --}}
+<div class="mb-4 mt-2">
+    <button type="button" class="voucher-trigger" onclick="toggleVoucherSection()">
+        <div class="flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981" stroke-width="2" width="20" height="20">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+            </svg>
+            <div class="text-left">
+                <p class="text-[10px] font-bold tracking-widest uppercase text-gray-500" id="activeVoucherTitle">Promo & Voucher</p>
+                <p class="text-sm font-semibold text-gray-900 mt-0.5" id="activeVoucherDesc">Makin Hemat</p>
+            </div>
+        </div>
+        <svg id="voucherChevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16" class="text-gray-400 transition-transform duration-300">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+    </button>
+
+    <div id="voucherCollapsible" class="hidden mt-3 border border-gray-100 rounded-lg p-4 bg-gray-50/50">
+        {{-- Manual input --}}
+        <div class="flex">
+            <input type="text" id="manualVoucherInput" 
+                class="w-full px-3 py-2.5 border border-gray-200 rounded-l-md text-xs font-semibold uppercase outline-none focus:border-black transition-colors" 
+                placeholder="KODE VOUCHER">
+            <button type="button" onclick="applyManualVoucher()" 
+                class="px-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-r-md hover:bg-gray-800 transition-colors whitespace-nowrap">
+                Terapkan
+            </button>
+        </div>
+        <p class="text-[10px] text-gray-400 mt-1.5">Atau pilih voucher kamu di bawah</p>
+        <p id="inlineVoucherMsg" class="text-[11px] font-medium hidden mt-2"></p>
+
+        <hr class="border-gray-200 my-4">
+        <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-bold tracking-widest uppercase text-gray-500">Voucher Saya</p>
+            <button onclick="clearVoucher()" class="text-[10px] font-bold text-red-500 hover:text-red-700 hidden" id="clearVoucherBtn">HAPUS</button>
+        </div>
+
+            <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
+                @forelse($userVouchers as $uv)
+                @php
+                    $v = $uv->voucher;
+                    $valStr = $v->type === 'fixed'
+                        ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
+                        : 'Diskon ' . $v->value . '%';
+                    $discount = $v->type === 'fixed' ? $v->value : 0;
+                @endphp
+                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+                    <input type="radio" name="voucher_selection" class="custom-radio" 
+                        value="{{ $v->code }}" 
+                        data-label="{{ $valStr }}" 
+                        data-discount="{{ $discount }}">
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
+                        <p class="text-[11px] text-gray-500 leading-relaxed">
+                            {{ $v->description ?: 'Berlaku untuk semua produk.' }}
+                            @if($v->min_purchase > 0)
+                                Min. Rp {{ number_format($v->min_purchase, 0, ',', '.') }}.
+                            @endif
+                        </p>
+                        @if($v->expires_at)
+                        <p class="text-[10px] text-gray-400 mt-1">Berlaku hingga {{ $v->expires_at->format('d M Y') }}</p>
+                        @endif
+                    </div>
+                </label>
+                @empty
+                <p class="text-xs text-gray-400 text-center py-2">Tidak ada voucher tersedia.</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
                         
                         {{-- Row Diskon Voucher dari Session --}}
                         <div class="flex justify-between items-center hidden" id="checkoutVoucherRow">
@@ -528,23 +653,31 @@ $shippingOptions = $shippingOptions ?? [
         return 'Rp ' + Math.round(val).toLocaleString('id-ID');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        // Ambil data voucher dari keranjang sebelumnya yang tersimpan di browser
-        const savedDiscount = sessionStorage.getItem('tanken_voucher_discount');
-        if (savedDiscount && !isNaN(savedDiscount) && parseInt(savedDiscount) > 0) {
-            voucherDiscount = parseInt(savedDiscount);
-            
-            // Tampilkan baris diskon
-            document.getElementById('checkoutVoucherRow').classList.remove('hidden');
-            document.getElementById('checkoutVoucherDiscount').textContent = '– ' + formatRp(voucherDiscount);
-            
-            // Simpan ke input hidden untuk dikirim ke backend
-            document.getElementById('voucherDiscountInput').value = voucherDiscount;
-        }
+    updateTotalSummary();
+    // Auto-apply voucher dari keranjang
+const savedVoucherCode     = '{{ $activeVoucherCode }}';
+const savedVoucherDiscount = {{ $activeVoucherDiscount }};
 
-        updateTotalSummary();
+if (savedVoucherCode && savedVoucherDiscount > 0) {
+    voucherDiscount = savedVoucherDiscount;
+    document.getElementById('voucherDiscountInput').value = savedVoucherDiscount;
+    document.getElementById('activeVoucherTitle').textContent = savedVoucherCode;
+    document.getElementById('activeVoucherDesc').textContent  = 'Diskon berhasil dipakai';
+    document.getElementById('activeVoucherDesc').classList.replace('text-gray-900', 'text-green-600');
+    document.getElementById('checkoutVoucherRow').classList.remove('hidden');
+    document.getElementById('checkoutVoucherDiscount').textContent = '– ' + formatRp(savedVoucherDiscount);
+    document.getElementById('clearVoucherBtn').classList.remove('hidden');
+
+    // Highlight radio button yang sesuai
+    document.querySelectorAll('input[name="voucher_selection"]').forEach(r => {
+        if (r.value === savedVoucherCode) {
+            r.checked = true;
+            r.closest('.voucher-radio-wrap').classList.add('selected');
+        }
     });
 
+    updateTotalSummary();
+}
     function updateTotalSummary() {
         let finalTotal = subtotalBase + currentShippingPrice - voucherDiscount;
         if (finalTotal < 0) finalTotal = 0;
@@ -836,5 +969,139 @@ $shippingOptions = $shippingOptions ?? [
 
     const defaultCityId = '{{ $defaultAddress->city_id ?? "" }}';
     if (defaultCityId) loadOngkir(defaultCityId);
+
+    function applyCheckoutVoucher() {
+    const code = document.getElementById('checkoutVoucherInput').value.toUpperCase().trim();
+    const msg  = document.getElementById('checkoutVoucherMsg');
+
+    if (!code) {
+        msg.textContent = 'Masukkan kode voucher dulu.';
+        msg.className   = 'text-[11px] font-medium mt-1.5 text-red-500 block';
+        return;
+    }
+
+    fetch('{{ route("pelanggan.voucher.claim") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({ code })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // Ambil nilai diskon dari voucher
+            fetch('/voucher/info?code=' + code)
+                .then(r => r.json())
+                .then(v => {
+                    voucherDiscount = v.discount;
+                    document.getElementById('voucherDiscountInput').value = voucherDiscount;
+                    document.getElementById('checkoutVoucherRow').classList.remove('hidden');
+                    document.getElementById('checkoutVoucherDiscount').textContent = '– ' + formatRp(voucherDiscount);
+                    document.getElementById('clearCheckoutVoucherBtn').classList.remove('hidden');
+                    msg.textContent = '✓ Voucher berhasil diterapkan!';
+                    msg.className   = 'text-[11px] font-medium mt-1.5 text-green-600 block';
+                    updateTotalSummary();
+                });
+        } else {
+            msg.textContent = data.message;
+            msg.className   = 'text-[11px] font-medium mt-1.5 text-red-500 block';
+        }
+    });
+}
+
+function clearCheckoutVoucher() {
+    voucherDiscount = 0;
+    document.getElementById('voucherDiscountInput').value = 0;
+    document.getElementById('checkoutVoucherInput').value = '';
+    document.getElementById('checkoutVoucherRow').classList.add('hidden');
+    document.getElementById('clearCheckoutVoucherBtn').classList.add('hidden');
+    document.getElementById('checkoutVoucherMsg').classList.add('hidden');
+    updateTotalSummary();
+}
+
+function toggleVoucherSection() {
+    const coll = document.getElementById('voucherCollapsible');
+    const chev = document.getElementById('voucherChevron');
+    coll.classList.contains('hidden')
+        ? (coll.classList.remove('hidden'), chev.style.transform = 'rotate(180deg)')
+        : (coll.classList.add('hidden'),    chev.style.transform = 'rotate(0deg)');
+}
+
+function selectVoucherRadio(labelEl) {
+    document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+    labelEl.classList.add('selected');
+    document.getElementById('manualVoucherInput').value = '';
+    document.getElementById('inlineVoucherMsg').classList.add('hidden');
+    confirmVoucherSelection(labelEl.querySelector('input'));
+}
+
+function applyManualVoucher() {
+    const code = document.getElementById('manualVoucherInput').value.toUpperCase().trim();
+    const msg  = document.getElementById('inlineVoucherMsg');
+
+    document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+
+    if (!code) {
+        msg.textContent = 'Masukkan kode voucher dulu.';
+        msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+        return;
+    }
+
+    fetch('/voucher/info?code=' + code)
+        .then(r => r.json())
+        .then(v => {
+            if (v.discount > 0) {
+                msg.textContent = '✓ Voucher diterapkan!';
+                msg.className   = 'mt-2 text-[11px] text-green-600 font-bold block';
+                confirmVoucherSelection(null, { code, discount: v.discount, label: code });
+            } else {
+                msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
+                msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+            }
+        });
+}
+
+function confirmVoucherSelection(radioEl = null, manualData = null) {
+    let discount = 0, label = '', code = '';
+
+    if (manualData) {
+        discount = manualData.discount;
+        label    = manualData.label;
+        code     = manualData.code;
+    } else if (radioEl) {
+        discount = parseInt(radioEl.dataset.discount);
+        label    = radioEl.dataset.label;
+        code     = radioEl.value;
+    } else return;
+
+    voucherDiscount = discount;
+    document.getElementById('voucherDiscountInput').value = discount;
+    document.getElementById('activeVoucherTitle').textContent = code;
+    document.getElementById('activeVoucherDesc').textContent  = 'Diskon berhasil dipakai';
+    document.getElementById('activeVoucherDesc').classList.replace('text-gray-900', 'text-green-600');
+    document.getElementById('checkoutVoucherRow').classList.remove('hidden');
+    document.getElementById('checkoutVoucherDiscount').textContent = '– ' + formatRp(discount);
+    document.getElementById('clearVoucherBtn').classList.remove('hidden');
+
+    updateTotalSummary();
+}
+
+function clearVoucher() {
+    voucherDiscount = 0;
+    document.getElementById('voucherDiscountInput').value = 0;
+    document.getElementById('activeVoucherTitle').textContent = 'Promo & Voucher';
+    document.getElementById('activeVoucherDesc').textContent  = 'Makin Hemat';
+    document.getElementById('activeVoucherDesc').classList.replace('text-green-600', 'text-gray-900');
+    document.getElementById('checkoutVoucherRow').classList.add('hidden');
+    document.getElementById('clearVoucherBtn').classList.add('hidden');
+    document.getElementById('manualVoucherInput').value = '';
+    document.getElementById('inlineVoucherMsg').classList.add('hidden');
+    document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+    updateTotalSummary();
+}
 </script>
 @endpush

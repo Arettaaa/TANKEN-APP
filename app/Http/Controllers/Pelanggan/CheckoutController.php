@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Pelanggan;
 use App\Http\Controllers\Controller;
 use App\Models\CartItem;
 use App\Models\Address;
-use App\Models\Product; // Ditambahkan untuk fitur Beli Sekarang
+use App\Models\Product;
+use App\Models\UserVoucher; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+
 
 class CheckoutController extends Controller
 {
@@ -86,30 +88,54 @@ class CheckoutController extends Controller
         // Total Murni = Subtotal + Ongkir
         $total = $subtotal + $shippingCost;
 
-        return view('pelanggan.checkout', compact(
-            'cartItems',
-            'addresses',
-            'defaultAddress',
-            'subtotal',
-            'shippingCost',
-            'total',
-            'shippingOptions'
-        ));
+        $userVouchers = auth()->user()
+            ->userVouchers()
+            ->with('voucher')
+            ->where('is_used', false)
+            ->whereHas('voucher', fn($q) => $q->where('is_active', true)
+                ->where(fn($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            )
+            ->get();
+            $activeVoucherCode     = session('tanken_voucher_code', '');
+            $activeVoucherDiscount = session('tanken_voucher_discount', 0);
+
+            return view('pelanggan.checkout', compact(
+                'cartItems', 'addresses', 'defaultAddress',
+                'subtotal', 'shippingCost', 'total', 'shippingOptions',
+                'userVouchers', 'activeVoucherCode', 'activeVoucherDiscount'
+            ));
     }
 
     // POST /checkout/simpan-item — dipanggil dari keranjang
     public function simpanItem(Request $request)
-    {
-        $ids = $request->input('selected_ids', []);
+{
+    $ids = $request->input('selected_ids', []);
 
-        if (empty($ids)) {
-            return back()->with('error', 'Pilih minimal 1 produk untuk checkout.');
-        }
-
-        session(['checkout_ids' => $ids]);
-
-        return redirect()->route('pelanggan.checkout.index');
+    if (empty($ids)) {
+        return back()->with('error', 'Pilih minimal 1 produk untuk checkout.');
     }
+
+    session(['checkout_ids' => $ids]);
+
+    // Simpan voucher code ke session kalau ada
+    if ($request->voucher_code) {
+        $voucher = \App\Models\Voucher::where('code', strtoupper($request->voucher_code))
+            ->where('is_active', true)
+            ->first();
+
+        if ($voucher) {
+            $discount = $voucher->type === 'fixed' ? $voucher->value : 0;
+            session([
+                'tanken_voucher_code'     => $voucher->code,
+                'tanken_voucher_discount' => $discount,
+            ]);
+        }
+    } else {
+        session()->forget(['tanken_voucher_code', 'tanken_voucher_discount']);
+    }
+
+    return redirect()->route('pelanggan.checkout.index');
+}
 
     // POST /checkout/proses — lanjut ke step 2
     public function proses(Request $request)
@@ -152,6 +178,7 @@ class CheckoutController extends Controller
             'checkout_shipping'      => $request->shipping_method,
             'checkout_shipping_cost' => $request->shipping_cost,
             'checkout_shipping_days' => $request->shipping_days ?? '2-3 hari',
+            'tanken_voucher_discount' => (int) $request->voucher_discount, // tambah ini
         ]);
 
         return redirect()->route('pelanggan.checkout.payment');

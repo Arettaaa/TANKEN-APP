@@ -120,6 +120,19 @@ Route::name('pelanggan.')->group(function () {
         
         Route::get('/voucher', [VoucherController::class, 'index'])->name('profil-voucher');
         Route::post('/voucher/claim', [VoucherController::class, 'claim'])->name('voucher.claim');
+        Route::get('/voucher/info', function (\Illuminate\Http\Request $request) {
+            $voucher = \App\Models\Voucher::where('code', strtoupper($request->code))
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$voucher) return response()->json(['discount' => 0]);
+
+            $discount = $voucher->type === 'fixed' 
+                ? $voucher->value 
+                : 0; 
+
+            return response()->json(['discount' => $discount]);
+        })->name('voucher.info');
 
 
         // ==== PAYMENT & REVIEW ====

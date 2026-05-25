@@ -430,21 +430,37 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
                             </div>
                             
                             <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-                                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
-                                    <input type="radio" name="voucher_selection" class="custom-radio" value="TANKEN50" data-label="Diskon Spesial" data-discount="50000">
-                                    <div class="flex-1">
-                                        <p class="text-xs font-bold text-gray-900 mb-1">Potongan Rp 50.000</p>
-                                        <p class="text-[11px] text-gray-500 leading-relaxed">Tanpa minimal belanja. Berlaku untuk semua produk.</p>
-                                    </div>
-                                </label>
-                                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
-                                    <input type="radio" name="voucher_selection" class="custom-radio" value="HEMAT100" data-label="Promo Hemat" data-discount="100000">
-                                    <div class="flex-1">
-                                        <p class="text-xs font-bold text-gray-900 mb-1">Potongan Rp 100.000</p>
-                                        <p class="text-[11px] text-gray-500 leading-relaxed">Min. belanja Rp 1.000.000. Pengguna baru.</p>
-                                    </div>
-                                </label>
-                            </div>
+    @forelse($userVouchers as $uv)
+    @php
+        $v = $uv->voucher;
+        $valStr = $v->type === 'fixed'
+            ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
+            : 'Diskon ' . $v->value . '%';
+        $discount = $v->type === 'fixed' ? $v->value : 0;
+    @endphp
+    <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+        <input type="radio" name="voucher_selection" class="custom-radio"
+            value="{{ $v->code }}"
+            data-label="{{ $valStr }}"
+            data-discount="{{ $discount }}">
+        <div class="flex-1">
+            <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
+            <p class="text-[11px] text-gray-500 leading-relaxed">
+                {{ $v->description ?: 'Berlaku untuk semua produk.' }}
+                @if($v->min_purchase > 0)
+                    Min. Rp {{ number_format($v->min_purchase, 0, ',', '.') }}.
+                @endif
+            </p>
+            @if($v->expires_at)
+            <p class="text-[10px] text-gray-400 mt-1">Berlaku hingga {{ $v->expires_at->format('d M Y') }}</p>
+            @endif
+        </div>
+    </label>
+    @empty
+    <p class="text-xs text-gray-400 text-center py-2">Tidak ada voucher tersedia.</p>
+    @endforelse
+</div>
+</div>
                         </div>
                     </div>
 
@@ -540,26 +556,30 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     }
 
     document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
-        const checked = document.querySelectorAll('.item-check:checked');
-        if (checked.length === 0) {
-            e.preventDefault();
-            alert('Pilih minimal 1 produk untuk checkout.');
-            return;
-        }
-        const container = document.getElementById('hiddenSelectedIds');
-        container.innerHTML = '';
-        checked.forEach(chk => {
-            const id = chk.closest('.cart-item-card').dataset.id;
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'selected_ids[]';
-            input.value = id;
-            container.appendChild(input);
-        });
-        
-        // Simpan nilai diskon voucher ke session storage
-        sessionStorage.setItem('tanken_voucher_discount', currentVoucherDiscount);
+    const checked = document.querySelectorAll('.item-check:checked');
+    if (checked.length === 0) {
+        e.preventDefault();
+        alert('Pilih minimal 1 produk untuk checkout.');
+        return;
+    }
+    const container = document.getElementById('hiddenSelectedIds');
+    container.innerHTML = '';
+    checked.forEach(chk => {
+        const id = chk.closest('.cart-item-card').dataset.id;
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_ids[]';
+        input.value = id;
+        container.appendChild(input);
     });
+
+    // Kirim voucher code ke server
+    const voucherInput = document.createElement('input');
+    voucherInput.type  = 'hidden';
+    voucherInput.name  = 'voucher_code';
+    voucherInput.value = activeVoucherCode;
+    container.appendChild(voucherInput);
+});
 
     // ========== UPDATE SUMMARY ==========
     function updateSummary() {
@@ -764,29 +784,32 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     }
 
     function applyManualVoucher() {
-        const input = document.getElementById('manualVoucherInput');
-        const code = input.value.toUpperCase().trim();
-        const msg = document.getElementById('inlineVoucherMsg');
-        
-        document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
-        document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+    const input = document.getElementById('manualVoucherInput');
+    const code  = input.value.toUpperCase().trim();
+    const msg   = document.getElementById('inlineVoucherMsg');
 
-        if(!code) {
-            msg.textContent = 'Masukkan kode voucher terlebih dahulu.';
-            msg.className = 'mt-2 text-[11px] text-red-500 font-medium block';
-            return;
-        }
+    document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
+    document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
 
-        if(code === 'TANKEN50') {
-            msg.textContent = '✓ Voucher diterapkan: Potongan Rp 50.000';
-            msg.className = 'mt-2 text-[11px] text-green-600 font-bold block';
-            confirmVoucherSelection(null, { code: 'TANKEN50', discount: 50000, label: 'Diskon Spesial' });
-        } else {
-            msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
-            msg.className = 'mt-2 text-[11px] text-red-500 font-medium block';
-        }
+    if (!code) {
+        msg.textContent = 'Masukkan kode voucher terlebih dahulu.';
+        msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+        return;
     }
 
+    fetch('/akun/voucher/info?code=' + code)
+        .then(r => r.json())
+        .then(v => {
+            if (v.discount > 0) {
+                msg.textContent = '✓ Voucher diterapkan!';
+                msg.className   = 'mt-2 text-[11px] text-green-600 font-bold block';
+                confirmVoucherSelection(null, { code, discount: v.discount, label: code });
+            } else {
+                msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
+                msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+            }
+        });
+}
     function confirmVoucherSelection(radioElement = null, manualData = null) {
         let discount = 0;
         let label = '';
