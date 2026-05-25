@@ -13,12 +13,37 @@ class OrderController extends Controller
     {
         // Tarik data order beserta relasi user dan items
         $query = Order::with('user', 'items')->latest();
-
-        // Fitur Search
         if ($search = $request->search) {
-            $query->where('order_number', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
                 ->orWhere('customer_name', 'like', "%{$search}%")
-                ->orWhere('customer_email', 'like', "%{$search}%");
+                ->orWhere('customer_email', 'like', "%{$search}%")
+                ->orWhere('customer_phone', 'like', "%{$search}%")
+                ->orWhere('shipping_city', 'like', "%{$search}%")
+                ->orWhere('shipping_province', 'like', "%{$search}%")
+                ->orWhere('courier', 'like', "%{$search}%")
+                ->orWhere('status', 'like', "%{$search}%")
+                ->orWhere('payment_status', 'like', "%{$search}%")
+                ->orWhere('payment_method', 'like', "%{$search}%")
+                ->orWhere('voucher_code', 'like', "%{$search}%")
+                ->orWhere('tracking_number', 'like', "%{$search}%")
+                ->orWhere('total', 'like', "%{$search}%")
+                ->orWhere('notes', 'like', "%{$search}%")
+                ->orWhereRaw("DATE_FORMAT(created_at, '%d %M %Y') LIKE ?", ["%{$search}%"])
+                ->orWhereRaw("DATE_FORMAT(created_at, '%Y-%m-%d') LIKE ?", ["%{$search}%"])
+                ->orWhereRaw("DATE_FORMAT(created_at, '%d/%m/%Y') LIKE ?", ["%{$search}%"])
+                ->orWhereHas('user', function ($u) use ($search) {
+                    $u->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                })
+                ->orWhereHas('items', function ($i) use ($search) {
+                    $i->whereHas('product', function ($p) use ($search) {
+                        $p->where('name', 'like', "%{$search}%")
+                            ->orWhere('sku', 'like', "%{$search}%");
+                    });
+                });
+            });
         }
 
         $orders = $query->paginate(15)->withQueryString();

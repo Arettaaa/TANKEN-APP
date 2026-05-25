@@ -13,10 +13,22 @@ class PaymentController extends Controller
     {
         $query = Order::latest();
 
-        if ($search = $request->search) {
-            $query->where('order_number', 'like', "%{$search}%")
-                ->orWhere('customer_name', 'like', "%{$search}%")
-                ->orWhere('customer_email', 'like', "%{$search}%");
+       if ($request->filled('search')) {
+
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%")
+                    ->orWhere('total', 'like', "%{$search}%")
+                    ->orWhere('total_payment', 'like', "%{$search}%")
+                    ->orWhere('payment_method', 'like', "%{$search}%")
+                    ->orWhere('payment_status', 'like', "%{$search}%")
+                    ->orWhereDate('created_at', $search)
+                    ->orWhere('created_at', 'like', "%{$search}%");
+            });
         }
         if ($status = $request->status) {
             $query->where('payment_status', $status);

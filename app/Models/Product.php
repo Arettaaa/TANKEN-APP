@@ -106,4 +106,8 @@ class Product extends Model
     {
         return $this->total_stock <= $threshold;
     }
+
+    
+
+    
 }

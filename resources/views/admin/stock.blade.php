@@ -105,7 +105,7 @@
                     $barPct = min(100, round(($stock / 100) * 100));
                 @endphp
 
-                <tr class="stock-row transition-colors" data-status="{{ $statusKey }}" data-name="{{ strtolower($item->name) }}" data-sku="{{ strtolower($item->sku) }}">
+                <tr class="stock-row transition-colors" data-status="{{ $statusKey }}" data-name="{{ strtolower($item->name) }}" data-sku="{{ strtolower($item->sku) }}" data-stock="{{ $stock }}"> 
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-3">
                             <img src="{{ $item->main_image_url }}" alt="{{ $item->name }}" class="product-thumb">
@@ -153,6 +153,23 @@
                 @endforelse
 
             </tbody>
+            <tbody id="emptyState" class="hidden">
+            <tr>
+                <td colspan="7" class="py-16 text-center">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4">
+                        <i class="fa-solid fa-box-open text-2xl text-gray-300"></i>
+                    </div>
+
+                    <p class="text-sm font-semibold text-gray-500">
+                        Tidak ada data yang tersedia
+                    </p>
+
+                    <p class="text-xs text-gray-400 mt-1">
+                        Coba gunakan kata kunci lain atau ubah filter
+                    </p>
+                </td>
+            </tr>
+        </tbody>
         </table>
     </div>
 </div>
@@ -189,18 +206,48 @@
 
 @push('scripts')
 <script>
-    // ---- Filter & Search ----
     function applyFilters() {
-        const search = document.getElementById('searchInput').value.toLowerCase();
-        const status = document.getElementById('filterStatus').value;
-        const rows = document.querySelectorAll('#stockBody tr.stock-row');
 
-        rows.forEach(row => {
-            const matchSearch = !search || row.dataset.name.includes(search) || row.dataset.sku.includes(search);
-            const matchStatus = !status || row.dataset.status === status;
-            row.style.display = (matchSearch && matchStatus) ? '' : 'none';
-        });
+    const search = document.getElementById('searchInput').value.toLowerCase();
+
+    const status = document.getElementById('filterStatus').value;
+
+    const rows = document.querySelectorAll('#stockBody tr.stock-row');
+
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+
+        const matchSearch =
+            !search ||
+            row.dataset.name.includes(search) ||
+            row.dataset.sku.includes(search) ||
+            row.dataset.stock.includes(search);
+
+        const matchStatus =
+            !status ||
+            row.dataset.status === status;
+
+        if (matchSearch && matchStatus) {
+
+            row.style.display = '';
+            visibleCount++;
+
+        } else {
+
+            row.style.display = 'none';
+        }
+    });
+
+    // EMPTY STATE
+    const emptyState = document.getElementById('emptyState');
+
+    if (visibleCount === 0) {
+        emptyState.classList.remove('hidden');
+    } else {
+        emptyState.classList.add('hidden');
     }
+}
 
     document.getElementById('searchInput').addEventListener('input', applyFilters);
     document.getElementById('filterStatus').addEventListener('change', applyFilters);
@@ -305,5 +352,6 @@
             alert('Gagal menyimpan stok. Silakan coba lagi.');
         });
     }
+
 </script>
 @endpush

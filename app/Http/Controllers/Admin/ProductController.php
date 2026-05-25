@@ -29,12 +29,34 @@ class ProductController extends Controller
             'reviews' => fn($q) => $q->where('status', 'approved'),
         ]);
 
-        if ($search = $request->search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
-            });
-        }
+      if ($search = $request->search) {
+    $query->where(function ($q) use ($search) {
+        $q->where('name', 'like', "%{$search}%")
+          ->orWhere('sku', 'like', "%{$search}%")
+          ->orWhere('price', 'like', "%{$search}%")
+          ->orWhere('type', 'like', "%{$search}%")
+          ->orWhere('description', 'like', "%{$search}%")
+          ->orWhere('colors', 'like', "%{$search}%")
+          ->orWhere('sizes', 'like', "%{$search}%")
+          ->orWhere(function ($q) use ($search) {
+              $q->whereIn('id', function ($sub) use ($search) {
+                  $sub->select('product_id')
+                      ->from('product_stocks')
+                      ->groupBy('product_id')
+                      ->havingRaw('SUM(quantity) LIKE ?', ["%{$search}%"]);
+              });
+          })
+          ->orWhere(function ($q) use ($search) {
+              $q->whereIn('id', function ($sub) use ($search) {
+                  $sub->select('product_id')
+                      ->from('product_reviews')
+                      ->where('status', 'approved')
+                      ->groupBy('product_id')
+                      ->havingRaw('ROUND(AVG(rating), 1) LIKE ?', ["%{$search}%"]);
+              });
+          });
+    });
+}
 
         if ($category = $request->category) {
             $query->where('category_id', $category);

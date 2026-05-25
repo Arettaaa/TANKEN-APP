@@ -115,10 +115,23 @@
         <input type="hidden" name="sort" id="input-sort" value="{{ request('sort') }}">
     </div>
 
-    <div class="flex-1 relative min-w-[180px]">
+   <div class="flex-1 relative min-w-[180px]">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau SKU..." class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-gray-900 transition-colors">
+        <input type="text" name="search" id="searchInput" value="{{ request('search') }}"
+            placeholder="Cari nama atau SKU..."
+            onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('filterForm').submit();}"
+            class="w-full pl-9 pr-10 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-gray-900 transition-colors">
+        @if(request('search'))
+        <button type="button" onclick="clearSearch()"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+            <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+        @endif
     </div>
+    <button type="submit"
+        class="flex items-center gap-2 border border-gray-900 bg-gray-900 text-white rounded-md px-4 py-2 text-sm font-semibold hover:bg-black transition-colors">
+        <i class="fa-solid fa-magnifying-glass text-xs"></i> Cari
+    </button>
 
     <a href="{{ route('admin.products.export', request()->query()) }}" class="flex items-center gap-2 border border-gray-200 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
         <i class="fa-solid fa-download"></i> Export Excel
@@ -692,6 +705,14 @@ function selectFilterItem(type, value, label) {
     document.getElementById('input-' + type).value = value;
     document.getElementById('label-' + type).innerHTML = label;
     document.getElementById(type + 'Menu').classList.add('hidden');
+    // Pastikan nilai search ikut terbawa saat filter dropdown berubah
+    // (input[name=search] sudah ada di form, jadi otomatis ikut — tidak perlu apa-apa)
+    document.getElementById('filterForm').submit();
+}
+
+// ─── SEARCH ───────────────────────────────────────────
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
     document.getElementById('filterForm').submit();
 }
 document.addEventListener('click', function(e) {
@@ -838,6 +859,12 @@ function formatRupiah(input) {
     let raw = input.value.replace(/\D/g, '');
     input.value = raw ? parseInt(raw).toLocaleString('id-ID') : '';
     input.dataset.raw = raw;
+}
+
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterForm').submit();
 }
 </script>
 @endpush

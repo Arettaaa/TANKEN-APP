@@ -282,7 +282,7 @@
         {{-- Search (Cukup filter via Javascript) --}}
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" id="searchInput" placeholder="Cari nama atau No. Order...">
+            <input type="text" id="searchInput" placeholder="Cari nama, No. Order, atau Harga...">
         </div>
 
         {{-- Tombol Export (Direct Download URL) --}}
@@ -342,10 +342,16 @@
                 };
                 @endphp
 
-                <tr class="order-row transition-colors" data-status="{{ $status }}" data-payment="{{ $payment }}"
+               <tr class="order-row transition-colors" data-status="{{ $status }}" data-payment="{{ $payment }}"
                     data-date="{{ $order->created_at->format('Y-m-d') }}"
-                    data-search="{{ strtolower($oid . ' ' . $customer . ' ' . $email) }}">
-
+                    data-search="{{ strtolower(
+                        $oid . ' ' .
+                        $customer . ' ' .
+                        $email . ' ' .
+                        $order->total . ' ' .
+                        $order->total_payment . ' ' .
+                        $shipping
+                    ) }}">
                     <td class="px-5 py-4">
                         <span class="font-bold text-gray-900 font-mono text-xs tracking-wide">{{ $oid }}</span>
                         <div class="text-xs text-gray-400 mt-0.5">{{ $items }} item{{ $items > 1 ? 's' : '' }}</div>
@@ -411,7 +417,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr>
+                <tr id="emptyState">
                     <td colspan="7">
                         <div class="py-16 text-center">
                             <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-50 mb-3">
@@ -422,6 +428,17 @@
                     </td>
                 </tr>
                 @endforelse
+                <tr id="emptyState" class="hidden">
+                    <td colspan="7">
+                        <div class="py-16 text-center">
+                            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gray-50 mb-3">
+                                <i class="fa-solid fa-filter text-xl text-gray-300"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-400">Tidak ada data yang sesuai</p>
+                            <p class="text-xs text-gray-300 mt-1">Coba ubah filter atau kata pencarian</p>
+                        </div>
+                    </td>
+                </tr>
 
             </tbody>
         </table>

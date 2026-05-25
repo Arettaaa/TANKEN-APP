@@ -9,41 +9,48 @@ use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        $query = Product::with('category', 'stocks');
+        // Stat cards — query terpisah, tidak kena filter
+        $allProducts   = Product::with('stocks')->get();
+        $totalProducts = $allProducts->count();
+        $totalUnits    = 0;
+        $lowStockItems = 0;
+        $outOfStock    = 0;
+
+        foreach ($allProducts as $prod) {
+            $stock = $prod->total_stock;
+            $totalUnits += $stock;
+            if ($stock <= 0) $outOfStock++;
+            elseif ($stock < 20) $lowStockItems++;
+        }
+
+        // Query tabel — kena filter & paginate
+        $query = Product::with(['category', 'stocks']);
 
         if ($search = $request->search) {
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
+                ->orWhere('sku', 'like', "%{$search}%")
+                ->orWhereHas('category', fn($c) => $c->where('name', 'like', "%{$search}%"))
+                ->orWhereHas('stocks', fn($s) => $s->where('size', 'like', "%{$search}%"))
+                ->orWhere(function ($q) use ($search) {
+                    $q->whereIn('id', function ($sub) use ($search) {
+                        $sub->select('product_id')
+                            ->from('product_stocks')
+                            ->groupBy('product_id')
+                            ->havingRaw('SUM(quantity) LIKE ?', ["%{$search}%"]);
+                    });
+                });
             });
         }
 
         $products = $query->latest()->paginate(10)->withQueryString();
 
-        $allProducts = Product::with('stocks')->get();
-        $totalProducts = $allProducts->count();
-        $lowStockItems = 0;
-        $outOfStock = 0;
-        $totalUnits = 0;
-
-        foreach ($allProducts as $prod) {
-            $stock = $prod->total_stock; // Total semua variasi
-            $totalUnits += $stock;
-            
-            if ($stock <= 0) {
-                $outOfStock++;
-            } elseif ($stock < 20) { 
-                $lowStockItems++;
-            }
-        }
-
         return view('admin.stock', compact(
             'products', 'totalProducts', 'lowStockItems', 'outOfStock', 'totalUnits'
         ));
     }
-
     public function update(Request $request, $id)
     {
         // Validasi: kita akan menerima array data stok dari modal
