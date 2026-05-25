@@ -284,9 +284,19 @@
                 </div>
                 @endif
                 <div class="flex justify-between pt-2.5 border-t border-gray-100">
-                    <span class="font-bold text-gray-900">Total</span>
-                    <span class="font-extrabold text-gray-900 text-base">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
-                </div>
+                <span class="font-bold text-gray-900">Total</span>
+                <span class="font-extrabold text-gray-900 text-base">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+            </div>
+            @if($order->unique_code > 0)
+            <div class="flex justify-between text-sm text-gray-500">
+                <span>Kode Unik</span>
+                <span class="font-medium text-gray-700">+ {{ $order->unique_code }}</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-dashed border-gray-100 mt-1">
+                <span class="font-bold text-gray-900">Total Transfer</span>
+                <span class="font-extrabold text-blue-600 text-base">Rp {{ number_format($order->total_payment, 0, ',', '.') }}</span>
+            </div>
+            @endif
             </div>
         </div>
 
@@ -454,7 +464,7 @@
                     <div class="info-label">Kurir</div>
                     <div class="info-value uppercase">{{ $order->courier ?? '-' }}</div>
                 </div>
-                @if($order->tracking_number)
+               @if($order->tracking_number)
                 <div>
                     <div class="info-label">Nomor Resi</div>
                     <div class="flex items-center gap-2">
@@ -463,6 +473,22 @@
                             <i class="fa-regular fa-copy text-sm" id="copyIcon"></i>
                         </button>
                     </div>
+                </div>
+
+                {{-- Tambah ini --}}
+                @php
+                    $cn = strtolower($order->courier ?? '');
+                    $trackUrl = str_contains($cn, 'jne') ? 'https://www.jne.co.id/id/tracking/trace'
+                        : (str_contains($cn, 'j&t') || str_contains($cn, 'jnt') ? 'https://www.jet.co.id/track'
+                        : (str_contains($cn, 'sicepat') ? 'https://www.sicepat.com/checkAwb'
+                        : 'https://cekresi.com/?noresi=' . $order->tracking_number));
+                @endphp
+                <div class="mt-3">
+                    <a href="{{ $trackUrl }}" target="_blank" rel="noopener"
+                        title="Membuka website kurir di tab baru"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-xs font-bold tracking-widest uppercase rounded-md hover:bg-black transition-colors">
+                        <i class="fa-solid fa-truck-fast"></i> Lacak Paket
+                    </a>
                 </div>
                 @endif
                 @if($order->estimated_arrival)

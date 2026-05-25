@@ -49,7 +49,7 @@ class VoucherController extends Controller
         ->exists();
 
     if ($already) {
-        return response()->json(['success' => false, 'message' => 'Kamu sudah punya voucher ini.']);
+        return response()->json(['success' => false, 'message' => 'Already claimed']);
     }
 
     UserVoucher::create([
@@ -57,6 +57,6 @@ class VoucherController extends Controller
         'voucher_id' => $voucher->id,
     ]);
 
-    return response()->json(['success' => true, 'message' => 'Voucher berhasil diklaim!']);
+    return response()->json(['success' => true, 'message' => 'Claimed!']);
 }
 }

@@ -365,6 +365,11 @@
                         <span class="font-bold text-gray-900 text-sm">
                             Rp {{ number_format($total, 0, ',', '.') }}
                         </span>
+                        @if($order->unique_code > 0)
+                        <div class="text-[13px] text-blue-600 font-semibold mt-0.5">
+                            Rp {{ number_format($order->total_payment, 0, ',', '.') }}
+                        </div>
+                        @endif
                     </td>
 
                     <td class="px-5 py-4">

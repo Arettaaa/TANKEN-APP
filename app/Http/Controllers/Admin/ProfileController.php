@@ -8,20 +8,34 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    public function edit()
+   public function edit()
     {
-        return view('admin.profile.edit', ['user' => auth()->user()]);
+        return view('admin.edit-akun', ['user' => auth()->user()]);
     }
 
-    public function update(Request $request)
+   public function update(Request $request)
     {
         $user = auth()->user();
+
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8|confirmed',
         ]);
-        $user->update($request->only('name', 'email'));
-        return back()->with('success', 'Profil berhasil diupdate.');
+
+        $data = [
+            'name'  => $request->name,
+            'email' => $request->email,
+        ];
+
+        // Update password hanya kalau diisi
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return back()->with('success', 'Akun berhasil diupdate.');
     }
 
     public function updatePassword(Request $request)

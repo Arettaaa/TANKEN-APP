@@ -223,9 +223,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
-    Route::get('/edit-akun', function () {
-        return view('admin.edit-akun');
-    })->name('edit-akun');
+    Route::get('/edit-akun', [ProfileController::class, 'edit'])->name('edit-akun');
 });
 
 Route::get('/wilayah', [AddressController::class, 'getWilayah']);

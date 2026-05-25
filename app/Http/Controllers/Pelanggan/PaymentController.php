@@ -64,8 +64,12 @@ class PaymentController extends Controller
         $voucherDiscount = session('tanken_voucher_discount', 0);
         $ppn             = 0; 
         
-        $total           = $subtotal + $shippingCost - $voucherDiscount;
+        $total = $subtotal + $shippingCost - $voucherDiscount;
         if($total < 0) $total = 0;
+
+        $uniqueCode = session('checkout_unique_code') ?? ((\App\Models\Order::max('unique_code') % 999) + 1);
+        $totalPayment = $total + $uniqueCode;
+        session(['checkout_unique_code' => $uniqueCode]);
 
         $banks = [
             ['value' => 'bca',     'label' => 'BCA',     'number' => '1234567890', 'name' => 'TANKEN ID'],
@@ -74,7 +78,7 @@ class PaymentController extends Controller
         ];
 
         return view('pelanggan.payment', compact(
-            'cartItems', 'address', 'shipping', 'shippingCost', 'subtotal', 'ppn', 'total', 'banks', 'voucherDiscount'
+            'cartItems', 'address', 'shipping', 'shippingCost', 'subtotal', 'ppn', 'total', 'banks', 'voucherDiscount', 'uniqueCode', 'totalPayment'
         ));
     }
 
@@ -192,6 +196,8 @@ class PaymentController extends Controller
 
             $total = $subtotal + $shippingCost - $voucherDiscount;
             if ($total < 0) $total = 0;
+            $uniqueCode = (int) session('checkout_unique_code', (\App\Models\Order::max('unique_code') % 999) + 1);
+            $totalPayment = $total + $uniqueCode;
 
             // BUAT ORDER UTAMA
             $order = Order::create([
@@ -217,6 +223,8 @@ class PaymentController extends Controller
                 'discount'             => $voucherDiscount,
                 'total'                => $total,
                 'estimated_arrival'    => now()->addDays($daysMax)->toDateString(),
+                'unique_code'   => $uniqueCode,
+                'total_payment' => $totalPayment,
             ]);
 
             // BUAT ITEM ORDER
@@ -260,6 +268,7 @@ class PaymentController extends Controller
                 'checkout_payment_method',
                 'checkout_payment_reference',
                 'checkout_payment_proof',
+                'checkout_unique_code',
                 'tanken_voucher_discount'
             ]);
 

@@ -34,7 +34,8 @@ class Order extends Model
         'payment_proof',
         'ppn',
         'tracking_number',
-        'estimated_arrival'
+        'unique_code',
+        'total_payment',
     ];
 
     protected $casts = ['paid_at' => 'datetime'];
