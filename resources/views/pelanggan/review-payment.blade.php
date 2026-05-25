@@ -183,7 +183,8 @@
                     <div class="flex justify-between items-center">
                         <span class="font-extrabold text-gray-900 text-sm sm:text-base">Total</span>
                         <span class="font-extrabold text-gray-900 text-base sm:text-lg">
-                            Rp {{ number_format($total, 0, ',', '.') }}
+                                 Rp {{ number_format($total + session('checkout_unique_code', 0), 0, ',', '.') }}
+
                         </span>
                     </div>
                 </div>

@@ -361,14 +361,11 @@
                         <div class="text-xs text-gray-400 mt-0.5 uppercase">{{ $shipping }}</div>
                     </td>
 
-                    <td class="px-5 py-4">
-                        <span class="font-bold text-gray-900 text-sm">
-                            Rp {{ number_format($total, 0, ',', '.') }}
-                        </span>
-                        @if($order->unique_code > 0)
-                        <div class="text-[13px] text-blue-600 font-semibold mt-0.5">
+                    <td class="px-5 py-4 font-bold text-gray-900">
+                        @if($order->total_payment > 0)
                             Rp {{ number_format($order->total_payment, 0, ',', '.') }}
-                        </div>
+                        @else
+                            Rp {{ number_format($order->total, 0, ',', '.') }}
                         @endif
                     </td>
 

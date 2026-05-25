@@ -244,7 +244,11 @@
                         <div class="text-xs text-gray-400 mt-0.5">{{ $payment->customer_email }}</div>
                     </td>
                     <td class="px-5 py-4 font-bold text-gray-900">
-                        Rp {{ number_format($payment->total, 0, ',', '.') }}
+                        @if($payment->total_payment > 0)
+                            Rp {{ number_format($payment->total_payment, 0, ',', '.') }}
+                        @else
+                            Rp {{ number_format($payment->total, 0, ',', '.') }}
+                        @endif
                     </td>
                     <td class="px-5 py-4">
                         @php
