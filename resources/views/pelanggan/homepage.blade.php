@@ -352,65 +352,40 @@
             </a>
         </div>
 
-        {{-- Products grid --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-
-            @php
-            $products = [
-                [
-                    'img'   => 'women-home2.jpg',
-                    'name'  => 'Classic Cargo Pants',
-                    'cat'   => 'Women',
-                    'price' => 'Rp 85.000',
-                    'rating'=> 4.8,
-                ],
-                [
-                    'img'   => 'men-home2.jpg',
-                    'name'  => 'Sport Active Joggers',
-                    'cat'   => 'Men',
-                    'price' => 'Rp 129.000',
-                    'rating'=> 4.9,
-                ],
-                [
-                    'img'   => 'women-home3.jpg',
-                    'name'  => 'Formal Office Trousers',
-                    'cat'   => 'Women',
-                    'price' => 'Rp 85.000',
-                    'rating'=> 4.7,
-                ],
-                [
-                    'img'   => 'men-home3.jpg',
-                    'name'  => 'Casual Everyday Pants',
-                    'cat'   => 'Men',
-                    'price' => 'Rp 129.000',
-                    'rating'=> 4.8,
-                ],
-            ];
-            @endphp
-
-            @foreach($products as $product)
-            <div class="product-card reveal">
-                <div class="product-img-wrap rounded-sm mb-3">
-                    <img src="{{ asset('images/' . $product['img']) }}"
-                         alt="{{ $product['name'] }}"
-                         loading="lazy">
-                </div>
-                <div class="px-0.5">
-                    <p class="text-[0.68rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-0.5">{{ $product['cat'] }}</p>
-                    <h3 class="text-sm font-body font-medium text-gray-900 leading-snug mb-1">{{ $product['name'] }}</h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-body font-semibold text-gray-900">{{ $product['price'] }}</span>
-                        <div class="flex items-center gap-0.5">
-                            <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="11" height="11">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                            <span class="text-xs font-body font-medium text-gray-600 ml-0.5">{{ $product['rating'] }}</span>
-                        </div>
+       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        @forelse($featuredProducts as $product)
+        <div class="product-card reveal" onclick="window.location='{{ route('pelanggan.produk.detail', $product->slug) }}'">
+            <div class="product-img-wrap rounded-sm mb-3">
+               <img src="{{ $product->main_image ? asset('storage/' . $product->main_image) : asset('images/placeholder.jpg') }}"
+                    alt="{{ $product->name }}"
+                    loading="lazy">
+            </div>
+            <div class="px-0.5">
+                <p class="text-[0.68rem] font-heading font-semibold tracking-widest uppercase text-gray-400 mb-0.5">
+                    {{ $product->category->name ?? '' }}
+                </p>
+                <h3 class="text-sm font-body font-medium text-gray-900 leading-snug mb-1">{{ $product->name }}</h3>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-body font-semibold text-gray-900">
+                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                    </span>
+                    @if($product->avg_rating > 0)
+                    <div class="flex items-center gap-0.5">
+                        <svg class="star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="11" height="11">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        <span class="text-xs font-body font-medium text-gray-600 ml-0.5">
+                            {{ number_format($product->avg_rating, 1) }}
+                        </span>
                     </div>
+                    @endif
                 </div>
             </div>
-            @endforeach
         </div>
+        @empty
+        <p class="text-sm text-gray-400 col-span-4">Belum ada produk.</p>
+        @endforelse
+    </div>
 
         {{-- Mobile view all --}}
         <div class="flex justify-center mt-8 md:hidden">

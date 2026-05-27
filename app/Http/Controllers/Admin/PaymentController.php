@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Helpers\ExportHelper;
 
 class PaymentController extends Controller
 {
@@ -77,39 +78,22 @@ class PaymentController extends Controller
     }
 
     public function export(Request $request)
-    {
-        $payments = Order::latest()->get();
-        $filename = "Tanken_Payments_" . date('Y-m-d_H-i') . ".csv";
-
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
-        $columns = ['Payment ID', 'Order ID', 'Customer', 'Amount (Rp)', 'Method', 'Status', 'Date', 'Transaction ID'];
-
-        $callback = function () use ($payments, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-
-            foreach ($payments as $pay) {
-                fputcsv($file, [
-                    $pay->id,
-                    $pay->order_number ?? '-',
-                    $pay->customer_name,
-                    $pay->total,
-                    strtoupper($pay->payment_method),
-                    strtoupper($pay->payment_status),
-                    $pay->created_at->format('Y-m-d H:i'),
-                    $pay->transaction_id ?? '-'
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
+{
+    $payments = \App\Models\Order::whereNotNull('payment_method')->get();
+ 
+    $columns = ['No. Order', 'Customer', 'Email', 'Metode', 'Bank/Via', 'Total Transfer', 'Status', 'Tanggal Bayar'];
+ 
+    $rows = $payments->map(fn($p) => [
+        $p->order_number,
+        $p->customer_name,
+        $p->customer_email,
+        str_replace('_', ' ', $p->payment_method),
+        strtoupper($p->payment_reference ?? '-'),
+        $p->total_payment > 0 ? $p->total_payment : $p->total,
+        $p->payment_status,
+        $p->paid_at ? \Carbon\Carbon::parse($p->paid_at)->format('Y-m-d H:i') : '-',
+    ]);
+ 
+   return ExportHelper::excel('Tanken_Payments', 'Laporan Pembayaran', $columns, $rows);
+}
 }

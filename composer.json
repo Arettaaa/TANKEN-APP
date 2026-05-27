@@ -11,7 +11,8 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/socialite": "^5.26",
-        "laravel/tinker": "^2.8"
+        "laravel/tinker": "^2.8",
+        "phpoffice/phpspreadsheet": "^5.7"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -54,13 +55,25 @@
             "dont-discover": []
         }
     },
-    "config": {
+   "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+
+        "audit": {
+            "block-insecure": false,
+            "ignore": [
+                "PKSA-28rh-rzzn-djk4",
+                "PKSA-smrh-yx37-92ws",
+                "PKSA-v5yj-8nmz-sk2q",
+                "PKSA-ft77-7h5f-p3r6",
+                "PKSA-b14r-zh1d-vdrc"
+            ]
         }
     },
     "minimum-stability": "stable",

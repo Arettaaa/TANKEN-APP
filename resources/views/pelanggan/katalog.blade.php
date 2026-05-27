@@ -159,11 +159,19 @@
                             {{ $product->name }}
                         </h3>
 
-                        <div class="flex items-center justify-between mt-1">
-                            <span class="text-sm font-bold text-gray-900">
-                                Rp {{ number_format($product->price, 0, ',', '.') }}
-                            </span>
-                        </div>
+                 <div class="flex items-center justify-between mt-1">
+                        <span class="text-sm font-bold text-gray-900">
+                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    @php
+                        $sold = $product->orderItems->filter(fn($i) => 
+                            in_array($i->order?->status, ['processing','shipped','delivered'])
+                        )->sum('quantity');
+                    @endphp
+                    @if($sold > 0)
+                    <p class="text-xs text-gray-400 mt-0.5">{{ number_format($sold) }}+ terjual</p>
+                    @endif
                     </a>
                 </div>
                 @endforeach

@@ -299,11 +299,9 @@
     </div>
 
     {{-- Export Excel --}}
-    <button
-        class="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-900 text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-900 hover:text-white transition-colors">
-        <i class="fa-solid fa-download"></i>
-        Export Excel
-    </button>
+    <a href="{{ route('admin.reviews.export') }}" class="flex items-center gap-2 border border-gray-200 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+        <i class="fa-solid fa-download"></i> Export Excel
+    </a>
 
 </div>
 

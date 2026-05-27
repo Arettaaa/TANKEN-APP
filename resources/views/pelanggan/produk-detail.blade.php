@@ -109,6 +109,21 @@
             </div>
             @endif
 
+            @php
+                $soldCount = $product->orderItems()->whereHas('order', fn($q) => 
+                    $q->whereIn('status', ['processing','shipped','delivered'])
+                )->sum('quantity');
+            @endphp
+
+            @if($soldCount > 0)
+            <div class="flex items-center gap-2 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="13" height="13" class="text-gray-400">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+                <span class="text-xs text-gray-500 font-medium">{{ number_format($soldCount) }}+ terjual</span>
+            </div>
+            @endif
+
             <hr class="border-gray-100 mb-5">
 
             @php $sizesArray = is_array($product->sizes) ? $product->sizes : (json_decode($product->sizes, true) ?? []); @endphp

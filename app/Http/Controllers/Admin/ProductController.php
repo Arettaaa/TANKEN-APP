@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+use App\Helpers\ExportHelper;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
@@ -273,43 +274,26 @@ class ProductController extends Controller
         return response()->json(['success' => true]);
     }
 
-    public function exportExcel(Request $request)
-    {
-        $products = Product::with(['stocks', 'reviews'])->get();
-        $filename = 'Tanken_Products_' . date('Y-m-d') . '.csv';
-
-        $headers = [
-            'Content-type'        => 'text/csv',
-            'Content-Disposition' => "attachment; filename=$filename",
-            'Pragma'              => 'no-cache',
-            'Cache-Control'       => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires'             => '0',
-        ];
-
-        $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'Harga', 'Total Stok', 'Warna', 'Status'];
-
-        $callback = function () use ($products, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            foreach ($products as $p) {
-                fputcsv($file, [
-                    $p->id,
-                    $p->name,
-                    $p->sku,
-                    $p->category_id == 1 ? 'Men' : 'Women',
-                    ucfirst($p->type),
-                    $p->price,
-                    $p->stocks->sum('quantity'),
-                    implode(', ', $p->colors ?? []),
-                    $p->is_active ? 'Aktif' : 'Nonaktif',
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
+   public function exportExcel(Request $request)
+{
+    $products = Product::with(['stocks', 'reviews'])->get();
+ 
+    $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'Harga', 'Total Stok', 'Warna', 'Status'];
+ 
+    $rows = $products->map(fn($p) => [
+        $p->id,
+        $p->name,
+        $p->sku,
+        $p->category_id == 1 ? 'Men' : 'Women',
+        ucfirst($p->type),
+        $p->price,
+        $p->stocks->sum('quantity'),
+        implode(', ', $p->colors ?? []),
+        $p->is_active ? 'Aktif' : 'Nonaktif',
+    ]);
+ 
+    return ExportHelper::excel('Tanken_Products', 'Laporan Produk', $columns, $rows);
+}
     // =============================================
     // PRIVATE HELPERS
     // =============================================

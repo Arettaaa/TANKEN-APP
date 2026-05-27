@@ -67,9 +67,9 @@
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
             <input type="text" id="searchInput" placeholder="Cari nama produk atau SKU...">
         </div>
-        <button class="flex items-center gap-2 px-4 py-2 border-2 border-gray-900 text-gray-900 text-sm font-semibold rounded-md hover:bg-gray-900 hover:text-white transition-colors">
+        <a href="{{ route('admin.stock.export') }}" class="flex items-center gap-2 border border-gray-200 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">
             <i class="fa-solid fa-download"></i> Export Excel
-        </button>
+        </a>
     </div>
 </div>
 

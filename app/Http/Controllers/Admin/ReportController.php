@@ -9,6 +9,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use App\Helpers\ExportHelper; 
 use Pdf;
 
 class ReportController extends Controller
@@ -135,33 +136,146 @@ class ReportController extends Controller
         $data['dateFrom'] = $data['start']->format('d M Y');
         $data['dateTo'] = $data['end']->format('d M Y');
         $pdf = Pdf::loadView('admin.report-pdf', $data);
-        return $pdf->stream("Tanken_Report_".now()->format('Ymd').".pdf");
+        return $pdf->download("Tanken_Report_".now()->format('Ymd').".pdf");
     }
 
-    public function exportExcel(Request $request)
-    {
-        $data = $this->getReportData($request);
-        $filename = "Tanken_Top_Products_" . date('Y-m-d') . ".csv";
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma" => "no-cache",
-            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-            "Expires" => "0"
-        ];
+   public function exportExcel(Request $request)
+{
+    $data = $this->getReportData($request);
 
-        $columns = ['Rank', 'Nama Produk', 'Units Sold', 'Revenue (Rp)', 'Avg Price (Rp)'];
-        $callback = function() use($data, $columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            foreach ($data['topProducts'] as $i => $row) {
-                fputcsv($file, [
-                    $i + 1, $row->name, $row->units_sold, $row->revenue, round($row->avg_price)
-                ]);
-            }
-            fclose($file);
-        };
+    $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
 
-        return response()->stream($callback, 200, $headers);
+   
+    $sheet1 = $spreadsheet->getActiveSheet();
+    $sheet1->setTitle('Ringkasan');
+
+    // Judul
+    $sheet1->mergeCells('A1:B1');
+    $sheet1->setCellValue('A1', 'LAPORAN PENJUALAN - ' . strtoupper($data['label']));
+    $sheet1->getStyle('A1:B1')->applyFromArray([
+        'font' => ['bold' => true, 'size' => 14, 'color' => ['argb' => 'FFFFFFFF']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1F2937']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+    ]);
+    $sheet1->getRowDimension(1)->setRowHeight(32);
+
+    // Periode
+    $sheet1->mergeCells('A2:B2');
+    $sheet1->setCellValue('A2', 'Periode: ' . $data['start']->format('d M Y') . ' s/d ' . $data['end']->format('d M Y'));
+    $sheet1->getStyle('A2:B2')->applyFromArray([
+        'font' => ['italic' => true, 'size' => 9, 'color' => ['argb' => 'FF6B7280']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF9FAFB']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+    ]);
+
+    // Spacer
+    $sheet1->getRowDimension(3)->setRowHeight(8);
+
+    // Header KPI
+    $sheet1->setCellValue('A4', 'Metrik');
+    $sheet1->setCellValue('B4', 'Nilai');
+    $sheet1->getStyle('A4:B4')->applyFromArray([
+        'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF111827']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFD1D5DB']]],
+    ]);
+
+    // Data KPI
+    $kpis = [
+        ['Total Revenue',    'Rp ' . number_format($data['totalRevenue'], 0, ',', '.')],
+        ['Total Orders',     $data['totalOrders'] . ' orders'],
+        ['Total Customers',  $data['newCustomers'] . ' customers'],
+        ['Avg. Order Value', 'Rp ' . number_format($data['avgOrderValue'], 0, ',', '.')],
+    ];
+
+    foreach ($kpis as $i => $kpi) {
+        $row = 5 + $i;
+        $bg  = $i % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
+        $sheet1->setCellValue("A{$row}", $kpi[0]);
+        $sheet1->setCellValue("B{$row}", $kpi[1]);
+        $sheet1->getStyle("A{$row}:B{$row}")->applyFromArray([
+            'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $bg]],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFE5E7EB']]],
+            'font'    => ['size' => 10],
+        ]);
+        $sheet1->getRowDimension($row)->setRowHeight(18);
     }
+
+    $sheet1->getColumnDimension('A')->setWidth(25);
+    $sheet1->getColumnDimension('B')->setWidth(25);
+
+    // ═══════════════════════════════════════════
+    // SHEET 2: TOP PRODUK
+    // ═══════════════════════════════════════════
+    $sheet2 = $spreadsheet->createSheet();
+    $sheet2->setTitle('Top Produk');
+
+    // Judul
+    $sheet2->mergeCells('A1:E1');
+    $sheet2->setCellValue('A1', 'TOP SELLING PRODUCTS - ' . strtoupper($data['label']));
+    $sheet2->getStyle('A1:E1')->applyFromArray([
+        'font' => ['bold' => true, 'size' => 14, 'color' => ['argb' => 'FFFFFFFF']],
+        'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1F2937']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+    ]);
+    $sheet2->getRowDimension(1)->setRowHeight(32);
+
+    // Spacer
+    $sheet2->getRowDimension(2)->setRowHeight(8);
+
+    // Header kolom
+    $cols2 = ['Rank', 'Nama Produk', 'Units Sold', 'Revenue (Rp)', 'Avg Price (Rp)'];
+    foreach ($cols2 as $i => $col) {
+        $letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i + 1);
+        $sheet2->setCellValue("{$letter}3", $col);
+    }
+    $sheet2->getStyle('A3:E3')->applyFromArray([
+        'font'      => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
+        'fill'      => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF111827']],
+        'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        'borders'   => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFD1D5DB']]],
+    ]);
+    $sheet2->getRowDimension(3)->setRowHeight(20);
+
+    // Data produk
+    foreach ($data['topProducts'] as $i => $row) {
+        $excelRow = 4 + $i;
+        $bg = $i % 2 === 0 ? 'FFFFFFFF' : 'FFF3F4F6';
+        $sheet2->setCellValue("A{$excelRow}", $i + 1);
+        $sheet2->setCellValue("B{$excelRow}", $row->name);
+        $sheet2->setCellValue("C{$excelRow}", $row->units_sold);
+        $sheet2->setCellValue("D{$excelRow}", 'Rp ' . number_format($row->revenue, 0, ',', '.'));
+        $sheet2->setCellValue("E{$excelRow}", 'Rp ' . number_format(round($row->avg_price), 0, ',', '.'));
+        $sheet2->getStyle("A{$excelRow}:E{$excelRow}")->applyFromArray([
+            'fill'    => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['argb' => $bg]],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['argb' => 'FFE5E7EB']]],
+            'font'    => ['size' => 9],
+        ]);
+        $sheet2->getRowDimension($excelRow)->setRowHeight(16);
+    }
+
+    foreach (['A' => 8, 'B' => 50, 'C' => 15, 'D' => 20, 'E' => 20] as $col => $width) {
+        $sheet2->getColumnDimension($col)->setWidth($width);
+    }
+    $sheet2->freezePane('A4');
+
+    // ═══════════════════════════════════════════
+    // DOWNLOAD
+    // ═══════════════════════════════════════════
+    $spreadsheet->setActiveSheetIndex(0);
+    $writer   = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+    $filename = 'Tanken_Reports_' . date('Y-m-d') . '.xlsx';
+
+    return response()->stream(
+        fn() => $writer->save('php://output'),
+        200,
+        [
+            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Cache-Control'       => 'max-age=0',
+            'Pragma'              => 'no-cache',
+        ]
+    );
+}
 }

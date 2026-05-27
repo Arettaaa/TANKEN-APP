@@ -56,6 +56,75 @@ class AuthController extends Controller
         return back()->with('error', 'Email atau password salah!');
     }
 
+    public function showForgotPassword()
+    {
+        return view('auth.forgot-password');
+    }
+    
+   public function checkEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return back()->with('error', 'Email tidak ditemukan. Pastikan email yang kamu masukkan sudah benar.');
+        }
+
+      if ($user->google_id) {
+            return back()->with('error', 'Akun ini terdaftar via Google. Silakan masuk menggunakan tombol "Continue with Google".');
+        }
+
+        session(['reset_email' => $request->email]);
+        return redirect()->route('password.reset.form');
+    }
+    
+    public function showResetPassword()
+    {
+        // Tolak akses langsung tanpa lewat step cek email
+        if (!session('reset_email')) {
+            return redirect()->route('password.forgot')
+                            ->with('error', 'Silakan masukkan email terlebih dahulu.');
+        }
+    
+        return view('auth.reset-password');
+    }
+    
+    public function resetPassword(Request $request)
+    {
+        $email = session('reset_email');
+    
+        if (!$email) {
+            return redirect()->route('password.forgot')
+                            ->with('error', 'Sesi habis. Silakan ulangi dari awal.');
+        }
+    
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'password.min'       => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+    
+        $user = User::where('email', $email)->first();
+    
+        if (!$user) {
+            return redirect()->route('password.forgot')
+                            ->with('error', 'Akun tidak ditemukan. Silakan ulangi.');
+        }
+    
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+    
+        session()->forget('reset_email');
+    
+        return redirect()->route('login')
+                        ->with('success', 'Password berhasil diubah! Silakan masuk dengan password baru.');
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();
@@ -65,11 +134,6 @@ class AuthController extends Controller
         return redirect()->route('login');
     }
 
-    // ─── PRIVATE ──────────────────────────────────────
-    /**
-     * Cari voucher dengan flag is_welcome = true yang masih aktif
-     * dan masih ada sisa kuota, lalu assign ke user baru.
-     */
     private function giveWelcomeVoucher(User $user): void
     {
         $voucher = Voucher::where('is_active', true)

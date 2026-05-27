@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\ExportHelper;
+
 
 class UserController extends Controller
 {
@@ -94,4 +96,25 @@ class UserController extends Controller
         $user->update(['is_active' => !$user->is_active]);
         return response()->json(['success' => true, 'is_active' => $user->is_active]);
     }
+
+    public function exportExcel(Request $request)
+{
+    $users = \App\Models\User::withCount('orders')->withSum('orders', 'total')->get();
+ 
+    $columns = ['ID', 'Nama', 'Email', 'Role', 'Total Order', 'Total Belanja', 'Status', 'Bergabung'];
+ 
+    $rows = $users->map(fn($u) => [
+        $u->id,
+        $u->name,
+        $u->email,
+        ucfirst(str_replace('_', ' ', $u->role)),
+        $u->orders_count,
+        'Rp ' . number_format($u->orders_sum_total ?? 0, 0, ',', '.'),
+        $u->is_active ? 'Aktif' : 'Nonaktif',
+        $u->created_at->format('Y-m-d'),
+    ]);
+ 
+    return ExportHelper::excel('Tanken_Users', 'Laporan Pengguna', $columns, $rows);
+}
+ 
 }

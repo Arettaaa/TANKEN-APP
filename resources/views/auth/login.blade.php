@@ -41,7 +41,7 @@
         </div>
 
         <div class="flex justify-end -mt-2">
-            <a href="#" class="text-sm font-bold text-gray-800 hover:underline">Forgot password?</a>
+            <a href="{{ route('password.forgot') }}" class="text-sm font-bold text-gray-800 hover:underline">Forgot password?</a>        
         </div>
 
         <button type="submit" class="w-full bg-black text-white font-bold text-sm py-4 rounded-full flex items-center justify-center gap-2 hover:bg-gray-900 transition-colors">

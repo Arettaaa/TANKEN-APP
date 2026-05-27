@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Voucher;
 use Illuminate\Http\Request;
+use App\Helpers\ExportHelper;
 
 class PromoController extends Controller
 {
@@ -196,4 +197,39 @@ class PromoController extends Controller
         $promo->update(['is_active' => !$promo->is_active]);
         return response()->json(['success' => true, 'is_active' => $promo->is_active]);
     }
+
+    public function exportExcel(Request $request)
+{
+    $vouchers = \App\Models\Voucher::withCount('userVouchers')->get();
+ 
+    $now = now();
+ 
+    $columns = ['ID', 'Kode', 'Tipe', 'Nilai', 'Min. Pembelian', 'Kuota', 'Diklaim', 'Sisa', 'Kadaluarsa', 'Welcome', 'Status'];
+ 
+    $rows = $vouchers->map(function ($v) use ($now) {
+        $isExpired = $v->expires_at && $now->gt($v->expires_at);
+        $claimed   = $v->user_vouchers_count;
+        $sisa      = $v->quota ? ($v->quota - $claimed) : '∞';
+ 
+        if (!$v->is_active) $status = 'Disabled';
+        elseif ($isExpired)  $status = 'Expired';
+        else                 $status = 'Active';
+ 
+        return [
+            $v->id,
+            $v->code,
+            ucfirst($v->type),
+            $v->type === 'fixed' ? 'Rp ' . number_format($v->value, 0, ',', '.') : $v->value . '%',
+            'Rp ' . number_format($v->min_purchase, 0, ',', '.'),
+            $v->quota ?? '∞',
+            $claimed,
+            $sisa,
+            $v->expires_at ? $v->expires_at->format('Y-m-d') : 'Tanpa Batas',
+            $v->is_welcome ? 'Ya' : 'Tidak',
+            $status,
+        ];
+    });
+ 
+   return ExportHelper::excel('Tanken_Promo_Vouchers', 'Laporan Promo & Voucher', $columns, $rows);
+}
 }

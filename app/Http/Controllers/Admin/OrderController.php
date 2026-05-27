@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+use App\Helpers\ExportHelper;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
@@ -103,49 +104,30 @@ class OrderController extends Controller
         ]);
     }
 
-    public function export()
-    {
-        $orders = Order::with('user', 'items')->latest()->get();
-
-        $filename = "Tanken_Orders_" . date('Y-m-d_H-i') . ".csv";
-
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
-        $columns = ['Order ID', 'Nama Customer', 'Email', 'Tanggal', 'Total (Rp)', 'Status Order', 'Status Bayar', 'Kurir', 'Jumlah Item'];
-
-        $callback = function () use ($orders, $columns) {
-            $file = fopen('php://output', 'w');
-
-            // Tambahkan header kolom
-            fputcsv($file, $columns);
-
-            // Masukkan data baris per baris
-            foreach ($orders as $order) {
-                fputcsv($file, [
-                    $order->order_number,
-                    $order->customer_name,
-                    $order->customer_email,
-                    $order->created_at->setTimezone('Asia/Jakarta')->format('d M Y, H:i'),
-                    $order->total,
-                    strtoupper($order->status),
-                    strtoupper($order->payment_status),
-                    $order->courier ?? '-',
-                    $order->items->sum('quantity')
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
+   public function export(Request $request)
+{
+    $orders = Order::with('items')->get();
+ 
+    $columns = ['No. Order', 'Customer', 'Email', 'Telepon', 'Subtotal', 'Ongkir', 'Diskon', 'Total', 'Total Transfer', 'Kurir', 'Status', 'Pembayaran', 'Tanggal'];
+ 
+    $rows = $orders->map(fn($o) => [
+        $o->order_number,
+        $o->customer_name,
+        $o->customer_email,
+        $o->customer_phone,
+        $o->subtotal,
+        $o->shipping_cost,
+        $o->discount,
+        $o->total,
+        $o->total_payment > 0 ? $o->total_payment : $o->total,
+        $o->courier,
+        ucfirst($o->status),
+        $o->payment_status,
+        $o->created_at->format('Y-m-d H:i'),
+    ]);
+ 
+    return ExportHelper::excel('Tanken_Orders', 'Laporan Pesanan', $columns, $rows);
+}
 
     public function konfirmasi(Request $request, Order $order)
     {
@@ -198,4 +180,6 @@ class OrderController extends Controller
             'message' => "Order {$order->order_number} telah ditolak.",
         ]);
     }
+
+    
 }

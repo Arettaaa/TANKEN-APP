@@ -110,6 +110,10 @@
     </a>
     @endif
 
+    <a href="{{ route('admin.promos.export') }}" class="flex items-center gap-2 border border-gray-200 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+        <i class="fa-solid fa-download"></i> Export Excel
+    </a>
+
     <button type="button" onclick="openAddModal()" class="flex items-center gap-2 bg-[#111111] text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-black transition-colors shadow-sm ml-1">
         <i class="fa-solid fa-plus text-xs"></i> Add Promo
     </button>

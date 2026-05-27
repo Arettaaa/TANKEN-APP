@@ -48,6 +48,10 @@ Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 
+Route::get('/lupa-password', [AuthController::class, 'showForgotPassword'])->name('password.forgot');
+Route::post('/lupa-password', [AuthController::class, 'checkEmail'])->name('password.check-email');
+Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset.form');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
 /*
 |--------------------------------------------------------------------------
 | Web Routes — PELANGGAN
@@ -64,7 +68,18 @@ Route::name('pelanggan.')->group(function () {
             })
             ->get();
 
-        return view('pelanggan.homepage', compact('activeVouchers'));
+        $featuredProducts = \App\Models\Product::withCount([
+                'reviews as avg_rating' => fn($q) => $q->where('status', 'approved')->select(\DB::raw('COALESCE(AVG(rating), 0)')),
+            ])
+            ->withSum(['orderItems as total_sold' => fn($q) => 
+                $q->whereHas('order', fn($o) => $o->where('payment_status', 'paid'))
+            ], 'quantity')
+            ->orderByDesc('total_sold')
+            ->orderByDesc('avg_rating')
+            ->take(4)
+            ->get();
+
+        return view('pelanggan.homepage', compact('activeVouchers', 'featuredProducts'));
     })->name('home');
 
     Route::get('/katalog', function () {
@@ -193,9 +208,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('/reviews/{id}/status', [ReviewController::class, 'updateStatus'])->name('reviews.updateStatus');
     Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
-    Route::patch('/stock/{id}', [StockController::class, 'update'])->name('stock.update');
+    Route::get('/reviews/export', [ReviewController::class, 'exportExcel'])->name('reviews.export');
 
+    Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/export', [OrderController::class, 'export'])->name('orders.export');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
@@ -203,8 +218,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::patch('/orders/{order}/konfirmasi', [OrderController::class, 'konfirmasi'])->name('orders.konfirmasi');
     Route::patch('/orders/{order}/tolak',      [OrderController::class, 'tolak'])->name('orders.tolak');
 
-    Route::get('stock', [StockController::class, 'index'])->name('stock.index');
     Route::patch('stock/{stock}', [StockController::class, 'update'])->name('stock.update');
+    Route::get('/stock/export', [StockController::class, 'exportExcel'])->name('stock.export');
 
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/export', [PaymentController::class, 'export'])->name('payments.export');
@@ -213,9 +228,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
     Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
 
+    Route::get('users/export', [UserController::class, 'exportExcel'])->name('users.export');
+
     Route::resource('users', UserController::class)->except(['create', 'show', 'edit']);
     Route::post('users/{user}/toggle-status', [UserController::class, 'toggleStatus']);
 
+    Route::get('promos/export', [PromoController::class, 'exportExcel'])->name('promos.export');
     Route::resource('promos', PromoController::class)->except(['create', 'show', 'edit']);
     Route::post('promos/{promo}/toggle-status', [PromoController::class, 'toggleStatus']);
 

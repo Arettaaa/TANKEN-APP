@@ -12,8 +12,17 @@
     .custom-dropdown-btn:focus { border-color: #111; outline: none; }
 
     .search-box { position: relative; }
-    .search-box input { padding: 8px 14px 8px 36px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 0.875rem; font-family: 'Inter', sans-serif; outline: none; width: 270px; background: #fff; transition: border-color 0.2s; }
-    .search-box input:focus { border-color: #111; }
+    .search-box input { 
+        padding: 8px 14px 8px 36px; 
+        border: 1px solid #e5e7eb; 
+        border-radius: 6px; 
+        font-size: 0.875rem; 
+        font-family: 'Inter', sans-serif; 
+        outline: none; 
+        width: 200px; 
+        background: #fff; 
+        transition: border-color 0.2s; 
+    }    .search-box input:focus { border-color: #111; }
 
     /* Stat icon circle */
     .stat-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: 16px; }
@@ -175,6 +184,10 @@
         <i class="fa-solid fa-rotate-left"></i>
     </a>
     @endif
+
+    <a href="{{ route('admin.users.export') }}" class="flex items-center gap-2 border border-gray-200 rounded-md px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+        <i class="fa-solid fa-download"></i> Export Excel
+    </a>
 
     {{-- Add User Button --}}
     <button type="button" onclick="openAddModal()" class="flex items-center gap-2 bg-[#111111] text-white text-sm font-semibold px-4 py-2 rounded-md hover:bg-black transition-colors shadow-sm ml-1">
