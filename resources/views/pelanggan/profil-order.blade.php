@@ -112,33 +112,6 @@
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Status Pengiriman</span>
                             
-                            @if($order['tracking'] && $order['tracking'] !== '-')
-                            @php
-                                $courierName = $order['courier'] ?? '';
-                                if (str_contains(strtolower($courierName), 'jne')) {
-                                    $courierUrl = 'https://www.jne.co.id/id/tracking/trace';
-                                } elseif (str_contains(strtolower($courierName), 'j&t') || str_contains(strtolower($courierName), 'jnt')) {
-                                    $courierUrl = 'https://www.jet.co.id/track';
-                                } elseif (str_contains(strtolower($courierName), 'sicepat')) {
-                                    $courierUrl = 'https://www.sicepat.com/checkAwb';
-                                } else {
-                                    $courierUrl = 'https://cekresi.com/?noresi=' . $order['tracking'];
-                                }
-                            @endphp
-                            <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-mono font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded cursor-pointer select-all"
-                                    title="Klik untuk copy"
-                                    onclick="copyResi('{{ $order['tracking'] }}', this)">
-                                    {{ $order['tracking'] }}
-                                </span>
-                                <a href="{{ $courierUrl }}" target="_blank"
-                                class="text-[10px] font-bold text-gray-500 hover:text-black underline underline-offset-2 flex items-center gap-1 transition-colors">
-                                    Lacak <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-                                </a>
-                            </div>
-                            @else
-                            <span class="text-[10px] font-mono font-medium text-gray-400 italic">Resi belum tersedia</span>
-                            @endif
                         </div>
                         
                         <div class="relative w-full max-w-lg mx-auto py-2">
