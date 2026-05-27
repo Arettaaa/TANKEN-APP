@@ -251,44 +251,73 @@
 </div>
 @endif
 
-                    {{-- Tombol Aksi Dinamis (Berubah sesuai status pesanan) --}}
-                    <div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-gray-100">
-                    <form action="{{ route('pelanggan.pesanan.beli-lagi', $order['db_id']) }}" method="POST" class="w-full sm:w-1/2">
-                        @csrf
-                        <button type="submit" class="w-full bg-black text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-800 transition-colors">
-                            Beli Lagi
-                        </button>
-                    </form>
-                        
-                        {{-- Logika Tombol Ulasan ala Shopee --}}
-                        @if($order['status'] == 'delivered')
-                           <a href="{{ route('pelanggan.ulasan.create', ['order_id' => $order['db_id']]) }}"
-                            class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors text-center">
-                                Beri Ulasan
-                            </a>
-                        @elseif($order['status'] == 'cancelled')
-                            <button class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors">
-                                Rincian Batal
-                            </button>
-                      @else
-                        @php
-                            $courierUrl = '#';
-                            $courierName = $order['courier'] ?? '';
-                            if (str_contains(strtolower($courierName), 'jne')) {
-                                $courierUrl = 'https://www.jne.co.id/id/tracking/trace';
-                            } elseif (str_contains(strtolower($courierName), 'j&t') || str_contains(strtolower($courierName), 'jnt')) {
-                                $courierUrl = 'https://www.jet.co.id/track';
-                            } elseif (str_contains(strtolower($courierName), 'sicepat')) {
-                                $courierUrl = 'https://www.sicepat.com/checkAwb';
-                            }
-                        @endphp
-                        <a href="{{ $courierUrl }}" target="_blank"
-                        class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors text-center flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-                            Lacak Paket
-                        </a>
-                    @endif
-                    </div>
+{{-- Tombol Aksi Dinamis --}}
+<div class="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-gray-100">
+
+    {{-- Beli Lagi --}}
+    <form action="{{ route('pelanggan.pesanan.beli-lagi', $order['db_id']) }}" method="POST"
+        class="w-full {{ $order['status'] == 'delivered' ? 'sm:w-1/3' : 'sm:w-1/2' }}">
+        @csrf
+        <button type="submit" class="w-full bg-black text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-800 transition-colors">
+            Beli Lagi
+        </button>
+    </form>
+
+    @if($order['status'] == 'delivered')
+        <a href="{{ route('pelanggan.ulasan.create', ['order_id' => $order['db_id']]) }}"
+            class="w-full sm:w-1/3 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors text-center">
+            Beri Ulasan
+        </a>
+        @php
+            $nomorWA = '6285121235200';
+            $pesanWA = urlencode(
+                "Halo Admin TANKEN, saya " . auth()->user()->name . " ingin mengajukan return barang.\n\n" .
+                "No. Pesanan: " . $order['id'] . "\n" .
+                "Email: " . auth()->user()->email . "\n" .
+                "Alasan Return: [tuliskan alasan return kamu di sini]\n" .
+                "Kondisi Barang: [jelaskan kondisi barang yang diterima]"
+            );
+            $linkWA = "https://wa.me/{$nomorWA}?text={$pesanWA}";
+        @endphp
+        <a href="{{ $linkWA }}" target="_blank"
+            class="w-full sm:w-1/3 bg-white text-red-600 border border-red-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-red-50 transition-colors text-center flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            Ajukan Return
+        </a>
+
+    @elseif($order['status'] == 'cancelled')
+        @php
+            $nomorWA = '628967';
+            $pesanWA = urlencode(
+                "Halo Admin TANKEN, saya " . auth()->user()->name . " ingin mengajukan refund.\n\n" .
+                "No. Pesanan: " . $order['id'] . "\n" .
+                "Email: " . auth()->user()->email . "\n" .
+                "Alasan: [tuliskan alasan refund kamu di sini]"
+            );
+            $linkWA = "https://wa.me/{$nomorWA}?text={$pesanWA}";
+        @endphp
+        <a href="{{ $linkWA }}" target="_blank"
+            class="w-full sm:w-1/2 bg-green-600 text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-green-700 transition-colors text-center flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            Ajukan Refund
+        </a>
+
+    @else
+        @php
+            $courierUrl = '#';
+            $cn = strtolower($order['courier'] ?? '');
+            if (str_contains($cn, 'jne')) $courierUrl = 'https://www.jne.co.id/id/tracking/trace';
+            elseif (str_contains($cn, 'j&t') || str_contains($cn, 'jnt')) $courierUrl = 'https://www.jet.co.id/track';
+            elseif (str_contains($cn, 'sicepat')) $courierUrl = 'https://www.sicepat.com/checkAwb';
+        @endphp
+        <a href="{{ $courierUrl }}" target="_blank"
+            class="w-full sm:w-1/2 bg-white text-black border border-gray-200 text-[10px] sm:text-xs font-bold tracking-widest uppercase py-3.5 rounded-md hover:bg-gray-50 transition-colors text-center flex items-center justify-center gap-2">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            Lacak Paket
+        </a>
+    @endif
+
+</div>
 
                 </div>
             </div>

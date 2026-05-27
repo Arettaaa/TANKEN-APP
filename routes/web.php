@@ -159,7 +159,8 @@ Route::name('pelanggan.')->group(function () {
         
         // Rute Buat Pesanan
         Route::post('/checkout/place-order', [PelangganPaymentController::class, 'placeOrder'])->name('checkout.place-order');
-
+        Route::patch('/pesanan/{id}/konfirmasi', [CustomerOrderController::class, 'konfirmasiDiterima'])
+            ->name('pesanan.konfirmasi');
         Route::get('/ulasan',  [PelangganReviewController::class, 'create'])->name('ulasan.create');
         Route::post('/ulasan', [PelangganReviewController::class, 'store'])->name('ulasan.store');
     });

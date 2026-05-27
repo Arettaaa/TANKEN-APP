@@ -98,4 +98,15 @@ class CustomerOrderController extends Controller
         return redirect()->route('pelanggan.keranjang.index')
             ->with('success', 'Produk dari pesanan sebelumnya berhasil ditambahkan ke keranjang!');
     }
+
+    public function konfirmasiDiterima($id)
+{
+    $order = Order::where('user_id', auth()->id())
+                  ->where('status', 'shipped')
+                  ->findOrFail($id);
+
+    $order->update(['status' => 'delivered']);
+
+    return back()->with('success', 'Pesanan dikonfirmasi diterima!');
+}
 }
