@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan; // <-- Tambahan untuk menjalankan perintah Artisan
 
 use App\Models\Product;
 
@@ -178,7 +179,7 @@ Route::name('pelanggan.')->group(function () {
 // Sukses & Gagal Checkout
 Route::get('/checkout/success', function () {
     return view('pelanggan.payment-confirm');
-})->name('pelanggan.checkout.success'); // Namanya disesuaikan biar rapi dipanggil controller
+})->name('pelanggan.checkout.success'); 
 
 Route::get('/checkout/failed', function () {
     return view('pelanggan.payment-failed');
@@ -244,3 +245,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::get('/wilayah', [AddressController::class, 'getWilayah']);
+
+// ==========================================
+// RUTE RAHASIA (UNTUK STORAGE LINK DI RAILWAY)
+// ==========================================
+Route::get('/rahasia-link-storage', function () {
+    Artisan::call('storage:link');
+    return 'Jembatan storage (symlink) berhasil dibuat! Silakan upload ulang gambar dari menu admin.';
+});
