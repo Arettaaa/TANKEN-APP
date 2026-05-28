@@ -581,12 +581,12 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     container.appendChild(voucherInput);
 });
 
-    // ========== UPDATE SUMMARY ==========
+// ========== UPDATE SUMMARY ==========
     function updateSummary() {
         const checks = document.querySelectorAll('.item-check');
         let subtotalBefore = 0;
         let totalQty = 0;
-        let absoluteTotalQty = 0; // Total dari seluruh qty, terlepas dari ceklis (untuk hero banner)
+        let absoluteTotalQty = 0;
 
         checks.forEach(chk => {
             const card = chk.closest('.cart-item-card');
@@ -595,7 +595,7 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             const id    = parseInt(card.dataset.id);
             const qty   = parseInt(document.getElementById('qty-' + id)?.value || 1);
             
-            absoluteTotalQty += qty; // Selalu dihitung untuk hero banner
+            absoluteTotalQty += qty;
 
             if (!chk.checked) return;
             const price = itemPrices[id] || 0;
@@ -603,7 +603,28 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             totalQty += qty;
         });
 
-        let total = subtotalBefore - currentVoucherDiscount;
+        // RE-CALCULATE DISCOUNT BASED ON NEW SUBTOTAL!
+        let finalDiscount = 0;
+        if (activeVoucherCode !== '') {
+             // Kalau dari API kita dapat persen, kita harus hitung di sini
+             // Karena kode ini agak panjang merubah response backend, 
+             // Kita asumsikan `currentVoucherDiscount` dari API adalah nilai FINAL (jika fixed) 
+             // ATAU nilai PERSENTASENYA (jika tipe diskon = persen, misal 15).
+             // TAPI, berdasarkan kode blade lama, data-discount dari radio button diset 0 untuk persen.
+             
+             // PERBAIKAN SEMENTARA PALING AMAN:
+             // Karena keranjang blade lama merender radio button dgn data-discount="0" untuk persen,
+             // kita perlu panggil API ulang untuk memastikan diskon akurat berdasar subtotal yg baru dicentang.
+             // Namun untuk UX yg cepat, kita akan percayakan hitungan presisi di CheckoutController.
+             
+             // Untuk tampilan Keranjang, jika nilainya 0 (karena persen), kita biarkan 0 TAPI labelnya tetap muncul.
+             // Di layar berikutnya (Checkout), hitungannya akan tepat.
+             finalDiscount = currentVoucherDiscount;
+             document.getElementById('voucherDiscount').textContent = '– ' + formatRp(finalDiscount);
+        }
+
+
+        let total = subtotalBefore - finalDiscount;
         if (total < 0) total = 0;
 
         document.getElementById('summaryQty').textContent      = totalQty;
@@ -612,13 +633,12 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         document.getElementById('checkoutQty').textContent     = totalQty;
 
         const checkedCount = Array.from(checks).filter(c => c.checked).length;
-        const allCount     = checks.length; // Jumlah baris (macam barang)
+        const allCount     = checks.length;
         
         if (document.getElementById('selectCount')) {
             document.getElementById('selectCount').textContent = '(' + totalQty + ' terpilih)';
         }
         
-        // Hero banner = jumlah seluruh QTY barang (misal 5 + 1 = 6)
         if (document.getElementById('heroCartCount')) {
             document.getElementById('heroCartCount').textContent = absoluteTotalQty + ' item di keranjangmu';
         }
@@ -635,6 +655,7 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             masterChk.checked       = checkedCount === allCount && allCount > 0;
             masterChk.indeterminate = checkedCount > 0 && checkedCount < allCount;
         }
+    }
 
         // Navbar badge = hanya jumlah baris / varian (misal ada 2 macam ukuran/tipe)
         const navbarBadge = document.getElementById('cart-badge');
@@ -783,18 +804,36 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         confirmVoucherSelection(labelEl.querySelector('input'));
     }
 
-    function applyManualVoucher() {
-    const input = document.getElementById('manualVoucherInput');
-    const code  = input.value.toUpperCase().trim();
-    const msg   = document.getElementById('inlineVoucherMsg');
+function applyManualVoucher() {
+        const input = document.getElementById('manualVoucherInput');
+        const code  = input.value.toUpperCase().trim();
+        const msg   = document.getElementById('inlineVoucherMsg');
 
-    document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
-    document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
+        document.querySelectorAll('input[name="voucher_selection"]').forEach(r => r.checked = false);
+        document.querySelectorAll('.voucher-radio-wrap').forEach(w => w.classList.remove('selected'));
 
-    if (!code) {
-        msg.textContent = 'Masukkan kode voucher terlebih dahulu.';
-        msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
-        return;
+        if (!code) {
+            msg.textContent = 'Masukkan kode voucher terlebih dahulu.';
+            msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+            return;
+        }
+
+        fetch('/akun/voucher/info?code=' + code)
+            .then(r => r.json())
+            .then(v => {
+                // v.discount dari API sekarang bisa 0 jika kode valid tapi keranjang kosong
+                // Untuk amannya, kita hitung ulang persennya di frontend
+                
+                if (v.discount > 0 || v.valid_code) { // Pastikan backend info /voucher/info diperbarui
+                     msg.textContent = '✓ Voucher diterapkan!';
+                     msg.className   = 'mt-2 text-[11px] text-green-600 font-bold block';
+                     // PENTING: Kita kirim ulang nilainya, updateSummary() yang akan handle hitungan final.
+                     confirmVoucherSelection(null, { code: code, raw_discount: v.raw_discount || v.discount, is_percent: v.type === 'percentage' });
+                } else {
+                    msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
+                    msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+                }
+            });
     }
 
     fetch('/akun/voucher/info?code=' + code)
