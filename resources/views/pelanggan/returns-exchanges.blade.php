@@ -17,19 +17,17 @@
     }
 
     /* Policy highlight card */
-    .policy-card { background: #111; border-radius: 12px; }
-    .policy-stat {
-        border-right: 1px solid #2a2a2a;
-    }
+    .policy-card { background: #111; border-radius: 0; }
+    .policy-stat { border-right: 1px solid #2a2a2a; }
     .policy-stat:last-child { border-right: none; }
 
-    /* Step number */
+    /* Step number dibuat KOTAK TAJAM */
     .step-number {
         width: 32px;
         height: 32px;
         background: #111;
         color: white;
-        border-radius: 50%;
+        border-radius: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -45,19 +43,17 @@
     .step-card:hover { border-color: #bbb; }
 
     /* Eligibility grid */
-    .eligibility-card { border: 1px solid #e8e8e8; border-radius: 8px; }
-
-    /* Check/X icons */
+    .eligibility-card { border: 1px solid #e8e8e8; border-radius: 0; }
     .icon-check { color: #22c55e; }
     .icon-x { color: #ef4444; }
 
     /* Refund dark card */
-    .refund-dark { background: #0a0a0a; border-radius: 12px; }
+    .refund-dark { background: #0a0a0a; border-radius: 0; }
     .refund-item { border-bottom: 1px solid #1e1e1e; }
     .refund-item:last-child { border-bottom: none; }
 
     /* CTA */
-    .cta-dark { background: #111; border-radius: 12px; }
+    .cta-dark { background: #111; border-radius: 0; }
 </style>
 @endpush
 
@@ -66,16 +62,6 @@
 {{-- ===== HERO ===== --}}
 <section class="returns-hero px-6 lg:px-10 py-10 md:py-14">
     <div class="max-w-7xl mx-auto">
-
-        <a href="{{ route('help') }}"
-           class="inline-flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors mb-8">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor" stroke-width="2" width="13" height="13">
-                <path d="M19 12H5M12 5l-7 7 7 7"/>
-            </svg>
-            Kembali ke Pusat Bantuan
-        </a>
-
         <div class="flex items-center gap-4">
             <div class="shipping-icon-wrap">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -95,13 +81,22 @@
                 </p>
             </div>
         </div>
-
     </div>
 </section>
 
 {{-- ===== MAIN CONTENT ===== --}}
 <div class="bg-white py-12 md:py-16">
     <div class="max-w-3xl mx-auto px-6 lg:px-10">
+
+        {{-- TOMBOL BACK --}}
+        <div class="mb-8">
+            <a href="{{ route('help') }}" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-black transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span class="text-xs font-bold uppercase tracking-widest">Back</span>
+            </a>
+        </div>
 
         {{-- ===== 1. KEBIJAKAN RETUR ===== --}}
         <section class="mb-14 reveal">
@@ -159,7 +154,7 @@
                 @endphp
 
                 @foreach($steps as $i => $step)
-                <div class="step-card rounded-lg px-5 py-4 flex items-start gap-4">
+                <div class="step-card rounded-none px-5 py-4 flex items-start gap-4">
                     <div class="step-number">{{ $i + 1 }}</div>
                     <div>
                         <p class="text-sm font-semibold text-gray-900 mb-0.5">{{ $step['title'] }}</p>
@@ -178,7 +173,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                {{-- Eligible --}}
                 <div class="eligibility-card p-5">
                     <p class="text-sm font-bold text-gray-900 mb-4">✓ Bisa Diretur</p>
                     <ul class="flex flex-col gap-3">
@@ -203,7 +197,6 @@
                     </ul>
                 </div>
 
-                {{-- Not Eligible --}}
                 <div class="eligibility-card p-5">
                     <p class="text-sm font-bold text-gray-900 mb-4">✕ Tidak Bisa Diretur</p>
                     <ul class="flex flex-col gap-3">
@@ -239,8 +232,7 @@
                 Penukaran Produk
             </h2>
 
-            <div class="border border-gray-100 rounded-lg px-6 py-6 flex flex-col gap-5">
-
+            <div class="border border-gray-100 rounded-none px-6 py-6 flex flex-col gap-5">
                 <div>
                     <p class="text-sm text-gray-500 leading-relaxed mb-4">
                         Mau ganti ukuran atau warna? Gampang banget! Kami pastikan proses penukaran kamu berjalan cepat dan mulus.
@@ -251,9 +243,7 @@
                         yang kamu inginkan. Cara ini memastikan ukuran atau warna pilihanmu langsung diproses secepat mungkin.
                     </p>
                 </div>
-
                 <hr class="border-gray-100">
-
                 <div>
                     <p class="text-sm font-semibold text-gray-900 mb-1">Penukaran Ekspres</p>
                     <p class="text-sm text-gray-500 leading-relaxed">
@@ -261,7 +251,6 @@
                         sebelum barang returmu tiba. Produk original wajib dikembalikan dalam 14 hari.
                     </p>
                 </div>
-
             </div>
         </section>
 
@@ -272,7 +261,6 @@
             </h2>
 
             <div class="refund-dark px-6 py-2">
-
                 <div class="refund-item py-5 flex items-start gap-4">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor" stroke-width="1.6" width="18" height="18"
@@ -287,7 +275,6 @@
                         </p>
                     </div>
                 </div>
-
                 <div class="refund-item py-5 flex items-start gap-4">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor" stroke-width="1.6" width="18" height="18"
@@ -302,7 +289,6 @@
                         </p>
                     </div>
                 </div>
-
                 <div class="py-5 flex items-start gap-4">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor" stroke-width="1.6" width="18" height="18"
@@ -318,7 +304,6 @@
                         </p>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -328,7 +313,7 @@
                 Retur Internasional
             </h2>
 
-            <div class="border border-gray-100 rounded-lg px-6 py-5">
+            <div class="border border-gray-100 rounded-none px-6 py-5">
                 <p class="text-sm text-gray-500 leading-relaxed mb-3">
                     Pelanggan internasional menanggung biaya pengiriman retur. Kami sangat menyarankan penggunaan
                     jasa pengiriman yang dapat dilacak karena kami tidak bertanggung jawab atas paket yang hilang dalam perjalanan.
@@ -348,12 +333,13 @@
                 </h2>
                 <p class="text-sm text-gray-400 mb-7">Tim customer service kami siap membantu kamu</p>
                 <div class="flex items-center justify-center gap-3 flex-wrap">
-                    <a href="mailto:support@tanken.com"
-                       class="inline-flex items-center gap-2 border border-white text-white text-xs font-bold tracking-widest uppercase px-6 py-3 rounded-full hover:bg-white hover:text-black transition-colors">
+                    <a href="https://wa.me/6285121235200?text=Halo%20admin%20tanken%2C%20saya%20ingin%20bertanya%20terkait..." 
+                    target="_blank" 
+                       class="inline-flex items-center gap-2 border border-white text-white text-xs font-bold tracking-widest uppercase px-6 py-3 rounded-none hover:bg-white hover:text-black transition-colors">
                         Hubungi Support
                     </a>
                     <a href="{{ route('pelanggan.profil-order') }}"
-                       class="inline-flex items-center gap-2 bg-white text-black text-xs font-bold tracking-widest uppercase px-6 py-3 rounded-full hover:bg-gray-200 transition-colors">
+                       class="inline-flex items-center gap-2 bg-white text-black text-xs font-bold tracking-widest uppercase px-6 py-3 rounded-none hover:bg-gray-200 transition-colors">
                         Lihat Pesanan Saya
                     </a>
                 </div>

@@ -4,10 +4,7 @@
 
 @push('styles')
 <style>
-    /* Hero */
-    .shipping-hero {
-        background-color: #0a0a0a;
-    }
+    .shipping-hero { background-color: #0a0a0a; }
     .shipping-icon-wrap {
         width: 52px;
         height: 52px;
@@ -18,8 +15,6 @@
         justify-content: center;
         flex-shrink: 0;
     }
-
-    /* Shipping option cards */
     .shipping-option {
         border: 1px solid #e8e8e8;
         transition: border-color 0.2s ease;
@@ -27,16 +22,12 @@
     .shipping-option:hover {
         border-color: #bbb;
     }
-
-    /* International table */
     .intl-table tr {
         border-bottom: 1px solid #f0f0f0;
     }
     .intl-table tr:last-child {
         border-bottom: none;
     }
-
-    /* Notes banner */
     .notes-banner {
         background: #0a0a0a;
     }
@@ -58,17 +49,6 @@
 {{-- ===== HERO ===== --}}
 <section class="shipping-hero px-6 lg:px-10 py-10 md:py-14">
     <div class="max-w-7xl mx-auto">
-
-        {{-- Back link --}}
-        <a href="{{ route('help') }}"
-           class="inline-flex items-center gap-2 text-xs text-white/40 hover:text-white/70 transition-colors mb-8">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                 stroke="currentColor" stroke-width="2" width="13" height="13">
-                <path d="M19 12H5M12 5l-7 7 7 7"/>
-            </svg>
-            Back to Help Center
-        </a>
-
         <div class="flex items-center gap-4">
             <div class="shipping-icon-wrap">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -87,13 +67,22 @@
                 <p class="text-sm text-white/50 mt-1">Everything you need to know about our shipping and delivery</p>
             </div>
         </div>
-
     </div>
 </section>
 
 {{-- ===== MAIN CONTENT ===== --}}
 <div class="bg-white py-12 md:py-16">
     <div class="max-w-3xl mx-auto px-6 lg:px-10">
+
+        {{-- TOMBOL BACK --}}
+        <div class="mb-8">
+            <a href="{{ route('help') }}" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-black transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span class="text-xs font-bold uppercase tracking-widest">Back</span>
+            </a>
+        </div>
 
         {{-- ===== 1. PENGIRIMAN DOMESTIK ===== --}}
         <section class="mb-14 reveal">
@@ -111,9 +100,7 @@
             </div>
 
             <div class="flex flex-col gap-3">
-
-                {{-- Reguler --}}
-                <div class="shipping-option rounded-lg px-6 py-5">
+                <div class="shipping-option rounded-none px-6 py-5">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-sm font-semibold text-gray-900 mb-0.5">Pengiriman Reguler</p>
@@ -130,8 +117,7 @@
                     </div>
                 </div>
 
-                {{-- Express --}}
-                <div class="shipping-option rounded-lg px-6 py-5">
+                <div class="shipping-option rounded-none px-6 py-5">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-sm font-semibold text-gray-900 mb-0.5">Express Shipping</p>
@@ -148,8 +134,7 @@
                     </div>
                 </div>
 
-                {{-- Overnight --}}
-                <div class="shipping-option rounded-lg px-6 py-5">
+                <div class="shipping-option rounded-none px-6 py-5">
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             <p class="text-sm font-semibold text-gray-900 mb-0.5">Overnight Shipping</p>
@@ -165,7 +150,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -183,16 +167,14 @@
                 </h2>
             </div>
 
-            {{-- Info banner --}}
-            <div class="bg-gray-900 rounded-lg px-6 py-4 mb-5">
+            <div class="bg-gray-900 rounded-none px-6 py-4 mb-5">
                 <p class="text-sm text-gray-300 leading-relaxed">
                     Kami melayani pengiriman ke berbagai negara. Pesanan internasional mungkin dikenakan bea cukai
                     dan pajak tambahan, yang sepenuhnya menjadi tanggung jawab pembeli.
                 </p>
             </div>
 
-            {{-- Table --}}
-            <div class="border border-gray-100 rounded-lg overflow-hidden">
+            <div class="border border-gray-100 rounded-none overflow-hidden">
                 <table class="intl-table w-full">
                     <thead class="bg-gray-50">
                         <tr>
@@ -235,17 +217,14 @@
                 </h2>
             </div>
 
-            <div class="border border-gray-100 rounded-lg px-6 py-6 flex flex-col gap-5">
-
+            <div class="border border-gray-100 rounded-none px-6 py-6 flex flex-col gap-5">
                 <div>
                     <p class="text-sm font-semibold text-gray-900 mb-1">Waktu Pemrosesan</p>
                     <p class="text-sm text-gray-500 leading-relaxed">
                         Kami memastikan barang yang dipesan dapat diproses dan dikirim pada hari yang sama.
                     </p>
                 </div>
-
                 <hr class="border-gray-100">
-
                 <div>
                     <p class="text-sm font-semibold text-gray-900 mb-1">Pelacakan Pesanan (Resi)</p>
                     <p class="text-sm text-gray-500 leading-relaxed">
@@ -253,9 +232,7 @@
                         langsung melalui sistem kami.
                     </p>
                 </div>
-
                 <hr class="border-gray-100">
-
                 <div>
                     <p class="text-sm font-semibold text-gray-900 mb-1">Kendala Pengiriman</p>
                     <p class="text-sm text-gray-500 leading-relaxed">
@@ -264,13 +241,12 @@
                         Kami akan membantu melacak paket Anda.
                     </p>
                 </div>
-
             </div>
         </section>
 
         {{-- ===== 4. CATATAN PENTING ===== --}}
         <section class="mb-14 reveal">
-            <div class="notes-banner rounded-lg px-6 py-6">
+            <div class="notes-banner rounded-none px-6 py-6">
                 <p class="text-sm font-bold text-white mb-4">Catatan Penting</p>
                 <ul class="flex flex-col gap-3">
                     <li class="text-sm text-gray-400 leading-relaxed">
@@ -292,8 +268,9 @@
         {{-- ===== 5. CTA ===== --}}
         <section class="text-center reveal">
             <p class="text-sm text-gray-500 mb-5">Have more questions about shipping?</p>
-            <a href="mailto:support@tanken.com"
-               class="inline-flex items-center gap-2 bg-black text-white text-xs font-bold tracking-widest uppercase px-8 py-3.5 rounded-full hover:bg-gray-800 transition-colors">
+            <a href="https://wa.me/6285121235200?text=Halo%20admin%20tanken%2C%20saya%20ingin%20bertanya%20terkait..." 
+               target="_blank" 
+               class="inline-flex items-center gap-2 bg-black text-white text-xs font-bold tracking-widest uppercase px-8 py-3.5 rounded-none hover:bg-gray-800 transition-colors">
                 Contact Support
             </a>
         </section>
