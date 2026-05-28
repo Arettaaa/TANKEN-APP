@@ -105,10 +105,7 @@ class CheckoutController extends Controller
         ));
     }
 
-<<<<<<< HEAD
-=======
 // POST /checkout/simpan-item — dipanggil dari keranjang
->>>>>>> c22e444e882c32bd0934b1293b4e759fd81ced56
     public function simpanItem(Request $request)
     {
         $ids = $request->input('selected_ids', []);
@@ -116,31 +113,6 @@ class CheckoutController extends Controller
         if (empty($ids)) {
             return back()->with('error', 'Pilih minimal 1 produk untuk checkout.');
         }
-<<<<<<< HEAD
-
-        session(['checkout_ids' => $ids]);
-
-        // Simpan voucher code ke session kalau ada
-        if ($request->voucher_code) {
-            $voucher = \App\Models\Voucher::where('code', strtoupper($request->voucher_code))
-                ->where('is_active', true)
-                ->first();
-
-            if ($voucher) {
-                $discount = $voucher->type === 'fixed' ? $voucher->value : 0;
-                session([
-                    'tanken_voucher_code'     => $voucher->code,
-                    'tanken_voucher_discount' => $discount,
-                ]);
-            }
-        } else {
-            session()->forget(['tanken_voucher_code', 'tanken_voucher_discount']);
-        }
-
-        return redirect()->route('pelanggan.checkout.index');
-    }
-
-=======
 
         session(['checkout_ids' => $ids]);
 
@@ -180,7 +152,6 @@ class CheckoutController extends Controller
     }
 
     // POST /checkout/proses — lanjut ke step 2
->>>>>>> c22e444e882c32bd0934b1293b4e759fd81ced56
     public function proses(Request $request)
     {
         // Kalau pakai alamat baru (address_id kosong)
