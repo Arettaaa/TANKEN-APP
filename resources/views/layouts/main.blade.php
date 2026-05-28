@@ -477,14 +477,14 @@
                             </svg>
                             <span>0851-2123-5200</span>
                         </a>
-                        <div class="flex items-center gap-2.5">
+                        <a href="mailto:explore.tanken@gmail.com" class="flex items-center gap-2.5 hover:text-white transition-colors cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" stroke-width="1.6" width="15" height="15">
                                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                                 <polyline points="22,6 12,13 2,6" />
                             </svg>
                             <span>explore.tanken@gmail.com</span>
-                        </div>
+                        </a>
                     </div>
                 </div>
 
@@ -492,10 +492,9 @@
                     <h4 class="text-xs font-bold tracking-widest uppercase text-white mb-4"
                         style="font-family:'Inter',sans-serif;">Shop</h4>
                     <ul class="flex flex-col gap-2.5 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">All Products</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Women</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Men</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Under</a></li>
+                        <li><a href="{{ Route::has('pelanggan.katalog') ? route('pelanggan.katalog') : url('/katalog') }}" class="hover:text-white transition-colors">All Products</a></li>
+                        <li><a href="{{ route('pelanggan.katalog', ['gender' => 'women']) }}" class="hover:text-white transition-colors">Women</a></li>
+                        <li><a href="{{ route('pelanggan.katalog', ['gender' => 'men']) }}" class="hover:text-white transition-colors">Men</a></li>
                     </ul>
                 </div>
 
@@ -503,11 +502,9 @@
                     <h4 class="text-xs font-bold tracking-widest uppercase text-white mb-4"
                         style="font-family:'Inter',sans-serif;">Help</h4>
                     <ul class="flex flex-col gap-2.5 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">My Orders</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Shipping Info</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Size Guide</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="{{ Route::has('help.shipping') ? route('help.shipping') : url('/help/shipping') }}" class="hover:text-white transition-colors">Shipping Info</a></li>
+                        <li><a href="{{ Route::has('help.returns') ? route('help.returns') : url('/help/returns') }}" class="hover:text-white transition-colors">Returns</a></li>
+                        <li><a href="{{ Route::has('help.faq') ? route('help.faq') : url('/help/faq') }}" class="hover:text-white transition-colors">FAQ</a></li>
                     </ul>
                 </div>
 
@@ -515,10 +512,7 @@
                     <h4 class="text-xs font-bold tracking-widest uppercase text-white mb-4"
                         style="font-family:'Inter',sans-serif;">Company</h4>
                     <ul class="flex flex-col gap-2.5 text-sm text-gray-400">
-                        <li><a href="#" class="hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Careers</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Sustainability</a></li>
+                        <li><a href="https://wa.me/6285121235200?text=Halo%20admin%20tanken%2C%20saya%20ingin...." target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Contact</a></li>
                     </ul>
                 </div>
             </div>
@@ -537,9 +531,18 @@
                                 <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
                             </svg>
                         </a>
+                        {{-- Icon TikTok --}}
+                        <a href="https://www.tiktok.com/@tanken_official?_r=1&_t=ZS-96jjm6Meqcm" target="_blank" rel="noopener noreferrer"
+                            class="w-10 h-10 md:w-9 md:h-9 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:border-white hover:text-white transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M9 0h1.98c.144.715.54 1.617 1.235 2.512C12.895 3.389 13.797 4 15 4v2c-1.753 0-3.07-.814-4-1.829V11a5 5 0 1 1-5-5v2a3 3 0 1 0 3 3z" />
+                            </svg>
+                        </a>
                     </div>
                 </div>
 
+                {{-- DI-HIDE SEMENTARA KARENA BELUM ADA BACKEND-NYA --}}
+                {{--
                 <div class="w-full md:w-auto">
                     <p class="text-xs text-gray-400 mb-3 uppercase tracking-widest font-semibold">Subscribe to our
                         newsletter</p>
@@ -550,6 +553,7 @@
                             class="bg-white text-black text-sm font-semibold px-5 py-2.5 md:py-2 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap">Subscribe</button>
                     </div>
                 </div>
+                --}}
             </div>
 
             <div
@@ -567,86 +571,73 @@
     {{-- Script Navigasi --}}
     <script>
         const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        navbar.classList.toggle('scrolled', window.scrollY > 10);
-    });
-
-    const hamburger = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (hamburger && mobileMenu) {
-        hamburger.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-    }
-
-    const searchToggle = document.getElementById('searchToggle');
-    const searchBox    = document.getElementById('searchBox');
-    const searchInput  = document.getElementById('searchInput');
-
-    if (searchToggle && searchBox && searchInput) {
-        let searchOpen = false;
-
-        searchToggle.addEventListener('click', () => {
-            searchOpen = !searchOpen;
-            if (searchOpen) {
-                searchBox.classList.add('open');
-                setTimeout(() => searchInput.focus(), 50);
-            } else {
-                searchBox.classList.remove('open');
-                searchInput.value = '';
-            }
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 10);
         });
 
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && searchInput.value.trim() !== '') {
-                window.location.href = '{{ route("pelanggan.katalog") }}?search=' + encodeURIComponent(searchInput.value.trim());
-            }
-        });
+        const hamburger = document.getElementById('hamburger');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (hamburger && mobileMenu) {
+            hamburger.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
 
-        document.addEventListener('click', (e) => {
-            if (searchOpen && !searchToggle.contains(e.target) && !searchBox.contains(e.target)) {
-                searchOpen = false;
-                searchBox.classList.remove('open');
-                searchInput.value = '';
-            }
-        });
+        const searchToggle = document.getElementById('searchToggle');
+        const searchBox = document.getElementById('searchBox');
+        const searchInput = document.getElementById('searchInput');
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && searchOpen) {
-                searchOpen = false;
-                searchBox.classList.remove('open');
-                searchInput.value = '';
-            }
-        });
-    }
+        if (searchToggle && searchBox && searchInput) {
+            let searchOpen = false;
 
-    // Search Mobile
-    const searchInputMobile = document.getElementById('searchInputMobile');
-    if (searchInputMobile) {
-        searchInputMobile.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && searchInputMobile.value.trim() !== '') {
-                window.location.href = '{{ route("pelanggan.katalog") }}?search=' + encodeURIComponent(searchInputMobile.value.trim());
-            }
-        });
-    }
+            searchToggle.addEventListener('click', () => {
+                searchOpen = !searchOpen;
+                if (searchOpen) {
+                    searchBox.classList.add('open');
+                    setTimeout(() => searchInput.focus(), 50);
+                } else {
+                    searchBox.classList.remove('open');
+                    searchInput.value = '';
+                }
+            });
+
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && searchInput.value.trim() !== '') {
+                    window.location.href = '{{ route("pelanggan.katalog") }}?search=' + encodeURIComponent(searchInput.value.trim());
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                if (searchOpen && !searchToggle.contains(e.target) && !searchBox.contains(e.target)) {
+                    searchOpen = false;
+                    searchBox.classList.remove('open');
+                    searchInput.value = '';
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && searchOpen) {
+                    searchOpen = false;
+                    searchBox.classList.remove('open');
+                    searchInput.value = '';
+                }
+            });
+        }
+
+        // Search Mobile
+        const searchInputMobile = document.getElementById('searchInputMobile');
+        if (searchInputMobile) {
+            searchInputMobile.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && searchInputMobile.value.trim() !== '') {
+                    window.location.href = '{{ route("pelanggan.katalog") }}?search=' + encodeURIComponent(searchInputMobile.value.trim());
+                }
+            });
+        }
     </script>
 
     <script>
         function updateCartBadge(count) {
-        const badge = document.getElementById('cart-badge');
-        if (!badge) return;
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.classList.remove('hidden');
-        } else {
-            badge.classList.add('hidden');
-        }
-    }
-
-    function updateWishlistBadge(count) {
-        const badgeDesktop = document.getElementById('wishlist-badge-desktop');
-        const badgeMobile  = document.getElementById('wishlist-badge-mobile');
-        [badgeDesktop, badgeMobile].forEach(badge => {
+            const badge = document.getElementById('cart-badge');
             if (!badge) return;
             if (count > 0) {
                 badge.textContent = count > 99 ? '99+' : count;
@@ -654,37 +645,63 @@
             } else {
                 badge.classList.add('hidden');
             }
+        }
+
+        function updateWishlistBadge(count) {
+            const badgeDesktop = document.getElementById('wishlist-badge-desktop');
+            const badgeMobile = document.getElementById('wishlist-badge-mobile');
+            [badgeDesktop, badgeMobile].forEach(badge => {
+                if (!badge) return;
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            @auth
+            updateCartBadge({
+                {
+                    \
+                    App\ Models\ CartItem::where('user_id', auth() - > id()) - > count()
+                }
+            });
+            updateWishlistBadge({
+                {
+                    auth() - > user() - > wishlists() - > count()
+                }
+            });
+            @else
+            updateCartBadge(0);
+            updateWishlistBadge(0);
+            @endauth
         });
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        @auth
-        updateCartBadge({{ \App\Models\CartItem::where('user_id', auth()->id())->count() }});
-        updateWishlistBadge({{ auth()->user()->wishlists()->count() }});
-        @else
-        updateCartBadge(0);
-        updateWishlistBadge(0);
-        @endauth
-    });
-
-    window.addEventListener('wishlistUpdated', (e) => updateWishlistBadge(e.detail?.count ?? 0));
+        window.addEventListener('wishlistUpdated', (e) => updateWishlistBadge(e.detail?.count ?? 0));
     </script>
 
     @auth
     <script>
         // Inject jumlah wishlist dari server supaya badge langsung muncul
-    document.addEventListener('DOMContentLoaded', () => {
-        const count = {{ auth()->user()->wishlists()->count() }};
-        const badgeDesktop = document.getElementById('wishlist-badge-desktop');
-        const badgeMobile  = document.getElementById('wishlist-badge-mobile');
-        [badgeDesktop, badgeMobile].forEach(badge => {
-            if (!badge) return;
-            if (count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.classList.remove('hidden');
-            }
+        document.addEventListener('DOMContentLoaded', () => {
+            const count = {
+                {
+                    auth() - > user() - > wishlists() - > count()
+                }
+            };
+            const badgeDesktop = document.getElementById('wishlist-badge-desktop');
+            const badgeMobile = document.getElementById('wishlist-badge-mobile');
+            [badgeDesktop, badgeMobile].forEach(badge => {
+                if (!badge) return;
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('hidden');
+                }
+            });
         });
-    });
     </script>
     @endauth
 
