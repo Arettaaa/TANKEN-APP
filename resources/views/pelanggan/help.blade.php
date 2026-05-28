@@ -54,10 +54,13 @@
     /* Contact cards */
     .contact-card {
         border: 1px solid #e8e8e8;
-        transition: border-color 0.2s ease;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        display: block; /* Bikin seluruh kotak bisa diklik */
+        text-align: left;
     }
     .contact-card:hover {
-        border-color: #bbb;
+        border-color: #111;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
     }
     .contact-icon {
         width: 40px;
@@ -95,7 +98,6 @@
         border-radius: 50%;
         border: 1px solid rgba(255,255,255,0.04);
     }
-
 </style>
 @endpush
 
@@ -116,9 +118,19 @@
 </section>
 
 {{-- ===== 2. TOPIC CARDS ===== --}}
-<section class="bg-gray-50 py-16 md:py-20">
+<section class="bg-gray-50 py-10 md:py-16">
     <div class="max-w-7xl mx-auto px-6 lg:px-10">
-        {{-- Diubah menjadi grid-cols-3 agar 3 kotak langsung berjajar sejajar --}}
+        
+        {{-- TOMBOL BACK KE HOME --}}
+        <div class="mb-8">
+            <a href="{{ route('pelanggan.home') }}" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-black transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span class="text-xs font-bold uppercase tracking-widest">Back to Home</span>
+            </a>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
             {{-- Shipping Information --}}
@@ -201,25 +213,25 @@
     </div>
 </section>
 
-{{-- ===== 3. STILL NEED HELP? ===== --}}
+{{-- ===== 3. STILL NEED HELP? (Kotak Centered: Email & WhatsApp) ===== --}}
 <section class="bg-white py-16 md:py-20 border-t border-gray-100">
     <div class="max-w-7xl mx-auto px-6 lg:px-10">
 
-        <div class="mb-12 reveal">
-            <p class="text-xs font-semibold tracking-widest uppercase text-gray-400 mb-2">Hubungi Kami</p>
+        {{-- Judul dibuat Center --}}
+        <div class="mb-12 reveal text-center flex flex-col items-center">
             <h2 class="font-extrabold text-3xl md:text-4xl tracking-tight text-gray-900"
                 style="font-family:'Inter',sans-serif;">
                 Masih Butuh Bantuan?
             </h2>
-            <p class="text-sm text-gray-500 mt-3 max-w-sm leading-relaxed">
-                Tim Customer Service kami selalu siap untuk membantu berbagai kendala Anda.
-            </p>
+             <p class="text-sm text-gray-500 mt-3 max-w-md leading-relaxed">
+                Admin kami siap membantu menjawab semua pertanyaan kamu.
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {{-- Grid diubah menjadi 2 kolom dan di-center (max-w-2xl mx-auto) --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
 
-            {{-- Email --}}
-            <div class="contact-card p-8 reveal">
+            {{-- Kotak Email --}}
+            <a href="mailto:explore.tanken@gmail.com" class="contact-card p-8 reveal bg-white rounded-none">
                 <div class="contact-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                          stroke="currentColor" stroke-width="1.6" width="18" height="18" class="text-gray-700">
@@ -227,36 +239,22 @@
                         <polyline points="22,6 12,13 2,6"/>
                     </svg>
                 </div>
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Email Kami</h3>
-                <p class="text-sm font-medium text-gray-700 mb-0.5">support@tanken.com</p>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Email TANKEN</h3>
+                <p class="text-sm font-medium text-gray-700 mb-0.5">explore.tanken@gmail.com</p>
                 <p class="text-xs text-gray-400">Dibalas maksimal dalam 24 jam</p>
-            </div>
+            </a>
 
-            {{-- Call --}}
-            <div class="contact-card p-8 reveal">
+            {{-- Kotak WhatsApp --}}
+            <a href="https://wa.me/6285121235200?text=Halo%20admin%20tanken%2C%20saya%20ingin%20bertanya%20terkait..." target="_blank" rel="noopener noreferrer" class="contact-card p-8 reveal bg-white rounded-none">
                 <div class="contact-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="1.6" width="18" height="18" class="text-gray-700">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.58a16 16 0 0 0 6 6l.95-1.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-gray-700" viewBox="0 0 16 16">
+                      <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
                     </svg>
                 </div>
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Telepon Kami</h3>
-                <p class="text-sm font-medium text-gray-700 mb-0.5">1-800-TANKEN</p>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">WhatsApp TANKEN</h3>
+                <p class="text-sm font-medium text-gray-700 mb-0.5">+62 851-2123-5200</p>
                 <p class="text-xs text-gray-400">Senin–Jumat, 09.00–18.00 WIB</p>
-            </div>
-
-            {{-- Live Chat --}}
-            <div class="contact-card p-8 reveal">
-                <div class="contact-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                         stroke="currentColor" stroke-width="1.6" width="18" height="18" class="text-gray-700">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
-                <h3 class="text-sm font-bold text-gray-900 mb-1">Live Chat</h3>
-                <p class="text-sm font-medium text-gray-700 mb-0.5">Mulai Obrolan</p>
-                <p class="text-xs text-gray-400">Tersedia 09.00–21.00 WIB</p>
-            </div>
+            </a>
 
         </div>
     </div>

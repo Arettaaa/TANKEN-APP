@@ -13,12 +13,11 @@ class PromoController extends Controller
     {
         $query = Voucher::query();
 
+        // SEARCH
         if ($request->filled('search')) {
-
             $search = strtolower($request->search);
 
             $query->where(function ($q) use ($search) {
-
                 $q->where('code', 'like', "%{$search}%")
                 ->orWhere('type', 'like', "%{$search}%")
                 ->orWhere('value', 'like', "%{$search}%")
@@ -28,6 +27,7 @@ class PromoController extends Controller
                 ->orWhere('description', 'like', "%{$search}%")
                 ->orWhereDate('expires_at', $search)
                 ->orWhere('expires_at', 'like', "%{$search}%");
+
                 if ($search === 'active') {
                     $q->orWhere(function ($qq) {
                         $qq->where('is_active', true)
@@ -52,28 +52,23 @@ class PromoController extends Controller
             });
         }
 
+        // FILTER TYPE
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
+        // FILTER STATUS
         if ($request->filled('status')) {
-
             $now = now();
-
             if ($request->status === 'active') {
-
                 $query->where('is_active', true)
                     ->where(function ($q) use ($now) {
                         $q->whereNull('expires_at')
                         ->orWhere('expires_at', '>', $now);
                     });
-
             } elseif ($request->status === 'disabled') {
-
                 $query->where('is_active', false);
-
             } elseif ($request->status === 'expired') {
-
                 $query->where('is_active', true)
                     ->whereNotNull('expires_at')
                     ->where('expires_at', '<=', $now);
@@ -101,7 +96,8 @@ class PromoController extends Controller
 
         $totalUsage = Voucher::sum('used_count');
 
-        $totalDiscount = Voucher::sum(
+        // PERUBAHAN DI SINI: Hanya kalikan value untuk voucher tipe 'fixed'
+        $totalDiscount = Voucher::where('type', 'fixed')->sum(
             \DB::raw('used_count * value')
         );
 
@@ -181,9 +177,7 @@ class PromoController extends Controller
     public function exportExcel(Request $request)
     {
         $vouchers = \App\Models\Voucher::withCount('userVouchers')->get();
-    
         $now = now();
-    
         $columns = ['ID', 'Kode', 'Tipe', 'Nilai', 'Min. Pembelian', 'Kuota', 'Diklaim', 'Sisa', 'Kadaluarsa', 'Welcome', 'Status'];
     
         $rows = $vouchers->map(function ($v) use ($now) {
@@ -210,6 +204,6 @@ class PromoController extends Controller
             ];
         });
     
-    return ExportHelper::excel('Tanken_Promo_Vouchers', 'Laporan Promo & Voucher', $columns, $rows);
+       return ExportHelper::excel('Tanken_Promo_Vouchers', 'Laporan Promo & Voucher', $columns, $rows);
     }
 }

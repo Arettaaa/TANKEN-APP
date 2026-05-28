@@ -136,14 +136,21 @@
 
     .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 
-    /* Order summary card */
+    /* Order summary card - FIXED LAYOUT */
     .summary-card {
         border: 1.5px solid #e5e7eb;
         border-radius: 10px;
         padding: 24px;
         position: sticky;
         top: 80px;
+        max-height: calc(100vh - 110px); /* Mencegah kepanjangan */
+        overflow-y: auto; /* Bisa di-scroll */
     }
+
+    /* Scrollbar khusus untuk ringkasan biar cantik */
+    .summary-card::-webkit-scrollbar { width: 4px; }
+    .summary-card::-webkit-scrollbar-track { background: transparent; }
+    .summary-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
     /* Checkbox custom */
     .custom-check {
@@ -430,37 +437,36 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
                             </div>
                             
                             <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-    @forelse($userVouchers as $uv)
-    @php
-        $v = $uv->voucher;
-        $valStr = $v->type === 'fixed'
-            ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
-            : 'Diskon ' . $v->value . '%';
-        $discount = $v->type === 'fixed' ? $v->value : 0;
-    @endphp
-    <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
-        <input type="radio" name="voucher_selection" class="custom-radio"
-            value="{{ $v->code }}"
-            data-label="{{ $valStr }}"
-            data-discount="{{ $discount }}">
-        <div class="flex-1">
-            <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
-            <p class="text-[11px] text-gray-500 leading-relaxed">
-                {{ $v->description ?: 'Berlaku untuk semua produk.' }}
-                @if($v->min_purchase > 0)
-                    Min. Rp {{ number_format($v->min_purchase, 0, ',', '.') }}.
-                @endif
-            </p>
-            @if($v->expires_at)
-            <p class="text-[10px] text-gray-400 mt-1">Berlaku hingga {{ $v->expires_at->format('d M Y') }}</p>
-            @endif
-        </div>
-    </label>
-    @empty
-    <p class="text-xs text-gray-400 text-center py-2">Tidak ada voucher tersedia.</p>
-    @endforelse
-</div>
-</div>
+                                @forelse($userVouchers as $uv)
+                                @php
+                                    $v = $uv->voucher;
+                                    $valStr = $v->type === 'fixed' || $v->type === 'nominal'
+                                        ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
+                                        : 'Diskon ' . $v->value . '%';
+                                @endphp
+                                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+                                    <input type="radio" name="voucher_selection" class="custom-radio"
+                                        value="{{ $v->code }}"
+                                        data-label="{{ $valStr }}"
+                                        data-type="{{ $v->type }}"
+                                        data-value="{{ $v->value }}">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
+                                        <p class="text-[11px] text-gray-500 leading-relaxed">
+                                            {{ $v->description ?: 'Berlaku untuk semua produk.' }}
+                                            @if($v->min_purchase > 0)
+                                                Min. Rp {{ number_format($v->min_purchase, 0, ',', '.') }}.
+                                            @endif
+                                        </p>
+                                        @if($v->expires_at)
+                                        <p class="text-[10px] text-gray-400 mt-1">Berlaku hingga {{ $v->expires_at->format('d M Y') }}</p>
+                                        @endif
+                                    </div>
+                                </label>
+                                @empty
+                                <p class="text-xs text-gray-400 text-center py-2">Tidak ada voucher tersedia.</p>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
 
@@ -541,6 +547,8 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
 
 @push('scripts')
 <script>
+    let activeVoucherType = '';
+    let activeVoucherValue = 0;
     let currentVoucherDiscount = 0; 
     let activeVoucherCode = '';
     let activeVoucherLabel = '';
@@ -573,7 +581,6 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         container.appendChild(input);
     });
 
-    // Kirim voucher code ke server
     const voucherInput = document.createElement('input');
     voucherInput.type  = 'hidden';
     voucherInput.name  = 'voucher_code';
@@ -586,7 +593,7 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         const checks = document.querySelectorAll('.item-check');
         let subtotalBefore = 0;
         let totalQty = 0;
-        let absoluteTotalQty = 0; // Total dari seluruh qty, terlepas dari ceklis (untuk hero banner)
+        let absoluteTotalQty = 0;
 
         checks.forEach(chk => {
             const card = chk.closest('.cart-item-card');
@@ -595,13 +602,26 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             const id    = parseInt(card.dataset.id);
             const qty   = parseInt(document.getElementById('qty-' + id)?.value || 1);
             
-            absoluteTotalQty += qty; // Selalu dihitung untuk hero banner
+            absoluteTotalQty += qty; 
 
             if (!chk.checked) return;
             const price = itemPrices[id] || 0;
             subtotalBefore += price * qty;
             totalQty += qty;
         });
+
+        // Hitung ulang diskon voucher (Support persen & nominal)
+        if (activeVoucherType === 'percent' || activeVoucherType === 'persen' || activeVoucherType === 'percentage') {
+            currentVoucherDiscount = subtotalBefore * (activeVoucherValue / 100);
+        } else if (activeVoucherType === 'fixed' || activeVoucherType === 'nominal') {
+            currentVoucherDiscount = activeVoucherValue;
+        } else {
+            currentVoucherDiscount = 0;
+        }
+
+        if (currentVoucherDiscount > subtotalBefore) {
+            currentVoucherDiscount = subtotalBefore;
+        }
 
         let total = subtotalBefore - currentVoucherDiscount;
         if (total < 0) total = 0;
@@ -611,14 +631,17 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         document.getElementById('summaryTotal').textContent    = formatRp(total);
         document.getElementById('checkoutQty').textContent     = totalQty;
 
+        if (activeVoucherType !== '') {
+            document.getElementById('voucherDiscount').textContent = '– ' + formatRp(currentVoucherDiscount);
+        }
+
         const checkedCount = Array.from(checks).filter(c => c.checked).length;
-        const allCount     = checks.length; // Jumlah baris (macam barang)
+        const allCount     = checks.length; 
         
         if (document.getElementById('selectCount')) {
             document.getElementById('selectCount').textContent = '(' + totalQty + ' terpilih)';
         }
         
-        // Hero banner = jumlah seluruh QTY barang (misal 5 + 1 = 6)
         if (document.getElementById('heroCartCount')) {
             document.getElementById('heroCartCount').textContent = absoluteTotalQty + ' item di keranjangmu';
         }
@@ -636,7 +659,6 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             masterChk.indeterminate = checkedCount > 0 && checkedCount < allCount;
         }
 
-        // Navbar badge = hanya jumlah baris / varian (misal ada 2 macam ukuran/tipe)
         const navbarBadge = document.getElementById('cart-badge');
         if (navbarBadge) {
             if (allCount > 0) {
@@ -800,34 +822,35 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     fetch('/akun/voucher/info?code=' + code)
         .then(r => r.json())
         .then(v => {
-            if (v.discount > 0) {
+            if (v.discount > 0 || v.value > 0) {
                 msg.textContent = '✓ Voucher diterapkan!';
                 msg.className   = 'mt-2 text-[11px] text-green-600 font-bold block';
-                confirmVoucherSelection(null, { code, discount: v.discount, label: code });
+                confirmVoucherSelection(null, { code: code, type: v.type || 'fixed', value: v.value || v.discount, label: code });
             } else {
                 msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
                 msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
             }
         });
 }
+
     function confirmVoucherSelection(radioElement = null, manualData = null) {
-        let discount = 0;
         let label = '';
         let code = '';
 
         if (manualData) {
-            discount = manualData.discount;
+            activeVoucherType = manualData.type || 'fixed';
+            activeVoucherValue = parseFloat(manualData.value || manualData.discount);
             label = manualData.label;
             code = manualData.code;
         } else if (radioElement) {
-            discount = parseInt(radioElement.dataset.discount);
+            activeVoucherType = radioElement.dataset.type;
+            activeVoucherValue = parseFloat(radioElement.dataset.value);
             label = radioElement.dataset.label;
             code = radioElement.value;
         } else {
             return;
         }
 
-        currentVoucherDiscount = discount;
         activeVoucherCode = code;
         activeVoucherLabel = label;
 
@@ -836,13 +859,14 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         document.getElementById('activeVoucherDesc').classList.replace('text-gray-900', 'text-green-600');
         
         document.getElementById('voucherRow').classList.remove('hidden');
-        document.getElementById('voucherDiscount').textContent = '– ' + formatRp(discount);
         document.getElementById('clearVoucherBtn').classList.remove('hidden');
 
         updateSummary();
     }
 
     function clearVoucher() {
+        activeVoucherType = '';
+        activeVoucherValue = 0;
         currentVoucherDiscount = 0;
         activeVoucherCode = '';
         activeVoucherLabel = '';
