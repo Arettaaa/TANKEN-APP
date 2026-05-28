@@ -136,14 +136,21 @@
 
     .delete-btn:hover { background: #fee2e2; color: #dc2626; }
 
-    /* Order summary card */
+    /* Order summary card - FIXED LAYOUT */
     .summary-card {
         border: 1.5px solid #e5e7eb;
         border-radius: 10px;
         padding: 24px;
         position: sticky;
         top: 80px;
+        max-height: calc(100vh - 110px); /* Mencegah kepanjangan */
+        overflow-y: auto; /* Bisa di-scroll */
     }
+
+    /* Scrollbar khusus untuk ringkasan biar cantik */
+    .summary-card::-webkit-scrollbar { width: 4px; }
+    .summary-card::-webkit-scrollbar-track { background: transparent; }
+    .summary-card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
     /* Checkbox custom */
     .custom-check {
@@ -430,37 +437,36 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
                             </div>
                             
                             <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
-    @forelse($userVouchers as $uv)
-    @php
-        $v = $uv->voucher;
-        $valStr = $v->type === 'fixed'
-            ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
-            : 'Diskon ' . $v->value . '%';
-    @endphp
-    <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
-        <input type="radio" name="voucher_selection" class="custom-radio"
-            value="{{ $v->code }}"
-            data-label="{{ $valStr }}"
-            data-type="{{ $v->type }}"
-            data-value="{{ $v->value }}">
-        <div class="flex-1">
-            <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
-            <p class="text-[11px] text-gray-500 leading-relaxed">
-                {{ $v->description ?: 'Berlaku untuk semua produk.' }}
-                @if($v->min_purchase > 0)
-                    Min. Rp {{ number_format($v->min_purchase, 0, ',', '.') }}.
-                @endif
-            </p>
-            @if($v->expires_at)
-            <p class="text-[10px] text-gray-400 mt-1">Berlaku hingga {{ $v->expires_at->format('d M Y') }}</p>
-            @endif
-        </div>
-    </label>
-    @empty
-    <p class="text-xs text-gray-400 text-center py-2">Tidak ada voucher tersedia.</p>
-    @endforelse
-</div>
-</div>
+                                @forelse($userVouchers as $uv)
+                                @php
+                                    $v = $uv->voucher;
+                                    $valStr = $v->type === 'fixed' || $v->type === 'nominal'
+                                        ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
+                                        : 'Diskon ' . $v->value . '%';
+                                @endphp
+                                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+                                    <input type="radio" name="voucher_selection" class="custom-radio"
+                                        value="{{ $v->code }}"
+                                        data-label="{{ $valStr }}"
+                                        data-type="{{ $v->type }}"
+                                        data-value="{{ $v->value }}">
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
+                                        <p class="text-[11px] text-gray-500 leading-relaxed">
+                                            {{ $v->description ?: 'Berlaku untuk semua produk.' }}
+                                            @if($v->min_purchase > 0)
+                                                Min. Rp {{ number_format($v->min_purchase, 0, ',', '.') }}.
+                                            @endif
+                                        </p>
+                                        @if($v->expires_at)
+                                        <p class="text-[10px] text-gray-400 mt-1">Berlaku hingga {{ $v->expires_at->format('d M Y') }}</p>
+                                        @endif
+                                    </div>
+                                </label>
+                                @empty
+                                <p class="text-xs text-gray-400 text-center py-2">Tidak ada voucher tersedia.</p>
+                                @endforelse
+                            </div>
                         </div>
                     </div>
 
@@ -575,7 +581,6 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         container.appendChild(input);
     });
 
-    // Kirim voucher code ke server
     const voucherInput = document.createElement('input');
     voucherInput.type  = 'hidden';
     voucherInput.name  = 'voucher_code';
@@ -605,16 +610,15 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             totalQty += qty;
         });
 
-        // Hitung ulang diskon voucher kalau tipenya persen!
-        if (activeVoucherType === 'percent') {
+        // Hitung ulang diskon voucher (Support persen & nominal)
+        if (activeVoucherType === 'percent' || activeVoucherType === 'persen' || activeVoucherType === 'percentage') {
             currentVoucherDiscount = subtotalBefore * (activeVoucherValue / 100);
-        } else if (activeVoucherType === 'fixed') {
+        } else if (activeVoucherType === 'fixed' || activeVoucherType === 'nominal') {
             currentVoucherDiscount = activeVoucherValue;
         } else {
             currentVoucherDiscount = 0;
         }
 
-        // Jangan sampai diskon voucher melebihi total harga keranjang
         if (currentVoucherDiscount > subtotalBefore) {
             currentVoucherDiscount = subtotalBefore;
         }
@@ -857,7 +861,7 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
         document.getElementById('voucherRow').classList.remove('hidden');
         document.getElementById('clearVoucherBtn').classList.remove('hidden');
 
-        updateSummary(); // Kalkulasi ulang diskon akan terjadi di sini!
+        updateSummary();
     }
 
     function clearVoucher() {
