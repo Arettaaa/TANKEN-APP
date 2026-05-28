@@ -663,17 +663,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             @auth
-            updateCartBadge({
-                {
-                    \
-                    App\ Models\ CartItem::where('user_id', auth() - > id()) - > count()
-                }
-            });
-            updateWishlistBadge({
-                {
-                    auth() - > user() - > wishlists() - > count()
-                }
-            });
+            updateCartBadge({{ \App\Models\CartItem::where('user_id', auth()->id())->count() }});
+            updateWishlistBadge({{ auth()->user()->wishlists()->count() }});
             @else
             updateCartBadge(0);
             updateWishlistBadge(0);
@@ -687,11 +678,7 @@
     <script>
         // Inject jumlah wishlist dari server supaya badge langsung muncul
         document.addEventListener('DOMContentLoaded', () => {
-            const count = {
-                {
-                    auth() - > user() - > wishlists() - > count()
-                }
-            };
+            const count = {{ auth()->user()->wishlists()->count() }};
             const badgeDesktop = document.getElementById('wishlist-badge-desktop');
             const badgeMobile = document.getElementById('wishlist-badge-mobile');
             [badgeDesktop, badgeMobile].forEach(badge => {
