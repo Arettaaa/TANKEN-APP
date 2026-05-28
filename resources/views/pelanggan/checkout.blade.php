@@ -548,6 +548,10 @@ $shippingOptions = $shippingOptions ?? [
                                 {{ isset($defaultAddress) ? '...' : 'Pilih alamat dulu' }}
                             </span>
                         </div>
+                        <div class="flex justify-between items-center hidden" id="checkoutVoucherRow">
+                            <span class="text-green-600 font-medium">Diskon Voucher</span>
+                            <span class="font-bold text-green-600" id="checkoutVoucherDiscount">– Rp 0</span>
+                        </div>
 
                         {{-- VOUCHER INLINE --}}
 <div class="mb-4 mt-2">
@@ -589,17 +593,17 @@ $shippingOptions = $shippingOptions ?? [
             <div class="flex flex-col gap-3 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
                 @forelse($userVouchers as $uv)
                 @php
-                    $v = $uv->voucher;
-                    $valStr = $v->type === 'fixed'
-                        ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
-                        : 'Diskon ' . $v->value . '%';
-                    $discount = $v->type === 'fixed' ? $v->value : 0;
-                @endphp
-                <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
-                    <input type="radio" name="voucher_selection" class="custom-radio" 
-                        value="{{ $v->code }}" 
-                        data-label="{{ $valStr }}" 
-                        data-discount="{{ $discount }}">
+                $v = $uv->voucher;
+                $valStr = $v->type === 'fixed'
+                    ? 'Potongan Rp ' . number_format($v->value, 0, ',', '.')
+                    : 'Diskon ' . $v->value . '%';
+            @endphp
+            <label class="voucher-radio-wrap" onclick="selectVoucherRadio(this)">
+                <input type="radio" name="voucher_selection" class="custom-radio" 
+                    value="{{ $v->code }}" 
+                    data-label="{{ $valStr }}"
+                    data-type="{{ $v->type }}"
+                    data-value="{{ $v->value }}">
                     <div class="flex-1">
                         <p class="text-xs font-bold text-gray-900 mb-1">{{ $valStr }}</p>
                         <p class="text-[11px] text-gray-500 leading-relaxed">
@@ -619,12 +623,6 @@ $shippingOptions = $shippingOptions ?? [
             </div>
         </div>
     </div>
-                        
-                        {{-- Row Diskon Voucher dari Session --}}
-                        <div class="flex justify-between items-center hidden" id="checkoutVoucherRow">
-                            <span class="text-green-600 font-medium">Diskon Voucher</span>
-                            <span class="font-bold text-green-600" id="checkoutVoucherDiscount">– Rp 0</span>
-                        </div>
                     </div>
 
                     <hr class="summary-divider">
@@ -992,7 +990,7 @@ if (savedVoucherCode && savedVoucherDiscount > 0) {
     .then(data => {
         if (data.success) {
             // Ambil nilai diskon dari voucher
-            fetch('/voucher/info?code=' + code)
+           fetch('/akun/voucher/info?code=' + code)
                 .then(r => r.json())
                 .then(v => {
                     voucherDiscount = v.discount;
@@ -1050,18 +1048,21 @@ function applyManualVoucher() {
         return;
     }
 
-    fetch('/voucher/info?code=' + code)
-        .then(r => r.json())
-        .then(v => {
-            if (v.discount > 0) {
-                msg.textContent = '✓ Voucher diterapkan!';
-                msg.className   = 'mt-2 text-[11px] text-green-600 font-bold block';
-                confirmVoucherSelection(null, { code, discount: v.discount, label: code });
-            } else {
-                msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
-                msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
-            }
-        });
+ fetch('/akun/voucher/info?code=' + code)
+    .then(r => r.json())
+    .then(v => {
+        const isPercent = ['percent','persen','percentage','pct'].includes(v.type?.toLowerCase());
+        const disc = isPercent ? Math.round(subtotalBase * (v.value / 100)) : v.value;
+
+        if (disc > 0) {
+            msg.textContent = '✓ Voucher diterapkan!';
+            msg.className   = 'mt-2 text-[11px] text-green-600 font-bold block';
+            confirmVoucherSelection(null, { code, discount: disc, label: code });
+        } else {
+            msg.textContent = 'Kode voucher tidak valid atau kedaluwarsa.';
+            msg.className   = 'mt-2 text-[11px] text-red-500 font-medium block';
+        }
+    });
 }
 
 function confirmVoucherSelection(radioEl = null, manualData = null) {
@@ -1072,7 +1073,10 @@ function confirmVoucherSelection(radioEl = null, manualData = null) {
         label    = manualData.label;
         code     = manualData.code;
     } else if (radioEl) {
-        discount = parseInt(radioEl.dataset.discount);
+        const type  = radioEl.dataset.type;
+        const value = parseFloat(radioEl.dataset.value);
+        const isPercent = ['percent','persen','percentage','pct'].includes(type?.toLowerCase());
+        discount = isPercent ? Math.round(subtotalBase * (value / 100)) : value;
         label    = radioEl.dataset.label;
         code     = radioEl.value;
     } else return;

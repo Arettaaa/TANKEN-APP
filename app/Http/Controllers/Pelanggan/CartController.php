@@ -24,7 +24,6 @@ class CartController extends Controller
                         : null,
                     'size'      => $item->size,
                     'color'     => $item->color,
-                    'color_hex' => $this->colorToHex($item->color),
                     'price'     => $item->product->price,
                     'qty'       => $item->quantity,
                     'checked'   => true,
@@ -109,36 +108,5 @@ class CartController extends Controller
             ->delete();
 
         return response()->json(['success' => true]);
-    }
-
-    private function colorToHex(?string $color): string
-    {
-        $map = [
-            'black'  => '#111111',
-            'hitam'  => '#111111',
-            'white'  => '#ffffff',
-            'putih'  => '#ffffff',
-            'navy'   => '#1e3a5f',
-            'grey'   => '#9ca3af',
-            'gray'   => '#9ca3af',
-            'abu'    => '#9ca3af',
-            'olive'  => '#6b7c3f',
-            'green'  => '#16a34a',
-            'hijau'  => '#16a34a',
-            'blue'   => '#2563eb',
-            'biru'   => '#2563eb',
-            'red'    => '#dc2626',
-            'merah'  => '#dc2626',
-            'brown'  => '#92400e',
-            'coklat' => '#92400e',
-            'cream'  => '#fef3c7',
-            'indigo' => '#4338ca',
-            'stone'  => '#78716c',
-        ];
-
-        if (!$color) return '#9ca3af';
-
-        $key = strtolower(trim($color));
-        return $map[$key] ?? '#9ca3af';
     }
 }

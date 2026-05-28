@@ -552,6 +552,8 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     let currentVoucherDiscount = 0; 
     let activeVoucherCode = '';
     let activeVoucherLabel = '';
+    let pendingRequests = 0;
+
 
     const itemPrices = {
         @foreach($cartItems as $item)
@@ -564,6 +566,11 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     }
 
     document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
+    if (pendingRequests > 0) {
+        e.preventDefault();
+        alert('Mohon tunggu sebentar, sedang menyimpan perubahan...');
+        return;
+    }
     const checked = document.querySelectorAll('.item-check:checked');
     if (checked.length === 0) {
         e.preventDefault();
@@ -588,89 +595,93 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     container.appendChild(voucherInput);
 });
 
-    // ========== UPDATE SUMMARY ==========
-    function updateSummary() {
-        const checks = document.querySelectorAll('.item-check');
-        let subtotalBefore = 0;
-        let totalQty = 0;
-        let absoluteTotalQty = 0;
 
-        checks.forEach(chk => {
-            const card = chk.closest('.cart-item-card');
-            card.classList.toggle('is-checked', chk.checked);
+function isPercentType(type) {
+    return ['percent', 'persen', 'percentage', 'pct'].includes(type?.toLowerCase());
+}
+function isFixedType(type) {
+    return ['fixed', 'nominal', 'flat'].includes(type?.toLowerCase());
+}
 
-            const id    = parseInt(card.dataset.id);
-            const qty   = parseInt(document.getElementById('qty-' + id)?.value || 1);
-            
-            absoluteTotalQty += qty; 
+ function updateSummary() {
+    const checks = document.querySelectorAll('.item-check');
+    let subtotalBefore = 0;
+    let totalQty = 0;
+    let absoluteTotalQty = 0;
+    let selectedCardCount = 0; // jumlah card yang dicentang
 
-            if (!chk.checked) return;
-            const price = itemPrices[id] || 0;
-            subtotalBefore += price * qty;
-            totalQty += qty;
-        });
+    checks.forEach(chk => {
+        const card = chk.closest('.cart-item-card');
+        card.classList.toggle('is-checked', chk.checked);
 
-        // Hitung ulang diskon voucher (Support persen & nominal)
-        if (activeVoucherType === 'percent' || activeVoucherType === 'persen' || activeVoucherType === 'percentage') {
-            currentVoucherDiscount = subtotalBefore * (activeVoucherValue / 100);
-        } else if (activeVoucherType === 'fixed' || activeVoucherType === 'nominal') {
-            currentVoucherDiscount = activeVoucherValue;
+        const id  = parseInt(card.dataset.id);
+        const qty = parseInt(document.getElementById('qty-' + id)?.value || 1);
+
+        absoluteTotalQty += qty;
+
+        if (!chk.checked) return;
+
+        const price = itemPrices[id] || 0;
+        subtotalBefore += price * qty;
+        selectedCardCount++; // hitung per card, bukan per qty
+        totalQty += qty;
+    });
+
+    if (isPercentType(activeVoucherType)) {
+        currentVoucherDiscount = subtotalBefore * (activeVoucherValue / 100);
+    } else if (isFixedType(activeVoucherType)) {
+        currentVoucherDiscount = activeVoucherValue;
+    } else {
+        currentVoucherDiscount = 0;
+    }
+
+    if (currentVoucherDiscount > subtotalBefore) currentVoucherDiscount = subtotalBefore;
+
+    let total = subtotalBefore - currentVoucherDiscount;
+    if (total < 0) total = 0;
+
+    document.getElementById('summaryQty').textContent      = selectedCardCount; // card, bukan qty
+    document.getElementById('summarySubtotal').textContent = formatRp(subtotalBefore);
+    document.getElementById('summaryTotal').textContent    = formatRp(total);
+    document.getElementById('checkoutQty').textContent     = selectedCardCount; // card, bukan qty
+
+    if (activeVoucherType !== '') {
+        document.getElementById('voucherDiscount').textContent = '– ' + formatRp(currentVoucherDiscount);
+    }
+
+    if (document.getElementById('selectCount')) {
+        document.getElementById('selectCount').textContent = '(' + selectedCardCount + ' terpilih)';
+    }
+
+    if (document.getElementById('heroCartCount')) {
+        document.getElementById('heroCartCount').textContent = absoluteTotalQty + ' item di keranjangmu';
+    }
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (selectedCardCount === 0 || pendingRequests > 0) {
+        checkoutBtn.classList.add('opacity-40', 'pointer-events-none');
+    } else {
+        checkoutBtn.classList.remove('opacity-40', 'pointer-events-none');
+    }
+
+    const masterChk = document.getElementById('selectAll');
+    if (masterChk) {
+        masterChk.checked       = selectedCardCount === checks.length && checks.length > 0;
+        masterChk.indeterminate = selectedCardCount > 0 && selectedCardCount < checks.length;
+    }
+
+    const navbarBadge = document.getElementById('cart-badge');
+    if (navbarBadge) {
+        if (checks.length > 0) {
+            navbarBadge.textContent = checks.length > 99 ? '99+' : checks.length;
+            navbarBadge.classList.remove('hidden');
+            navbarBadge.style.display = '';
         } else {
-            currentVoucherDiscount = 0;
-        }
-
-        if (currentVoucherDiscount > subtotalBefore) {
-            currentVoucherDiscount = subtotalBefore;
-        }
-
-        let total = subtotalBefore - currentVoucherDiscount;
-        if (total < 0) total = 0;
-
-        document.getElementById('summaryQty').textContent      = totalQty;
-        document.getElementById('summarySubtotal').textContent = formatRp(subtotalBefore);
-        document.getElementById('summaryTotal').textContent    = formatRp(total);
-        document.getElementById('checkoutQty').textContent     = totalQty;
-
-        if (activeVoucherType !== '') {
-            document.getElementById('voucherDiscount').textContent = '– ' + formatRp(currentVoucherDiscount);
-        }
-
-        const checkedCount = Array.from(checks).filter(c => c.checked).length;
-        const allCount     = checks.length; 
-        
-        if (document.getElementById('selectCount')) {
-            document.getElementById('selectCount').textContent = '(' + totalQty + ' terpilih)';
-        }
-        
-        if (document.getElementById('heroCartCount')) {
-            document.getElementById('heroCartCount').textContent = absoluteTotalQty + ' item di keranjangmu';
-        }
-
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        if (totalQty === 0) {
-            checkoutBtn.classList.add('opacity-40', 'pointer-events-none');
-        } else {
-            checkoutBtn.classList.remove('opacity-40', 'pointer-events-none');
-        }
-
-        const masterChk = document.getElementById('selectAll');
-        if (masterChk) {
-            masterChk.checked       = checkedCount === allCount && allCount > 0;
-            masterChk.indeterminate = checkedCount > 0 && checkedCount < allCount;
-        }
-
-        const navbarBadge = document.getElementById('cart-badge');
-        if (navbarBadge) {
-            if (allCount > 0) {
-                navbarBadge.textContent = allCount > 99 ? '99+' : allCount;
-                navbarBadge.classList.remove('hidden');
-                navbarBadge.style.display = '';
-            } else {
-                navbarBadge.classList.add('hidden');
-                navbarBadge.style.display = 'none';
-            }
+            navbarBadge.classList.add('hidden');
+            navbarBadge.style.display = 'none';
         }
     }
+}
 
     function changeQty(id, delta) {
         const input = document.getElementById('qty-' + id);
@@ -697,14 +708,21 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
     }
 
     function syncQtyToServer(id, qty) {
-        fetch('/keranjang/' + id, {
+        pendingRequests++;
+        updateSummary();
+
+        fetch('/akun/keranjang/' + id, {  // ← tambah /akun/
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
             },
             body: JSON.stringify({ quantity: qty }),
-        }).catch(() => {});
+        })
+        .finally(() => {
+            pendingRequests = Math.max(0, pendingRequests - 1);
+            updateSummary();
+        });
     }
 
     let deleteMode = ''; 
@@ -748,7 +766,7 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
             checkEmptyState(); 
         }, 300);
         
-        fetch('/keranjang/' + id, {
+        fetch('/akun/keranjang/' + id, {
             method: 'DELETE',
             headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
         }).catch(() => {});
@@ -767,7 +785,7 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
                 checkEmptyState(); 
             }, 250);
             
-            fetch('/keranjang/' + id, {
+            fetch('/akun/keranjang/' + id, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
             }).catch(() => {});

@@ -136,34 +136,35 @@ Route::name('pelanggan.')->group(function () {
         
         Route::get('/voucher', [VoucherController::class, 'index'])->name('profil-voucher');
         Route::post('/voucher/claim', [VoucherController::class, 'claim'])->name('voucher.claim');
-        Route::get('/voucher/info', function (\Illuminate\Http\Request $request) {
-    $voucher = \App\Models\Voucher::where('code', strtoupper($request->code))
-        ->where('is_active', true)
-        ->first();
-    
-    if (!$voucher) return response()->json(['discount' => 0]);
-
-    $discount = 0;
-
-    // PERUBAHAN: Logika matematika untuk membedakan Harga Pas vs Persentase
-    if ($voucher->type === 'fixed') {
-        $discount = $voucher->value;
-    } else {
-        // Ambil isi keranjang belanja user yang login
-        $cartItems = \App\Models\Cart::where('user_id', auth()->id())->get();
+       Route::get('/voucher/info', function (\Illuminate\Http\Request $request) {
+        $voucher = \App\Models\Voucher::where('code', strtoupper($request->code))
+            ->where('is_active', true)
+            ->where(function($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->first();
         
-        // Hitung total belanja (Subtotal)
-        $subtotal = 0;
-        foreach($cartItems as $item) {
-            $subtotal += $item->product->price * $item->quantity; 
-        }
-        
-        // Rumus Persentase: (Persen / 100) * Subtotal Belanja
-        $discount = ($voucher->value / 100) * $subtotal;
-    }
+        if (!$voucher) return response()->json(['discount' => 0, 'value' => 0, 'type' => '']);
 
-    return response()->json(['discount' => $discount]);
-})->name('voucher.info');
+        $cartItems = \App\Models\CartItem::where('user_id', auth()->id())
+            ->with('product')
+            ->get();
+        
+        $subtotal = $cartItems->sum(fn($i) => $i->product->price * $i->quantity);
+
+        // Normalisasi type
+        $isPercent = in_array(strtolower($voucher->type), ['percent', 'persen', 'percentage', 'pct']);
+        
+        $discount = $isPercent
+            ? ($voucher->value / 100) * $subtotal
+            : $voucher->value;
+
+        return response()->json([
+            'discount' => $discount,
+            'value'    => $voucher->value,
+            'type'     => $voucher->type, // kirim type aslinya ke JS
+        ]);
+    })->name('voucher.info');
 
 
         // ==== PAYMENT & REVIEW ====

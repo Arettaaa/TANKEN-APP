@@ -14,96 +14,114 @@ use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
-    public function index(Request $request)
+    private function hitungDiskon($voucher, $subtotal): int
     {
-        if ($request->has('buy_now')) {
-            $product = Product::findOrFail($request->product_id);
+        $isPercent = in_array(strtolower($voucher->type), ['percent', 'persen', 'percentage', 'pct']);
+        return $isPercent
+            ? (int) round(($voucher->value / 100) * $subtotal)
+            : (int) $voucher->value;
+    }
+   public function index(Request $request)
+{
+    if ($request->has('buy_now')) {
+        $product = Product::findOrFail($request->product_id);
 
-            $cartItems = collect([[
-                'id'    => 'buy_now',
-                'name'  => $product->name,
-                'image' => $product->main_image
-                    ? asset('storage/' . $product->main_image)
-                    : null,
-                'size'  => $request->size,
-                'qty'   => (int) $request->qty,
-                'price' => $product->price,
-            ]]);
+        $cartItems = collect([[
+            'id'    => 'buy_now',
+            'name'  => $product->name,
+            'image' => $product->main_image
+                ? asset('storage/' . $product->main_image)
+                : null,
+            'size'  => $request->size,
+            'qty'   => (int) $request->qty,
+            'price' => $product->price,
+        ]]);
 
-            session(['buy_now_item' => [
-                'product_id' => $product->id,
-                'size'       => $request->size,
-                'qty'        => (int) $request->qty,
-                'price'      => $product->price,
-            ]]);
-            session()->forget('checkout_ids');
-        } else {
-            session()->forget('buy_now_item');
-            $selectedIds = session('checkout_ids', []);
+        session(['buy_now_item' => [
+            'product_id' => $product->id,
+            'size'       => $request->size,
+            'qty'        => (int) $request->qty,
+            'price'      => $product->price,
+        ]]);
+        session()->forget('checkout_ids');
+    } else {
+        session()->forget('buy_now_item');
+        $selectedIds = session('checkout_ids', []);
 
-            if (empty($selectedIds)) {
-                return redirect()->route('pelanggan.keranjang.index')
-                    ->with('error', 'Pilih minimal 1 produk untuk checkout.');
-            }
-
-            $cartItems = CartItem::whereIn('id', $selectedIds)
-                ->where('user_id', auth()->id())
-                ->with('product')
-                ->get()
-                ->map(fn($item) => [
-                    'id'    => $item->id,
-                    'name'  => $item->product->name,
-                    'image' => $item->product->main_image
-                        ? asset('storage/' . $item->product->main_image)
-                        : null,
-                    'size'  => $item->size,
-                    'qty'   => $item->quantity,
-                    'price' => $item->product->price,
-                ]);
+        if (empty($selectedIds)) {
+            return redirect()->route('pelanggan.keranjang.index')
+                ->with('error', 'Pilih minimal 1 produk untuk checkout.');
         }
 
-        $addresses      = auth()->user()->addresses()->orderByDesc('is_default')->get();
-        $defaultAddress = $addresses->firstWhere('is_default', true);
-
-        $subtotal = $cartItems->sum(fn($i) => $i['price'] * $i['qty']);
-
-        $shippingOptions = [
-            ['id' => 'jne',      'name' => 'JNE Regular',      'days' => '2-3 hari', 'price' => 150000],
-            ['id' => 'jnt',      'name' => 'J&T Express',       'days' => '2-4 hari', 'price' => 120000],
-            ['id' => 'sicepat',  'name' => 'SiCepat Reguler',   'days' => '2-3 hari', 'price' => 130000, 'default' => true],
-            ['id' => 'anteraja', 'name' => 'AnterAja Standard', 'days' => '3-4 hari', 'price' => 110000],
-        ];
-
-        $shippingCost = 130000;
-
-        $total = $subtotal + $shippingCost;
-
-        $userVouchers = auth()->user()
-            ->userVouchers()
-            ->with('voucher')
-            ->where('is_used', false)
-            ->whereHas(
-                'voucher',
-                fn($q) => $q->where('is_active', true)
-                    ->where(fn($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            )
-            ->get();
-        $activeVoucherCode     = session('tanken_voucher_code', '');
-        $activeVoucherDiscount = session('tanken_voucher_discount', 0);
-
-        return view('pelanggan.checkout', compact(
-            'cartItems',
-            'addresses',
-            'defaultAddress',
-            'subtotal',
-            'shippingCost',
-            'total',
-            'shippingOptions',
-            'userVouchers',
-            'activeVoucherCode',
-            'activeVoucherDiscount'
-        ));
+        $cartItems = CartItem::whereIn('id', $selectedIds)
+            ->where('user_id', auth()->id())
+            ->with('product')
+            ->get()
+            ->map(fn($item) => [
+                'id'    => $item->id,
+                'name'  => $item->product->name,
+                'image' => $item->product->main_image
+                    ? asset('storage/' . $item->product->main_image)
+                    : null,
+                'size'  => $item->size,
+                'qty'   => $item->quantity,
+                'price' => $item->product->price,
+            ]);
     }
+
+    $addresses      = auth()->user()->addresses()->orderByDesc('is_default')->get();
+    $defaultAddress = $addresses->firstWhere('is_default', true);
+
+    $subtotal = $cartItems->sum(fn($i) => $i['price'] * $i['qty']);
+
+    $shippingOptions = [
+        ['id' => 'jne',      'name' => 'JNE Regular',      'days' => '2-3 hari', 'price' => 150000],
+        ['id' => 'jnt',      'name' => 'J&T Express',       'days' => '2-4 hari', 'price' => 120000],
+        ['id' => 'sicepat',  'name' => 'SiCepat Reguler',   'days' => '2-3 hari', 'price' => 130000, 'default' => true],
+        ['id' => 'anteraja', 'name' => 'AnterAja Standard', 'days' => '3-4 hari', 'price' => 110000],
+    ];
+
+    $shippingCost = 130000;
+    $total        = $subtotal + $shippingCost;
+
+    $userVouchers = auth()->user()
+        ->userVouchers()
+        ->with('voucher')
+        ->where('is_used', false)
+        ->whereHas('voucher', fn($q) => $q->where('is_active', true)
+            ->where(fn($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+        )
+        ->get();
+
+    $activeVoucherCode     = session('tanken_voucher_code', '');
+    $activeVoucherDiscount = 0;
+
+    if ($activeVoucherCode) {
+        $voucher = \App\Models\Voucher::where('code', $activeVoucherCode)
+            ->where('is_active', true)
+            ->first();
+
+        if ($voucher) {
+            $isPercent = in_array(strtolower($voucher->type), ['percent', 'persen', 'percentage', 'pct']);
+            $activeVoucherDiscount = $isPercent
+                ? (int) round(($voucher->value / 100) * $subtotal)
+                : (int) $voucher->value;
+        }
+    }
+
+    return view('pelanggan.checkout', compact(
+        'cartItems',
+        'addresses',
+        'defaultAddress',
+        'subtotal',
+        'shippingCost',
+        'total',
+        'shippingOptions',
+        'userVouchers',
+        'activeVoucherCode',
+        'activeVoucherDiscount'
+    ));
+}
 
 // POST /checkout/simpan-item — dipanggil dari keranjang
     public function simpanItem(Request $request)
@@ -131,13 +149,7 @@ class CheckoutController extends Controller
                 
                 $subtotal = $cartItems->sum(fn($i) => $i->product->price * $i->quantity);
 
-                // LOGIKA HITUNG DISKON (FIXED ATAU PERSENTASE)
-                $discount = 0;
-                if ($voucher->type === 'fixed') {
-                    $discount = $voucher->value;
-                } else {
-                    $discount = ($voucher->value / 100) * $subtotal;
-                }
+                $discount = $this->hitungDiskon($voucher, $subtotal);
 
                 session([
                     'tanken_voucher_code'     => $voucher->code,
@@ -191,8 +203,10 @@ class CheckoutController extends Controller
             'checkout_shipping'       => $request->shipping_method,
             'checkout_shipping_cost'  => $request->shipping_cost,
             'checkout_shipping_days'  => $request->shipping_days ?? '2-3 hari',
-            'tanken_voucher_discount' => (int) $request->voucher_discount,
             'tanken_voucher_code'     => $request->voucher_code ?? session('tanken_voucher_code'),
+            'tanken_voucher_discount' => $request->filled('voucher_discount') && (int)$request->voucher_discount > 0
+                ? (int) $request->voucher_discount
+                : (int) session('tanken_voucher_discount', 0),
         ]);
 
         return redirect()->route('pelanggan.checkout.payment');

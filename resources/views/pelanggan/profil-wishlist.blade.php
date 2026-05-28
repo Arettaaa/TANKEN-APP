@@ -204,11 +204,13 @@
                     @endif
                 </div>
 
-                {{-- Varian Warna (Hanya display kecil) --}}
                 @if(count($wcolors) > 0)
                 <div class="flex items-center gap-1.5 mb-5 mt-auto">
-                    @foreach($wcolors as $color)
-                    <span class="color-swatch-display" style="background-color: {{ $color }};"></span>
+                    @foreach($item->product->colors_hex as $color)
+                    <span class="color-swatch-display"
+                        style="background-color: {{ $color['hex'] }};"
+                        title="{{ $color['name'] }}">
+                    </span>
                     @endforeach
                 </div>
                 @else

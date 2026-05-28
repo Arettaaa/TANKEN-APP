@@ -57,4 +57,30 @@ class VoucherController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Claimed!']);
     }
+
+    public function info(Request $request)
+{
+    $voucher = Voucher::where('code', strtoupper($request->code))
+        ->where('is_active', true)
+        ->where(function ($q) {
+            $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+        })
+        ->first();
+
+    if (!$voucher) {
+        return response()->json(['discount' => 0, 'type' => null, 'value' => 0]);
+    }
+
+    $subtotal = (int) $request->subtotal;
+    $isPercent = in_array(strtolower($voucher->type), ['percent', 'persen', 'percentage', 'pct']);
+    $discount = $isPercent && $subtotal > 0
+        ? (int) round(($voucher->value / 100) * $subtotal)
+        : (int) $voucher->value;
+
+    return response()->json([
+        'discount' => $discount,
+        'type'     => $voucher->type,
+        'value'    => $voucher->value,
+    ]);
+}
 }
