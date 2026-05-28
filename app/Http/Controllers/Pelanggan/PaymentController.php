@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    // GET /checkout/payment — Step 2 (Halaman Upload Pembayaran)
     public function index()
     {
         $addressId    = session('checkout_address_id');
@@ -59,7 +58,6 @@ class PaymentController extends Controller
 
         $address = Address::findOrFail($addressId);
 
-        // PPN DIHAPUS. Logic murni Subtotal + Ongkir - Voucher
         $subtotal        = collect($cartItems)->sum(fn($i) => $i->price * $i->qty);
         $voucherDiscount = session('tanken_voucher_discount', 0);
         $ppn             = 0; 
@@ -82,7 +80,6 @@ class PaymentController extends Controller
         ));
     }
 
-    // POST /checkout/payment/simpan — Simpan bukti bayar ke session, pindah ke Review
     public function simpan(Request $request)
     {
         $request->validate([
@@ -99,11 +96,9 @@ class PaymentController extends Controller
             'checkout_payment_proof'     => $proofPath,
         ]);
 
-        // Redirect ke Tinjauan / Review, bukan langsung Success!
         return redirect()->route('pelanggan.checkout.review');
     }
 
-    // GET /checkout/review — Step 3 (Halaman Tinjauan Pesanan)
     public function review()
     {
         $addressId       = session('checkout_address_id');
@@ -159,7 +154,6 @@ class PaymentController extends Controller
         ));
     }
 
-    // POST /checkout/place-order — Pembuatan Data Pesanan ke Database (Final)
     public function placeOrder(Request $request)
     {
         $addressId       = session('checkout_address_id');
@@ -227,7 +221,6 @@ class PaymentController extends Controller
                 'total_payment' => $totalPayment,
             ]);
 
-            // BUAT ITEM ORDER
             if ($buyNowItem) {
                 $product = Product::findOrFail($buyNowItem['product_id']);
                 OrderItem::create([
@@ -253,7 +246,6 @@ class PaymentController extends Controller
                         'subtotal'     => $item->product->price * $item->quantity,
                     ]);
                 }
-                // Hapus barang dari keranjang jika belinya via keranjang
                 CartItem::whereIn('id', $selectedIds)->delete();
             }
 

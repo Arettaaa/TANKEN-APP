@@ -39,7 +39,6 @@ class Product extends Model
         'is_featured'    => 'boolean',
     ];
 
-    // ---- Auto-generate slug ----
     protected static function boot()
     {
         parent::boot();
@@ -50,7 +49,6 @@ class Product extends Model
         });
     }
 
-    // ---- Relationships ----
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -76,7 +74,6 @@ class Product extends Model
         return $this->hasMany(ProductGallery::class);
     }
 
-    // ---- Helpers ----
     public function getTotalStockAttribute(): int
     {
         return $this->stocks()->sum('quantity');
@@ -106,8 +103,4 @@ class Product extends Model
     {
         return $this->total_stock <= $threshold;
     }
-
-    
-
-    
 }

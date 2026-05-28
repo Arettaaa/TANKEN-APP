@@ -9,44 +9,43 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    // ─────────────────────────────────────────────────────────
-    // GET /keranjang — tampilkan halaman keranjang
-    // ─────────────────────────────────────────────────────────
-public function index()
-{
-    $cartItems = CartItem::where('user_id', auth()->id())
-        ->with('product')
-        ->get()
-        ->map(function ($item) {
-            return [
-                'id'        => $item->id,
-                'name'      => $item->product->name,
-                'image'     => $item->product->main_image
-                    ? asset('storage/' . $item->product->main_image)
-                    : null,
-                'size'      => $item->size,
-                'color'     => $item->color,
-                'color_hex' => $this->colorToHex($item->color),
-                'price'     => $item->product->price,
-                'qty'       => $item->quantity,
-                'checked'   => true,
-            ];
-        });
 
-    $userVouchers = auth()->user()
-        ->userVouchers()
-        ->with('voucher')
-        ->where('is_used', false)
-        ->whereHas('voucher', fn($q) => $q->where('is_active', true)
-            ->where(fn($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-        )
-        ->get();
+    public function index()
+    {
+        $cartItems = CartItem::where('user_id', auth()->id())
+            ->with('product')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id'        => $item->id,
+                    'name'      => $item->product->name,
+                    'image'     => $item->product->main_image
+                        ? asset('storage/' . $item->product->main_image)
+                        : null,
+                    'size'      => $item->size,
+                    'color'     => $item->color,
+                    'color_hex' => $this->colorToHex($item->color),
+                    'price'     => $item->product->price,
+                    'qty'       => $item->quantity,
+                    'checked'   => true,
+                ];
+            });
 
-    return view('pelanggan.keranjang', compact('cartItems', 'userVouchers'));
-}
+        $userVouchers = auth()->user()
+            ->userVouchers()
+            ->with('voucher')
+            ->where('is_used', false)
+            ->whereHas(
+                'voucher',
+                fn($q) => $q->where('is_active', true)
+                    ->where(fn($q2) => $q2->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            )
+            ->get();
 
-    // POST /keranjang — tambah item ke keranjang
-    // Kalau kombinasi (product + color + size) sudah ada → tambah qty
+        return view('pelanggan.keranjang', compact('cartItems', 'userVouchers'));
+    }
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -58,7 +57,6 @@ public function index()
 
         $userId = auth()->id();
 
-        // Cari item yang sudah ada dengan kombinasi yang persis sama
         $existing = CartItem::where('user_id', $userId)
             ->where('product_id', $request->product_id)
             ->where('color', $request->color)
@@ -66,11 +64,9 @@ public function index()
             ->first();
 
         if ($existing) {
-            // Sudah ada → tambah jumlahnya, tapi jangan lewat 99
             $newQty = min(99, $existing->quantity + $request->quantity);
             $existing->update(['quantity' => $newQty]);
         } else {
-            // Belum ada → buat baris baru
             CartItem::create([
                 'user_id'    => $userId,
                 'product_id' => $request->product_id,
@@ -80,7 +76,6 @@ public function index()
             ]);
         }
 
-        // Hitung total baris unik untuk badge navbar
         $cartCount = CartItem::where('user_id', $userId)->count();
 
         return response()->json([
@@ -90,9 +85,7 @@ public function index()
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // PATCH /keranjang/{id} — update qty item
-    // ─────────────────────────────────────────────────────────
+
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -108,9 +101,7 @@ public function index()
         return response()->json(['success' => true]);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // DELETE /keranjang/{id} — hapus satu item
-    // ─────────────────────────────────────────────────────────
+
     public function destroy($id)
     {
         CartItem::where('id', $id)
@@ -120,9 +111,6 @@ public function index()
         return response()->json(['success' => true]);
     }
 
-    // ─────────────────────────────────────────────────────────
-    // Helper: warna nama → hex (opsional, bisa dikembangkan)
-    // ─────────────────────────────────────────────────────────
     private function colorToHex(?string $color): string
     {
         $map = [

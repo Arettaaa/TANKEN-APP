@@ -28,7 +28,6 @@ class CustomerProfileController extends Controller
     {
         $user = auth()->user();
 
-        // Blokir user Google
         if ($user->google_id && !$user->password) {
             return back()->with('error', 'Akun Google tidak bisa ganti password di sini.');
         }

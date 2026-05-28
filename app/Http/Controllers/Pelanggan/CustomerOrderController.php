@@ -25,7 +25,6 @@ class CustomerOrderController extends Controller
                     default                           => 'menunggu',
                 };
 
-                // Estimasi tiba
                 $estDate = $order->estimated_arrival
                     ? Carbon::parse($order->estimated_arrival)
                     : Carbon::parse($order->created_at)->addDays(3);

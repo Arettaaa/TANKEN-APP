@@ -13,13 +13,11 @@ use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
-    // Daftar warna yang dikenali sistem (auto-detect dari nama produk)
     private array $knownColors = [
         'Black', 'Stone Grey', 'Indigo', 'Petrol', 'Pink Fusia', 'Sage', 'Olive',
         'White', 'Navy', 'Brown', 'Cream', 'Maroon', 'Army',
     ];
 
-    // Ukuran valid
     private array $validSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
     public function index(Request $request)
@@ -31,33 +29,33 @@ class ProductController extends Controller
         ]);
 
       if ($search = $request->search) {
-    $query->where(function ($q) use ($search) {
-        $q->where('name', 'like', "%{$search}%")
-          ->orWhere('sku', 'like', "%{$search}%")
-          ->orWhere('price', 'like', "%{$search}%")
-          ->orWhere('type', 'like', "%{$search}%")
-          ->orWhere('description', 'like', "%{$search}%")
-          ->orWhere('colors', 'like', "%{$search}%")
-          ->orWhere('sizes', 'like', "%{$search}%")
-          ->orWhere(function ($q) use ($search) {
-              $q->whereIn('id', function ($sub) use ($search) {
-                  $sub->select('product_id')
-                      ->from('product_stocks')
-                      ->groupBy('product_id')
-                      ->havingRaw('SUM(quantity) LIKE ?', ["%{$search}%"]);
-              });
-          })
-          ->orWhere(function ($q) use ($search) {
-              $q->whereIn('id', function ($sub) use ($search) {
-                  $sub->select('product_id')
-                      ->from('product_reviews')
-                      ->where('status', 'approved')
-                      ->groupBy('product_id')
-                      ->havingRaw('ROUND(AVG(rating), 1) LIKE ?', ["%{$search}%"]);
-              });
-          });
-    });
-}
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+            ->orWhere('sku', 'like', "%{$search}%")
+            ->orWhere('price', 'like', "%{$search}%")
+            ->orWhere('type', 'like', "%{$search}%")
+            ->orWhere('description', 'like', "%{$search}%")
+            ->orWhere('colors', 'like', "%{$search}%")
+            ->orWhere('sizes', 'like', "%{$search}%")
+            ->orWhere(function ($q) use ($search) {
+                $q->whereIn('id', function ($sub) use ($search) {
+                    $sub->select('product_id')
+                        ->from('product_stocks')
+                        ->groupBy('product_id')
+                        ->havingRaw('SUM(quantity) LIKE ?', ["%{$search}%"]);
+                });
+            })
+            ->orWhere(function ($q) use ($search) {
+                $q->whereIn('id', function ($sub) use ($search) {
+                    $sub->select('product_id')
+                        ->from('product_reviews')
+                        ->where('status', 'approved')
+                        ->groupBy('product_id')
+                        ->havingRaw('ROUND(AVG(rating), 1) LIKE ?', ["%{$search}%"]);
+                });
+            });
+        });
+        }
 
         if ($category = $request->category) {
             $query->where('category_id', $category);
@@ -104,20 +102,15 @@ class ProductController extends Controller
             'thumbnail_slot' => 'nullable|integer|min:0|max:3',
         ]);
 
-        // --- Auto-detect warna dari nama produk ---
         $colors = $this->detectColors($request->name);
 
-        // --- Parse sizes ---
         $sizes = $request->sizes ? array_filter(explode(',', $request->sizes)) : [];
 
-        // --- Handle foto: 4 slot ---
         $uploadedSlots = $this->handleSlotImages($request, 'slot_image');
 
-        // Tentukan foto utama
         $thumbnailSlot = (int) $request->input('thumbnail_slot', 0);
         $mainImage = $uploadedSlots[$thumbnailSlot] ?? (count($uploadedSlots) ? reset($uploadedSlots) : null);
 
-        // Foto lainnya masuk gallery
         $galleryImages = [];
         foreach ($uploadedSlots as $idx => $path) {
             if ($path && $idx !== $thumbnailSlot) {
@@ -125,7 +118,6 @@ class ProductController extends Controller
             }
         }
 
-        // Size chart (slot terpisah jika ada)
         $sizeChartImage = null;
         if ($request->hasFile('size_chart_image')) {
             $sizeChartImage = $request->file('size_chart_image')->store('products/size-charts', 'public');
@@ -146,7 +138,6 @@ class ProductController extends Controller
             'size_chart_image' => $sizeChartImage,
         ]);
 
-        // --- Simpan foto gallery ---
         foreach ($galleryImages as $path) {
             ProductGallery::create([
                 'product_id' => $product->id,
@@ -154,7 +145,6 @@ class ProductController extends Controller
             ]);
         }
 
-        // --- Simpan stok per ukuran ---
         $this->syncStockPerSize($product, $sizes, $request->input('stock_per_size', []));
 
         return redirect()->route('admin.products.index')
@@ -179,10 +169,8 @@ class ProductController extends Controller
             'thumbnail_slot' => 'nullable|integer|min:0|max:3',
         ]);
 
-        // --- Auto-detect warna dari nama produk ---
         $colors = $this->detectColors($request->name);
 
-        // --- Parse sizes ---
         $sizes = $request->sizes ? array_filter(explode(',', $request->sizes)) : [];
 
         $data = [
@@ -197,7 +185,6 @@ class ProductController extends Controller
             'sizes'       => array_values($sizes),
         ];
 
-        // --- Handle slot foto ---
         $uploadedSlots = $this->handleSlotImages($request, 'slot_image');
 
         if (!empty($uploadedSlots)) {
@@ -205,14 +192,12 @@ class ProductController extends Controller
             $newMain = $uploadedSlots[$thumbnailSlot] ?? reset($uploadedSlots);
 
             if ($newMain) {
-                // Hapus foto utama lama
                 if ($product->main_image) {
                     Storage::disk('public')->delete($product->main_image);
                 }
                 $data['main_image'] = $newMain;
             }
 
-            // Tambahkan foto lain ke gallery
             foreach ($uploadedSlots as $idx => $path) {
                 if ($path && $idx !== $thumbnailSlot) {
                     ProductGallery::create([
@@ -222,13 +207,11 @@ class ProductController extends Controller
                 }
             }
         } elseif ($request->filled('thumbnail_gallery_id')) {
-            // Admin memilih foto dari gallery yang sudah ada sebagai thumbnail baru
             $galleryItem = ProductGallery::where('product_id', $product->id)
                 ->where('id', $request->thumbnail_gallery_id)
                 ->first();
 
             if ($galleryItem) {
-                // Tukar: main_image lama masuk gallery, gallery item jadi main
                 if ($product->main_image) {
                     ProductGallery::create([
                         'product_id' => $product->id,
@@ -247,7 +230,6 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        // --- Sync stok per ukuran ---
         $this->syncStockPerSize($product, $sizes, $request->input('stock_per_size', []));
 
         return redirect()->route('admin.products.index')
@@ -275,40 +257,32 @@ class ProductController extends Controller
     }
 
    public function exportExcel(Request $request)
-{
-    $products = Product::with(['stocks', 'reviews'])->get();
- 
-    $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'Harga', 'Total Stok', 'Warna', 'Status'];
- 
-    $rows = $products->map(fn($p) => [
-        $p->id,
-        $p->name,
-        $p->sku,
-        $p->category_id == 1 ? 'Men' : 'Women',
-        ucfirst($p->type),
-        $p->price,
-        $p->stocks->sum('quantity'),
-        implode(', ', $p->colors ?? []),
-        $p->is_active ? 'Aktif' : 'Nonaktif',
-    ]);
- 
-    return ExportHelper::excel('Tanken_Products', 'Laporan Produk', $columns, $rows);
-}
-    // =============================================
-    // PRIVATE HELPERS
-    // =============================================
-
-    /**
-     * Auto-detect warna dari nama produk.
-     * Format yang dikenali: "Nama Produk - Warna"
-     */
+    {
+        $products = Product::with(['stocks', 'reviews'])->get();
+    
+        $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'Harga', 'Total Stok', 'Warna', 'Status'];
+    
+        $rows = $products->map(fn($p) => [
+            $p->id,
+            $p->name,
+            $p->sku,
+            $p->category_id == 1 ? 'Men' : 'Women',
+            ucfirst($p->type),
+            $p->price,
+            $p->stocks->sum('quantity'),
+            implode(', ', $p->colors ?? []),
+            $p->is_active ? 'Aktif' : 'Nonaktif',
+        ]);
+    
+        return ExportHelper::excel('Tanken_Products', 'Laporan Produk', $columns, $rows);
+    }
+    
     private function detectColors(string $name): array
     {
         if (!str_contains($name, ' - ')) {
             return [];
         }
 
-        // Ambil semua bagian setelah " - " (support multi-dash: "Nama - Sub - Warna")
         $parts = explode(' - ', $name);
         $colorPart = trim(end($parts));
 
@@ -316,21 +290,16 @@ class ProductController extends Controller
             return [$colorPart];
         }
 
-        // Case-insensitive fallback
         foreach ($this->knownColors as $known) {
             if (strtolower($colorPart) === strtolower($known)) {
                 return [$known];
             }
         }
 
-        // Warna tidak dikenal tapi tetap disimpan (bisa warna custom)
         return [ucwords(strtolower($colorPart))];
 
     }
 
-    /**
-     * Upload slot images (4 slot), return array [slot_index => storage_path]
-     */
     private function handleSlotImages(Request $request, string $fieldName): array
     {
         $uploaded = [];
@@ -347,13 +316,8 @@ class ProductController extends Controller
         return $uploaded;
     }
 
-    /**
-     * Sync stok per ukuran ke tabel product_stocks.
-     * Hanya update ukuran yang dipilih, hapus ukuran yang tidak lagi dipilih.
-     */
     private function syncStockPerSize(Product $product, array $sizes, array $stockPerSize): void
     {
-        // Hapus stok untuk size yang tidak lagi ada
         $product->stocks()->whereNotIn('size', $sizes)->delete();
 
         foreach ($sizes as $size) {

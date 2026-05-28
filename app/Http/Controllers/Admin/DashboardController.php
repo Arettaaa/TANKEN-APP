@@ -13,7 +13,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Statistik Utama
         $totalSales = Order::where('payment_status', 'paid')->sum('total');
         $totalOrders = Order::count();
         $totalUsers  = User::where('role', 'customer')->count();
@@ -43,13 +42,11 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Aktivitas Terbaru
         $recentActivity = ActivityLog::with('user')
             ->latest()
             ->limit(6)
             ->get();
 
-        // Mengarahkan ke resources/views/admin/dashboard.blade.php
         return view('admin.dashboard', compact(
             'totalSales',
             'totalOrders',

@@ -21,7 +21,6 @@ class GoogleController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            // ✅ firstOrCreate + update google_id sekalian
             $user = User::where('email', $googleUser->email)->first();
 
             if ($user) {
@@ -29,7 +28,6 @@ class GoogleController extends Controller
                     $user->update(['google_id' => $googleUser->id]);
                 }
             } else {
-                // User baru
                 $user = User::create([
                     'name'      => $googleUser->name,
                     'email'     => $googleUser->email,
@@ -39,9 +37,9 @@ class GoogleController extends Controller
                 ]);
             }
 
-            Auth::login($user, true); // ✅ true = remember, session lebih stabil
+            Auth::login($user, true); 
 
-            request()->session()->regenerate(); // ✅ TAMBAH INI
+            request()->session()->regenerate(); 
 
             if ($user->role === 'super_admin' || $user->role === 'admin_gudang') {
                 return redirect('/admin/products');

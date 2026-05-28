@@ -35,7 +35,6 @@ class Voucher extends Model
         return $this->hasMany(UserVoucher::class);
     }
 
-    // Sisa kuota yang belum diklaim
     public function getRemainingQuotaAttribute(): ?int
     {
         if (is_null($this->quota)) return null;

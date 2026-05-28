@@ -12,7 +12,6 @@ class StockController extends Controller
 {
    public function index(Request $request)
     {
-        // Stat cards — query terpisah, tidak kena filter
         $allProducts   = Product::with('stocks')->get();
         $totalProducts = $allProducts->count();
         $totalUnits    = 0;
@@ -26,7 +25,6 @@ class StockController extends Controller
             elseif ($stock < 20) $lowStockItems++;
         }
 
-        // Query tabel — kena filter & paginate
         $query = Product::with(['category', 'stocks']);
 
         if ($search = $request->search) {
@@ -54,14 +52,12 @@ class StockController extends Controller
     }
     public function update(Request $request, $id)
     {
-        // Validasi: kita akan menerima array data stok dari modal
         $request->validate([
             'variations' => 'required|array',
             'variations.*.id' => 'required|exists:product_stocks,id',
             'variations.*.quantity' => 'required|integer|min:0',
         ]);
 
-        // Looping untuk update setiap variasi yang dikirim dari modal
         foreach ($request->variations as $varData) {
             ProductStock::where('id', $varData['id'])
                         ->where('product_id', $id) // Keamanan ekstra
@@ -75,34 +71,32 @@ class StockController extends Controller
     }
 
     public function exportExcel(Request $request)
-{
-    $products = \App\Models\Product::with(['stocks', 'category'])->get();
- 
-    $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'Total Stok', 'Status Stok'];
- 
-    $rows = $products->map(function ($p) {
-        $totalStock = $p->stocks->sum('quantity');
-        $stockStatus = $totalStock <= 0 ? 'Habis' : ($totalStock < 20 ? 'Menipis' : 'Aman');
- 
-        return [
-            $p->id,
-            $p->name,
-            $p->sku,
-            $p->category->name ?? '-',
-            ucfirst($p->type),
-            $p->stocks->where('size', 'XS')->sum('quantity'),
-            $p->stocks->where('size', 'S')->sum('quantity'),
-            $p->stocks->where('size', 'M')->sum('quantity'),
-            $p->stocks->where('size', 'L')->sum('quantity'),
-            $p->stocks->where('size', 'XL')->sum('quantity'),
-            $p->stocks->where('size', 'XXL')->sum('quantity'),
-            $totalStock,
-            $stockStatus,
-        ];
-    });
- 
-    return ExportHelper::excel('Tanken_Stock', 'Laporan Stok', $columns, $rows);
-
-}
- 
+    {
+        $products = \App\Models\Product::with(['stocks', 'category'])->get();
+    
+        $columns = ['ID', 'Nama', 'SKU', 'Kategori', 'Tipe', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'Total Stok', 'Status Stok'];
+    
+        $rows = $products->map(function ($p) {
+            $totalStock = $p->stocks->sum('quantity');
+            $stockStatus = $totalStock <= 0 ? 'Habis' : ($totalStock < 20 ? 'Menipis' : 'Aman');
+    
+            return [
+                $p->id,
+                $p->name,
+                $p->sku,
+                $p->category->name ?? '-',
+                ucfirst($p->type),
+                $p->stocks->where('size', 'XS')->sum('quantity'),
+                $p->stocks->where('size', 'S')->sum('quantity'),
+                $p->stocks->where('size', 'M')->sum('quantity'),
+                $p->stocks->where('size', 'L')->sum('quantity'),
+                $p->stocks->where('size', 'XL')->sum('quantity'),
+                $p->stocks->where('size', 'XXL')->sum('quantity'),
+                $totalStock,
+                $stockStatus,
+            ];
+        });
+    
+        return ExportHelper::excel('Tanken_Stock', 'Laporan Stok', $columns, $rows);
+    }
 }

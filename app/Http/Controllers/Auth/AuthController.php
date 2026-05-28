@@ -32,7 +32,6 @@ class AuthController extends Controller
             'role'     => 'customer',
         ]);
 
-        // Kirim voucher welcome otomatis
         $this->giveWelcomeVoucher($user);
 
         return redirect()->route('login')->with('success', 'Registrasi berhasil! Cek voucher sambutan di halaman Voucher Saya.');
@@ -83,7 +82,6 @@ class AuthController extends Controller
     
     public function showResetPassword()
     {
-        // Tolak akses langsung tanpa lewat step cek email
         if (!session('reset_email')) {
             return redirect()->route('password.forgot')
                             ->with('error', 'Silakan masukkan email terlebih dahulu.');
@@ -151,7 +149,6 @@ class AuthController extends Controller
 
         if (!$voucher) return;
 
-        // Hindari duplikat jika user entah bagaimana sudah punya
         UserVoucher::firstOrCreate([
             'user_id'    => $user->id,
             'voucher_id' => $voucher->id,

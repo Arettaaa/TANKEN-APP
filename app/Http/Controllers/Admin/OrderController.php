@@ -12,7 +12,6 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        // Tarik data order beserta relasi user dan items
         $query = Order::with('user', 'items')->latest();
         if ($search = $request->search) {
             $query->where(function ($q) use ($search) {
@@ -78,7 +77,6 @@ class OrderController extends Controller
             'tracking_number' => 'nullable|string|max:100',
         ]);
 
-        // Kalau shipped, resi wajib ada
         if ($request->status === 'shipped' && empty($request->tracking_number)) {
             return response()->json(['success' => false, 'message' => 'Nomor resi wajib diisi.'], 422);
         }
@@ -105,29 +103,29 @@ class OrderController extends Controller
     }
 
    public function export(Request $request)
-{
-    $orders = Order::with('items')->get();
- 
-    $columns = ['No. Order', 'Customer', 'Email', 'Telepon', 'Subtotal', 'Ongkir', 'Diskon', 'Total', 'Total Transfer', 'Kurir', 'Status', 'Pembayaran', 'Tanggal'];
- 
-    $rows = $orders->map(fn($o) => [
-        $o->order_number,
-        $o->customer_name,
-        $o->customer_email,
-        $o->customer_phone,
-        $o->subtotal,
-        $o->shipping_cost,
-        $o->discount,
-        $o->total,
-        $o->total_payment > 0 ? $o->total_payment : $o->total,
-        $o->courier,
-        ucfirst($o->status),
-        $o->payment_status,
-        $o->created_at->format('Y-m-d H:i'),
-    ]);
- 
-    return ExportHelper::excel('Tanken_Orders', 'Laporan Pesanan', $columns, $rows);
-}
+    {
+        $orders = Order::with('items')->get();
+    
+        $columns = ['No. Order', 'Customer', 'Email', 'Telepon', 'Subtotal', 'Ongkir', 'Diskon', 'Total', 'Total Transfer', 'Kurir', 'Status', 'Pembayaran', 'Tanggal'];
+    
+        $rows = $orders->map(fn($o) => [
+            $o->order_number,
+            $o->customer_name,
+            $o->customer_email,
+            $o->customer_phone,
+            $o->subtotal,
+            $o->shipping_cost,
+            $o->discount,
+            $o->total,
+            $o->total_payment > 0 ? $o->total_payment : $o->total,
+            $o->courier,
+            ucfirst($o->status),
+            $o->payment_status,
+            $o->created_at->format('Y-m-d H:i'),
+        ]);
+    
+        return ExportHelper::excel('Tanken_Orders', 'Laporan Pesanan', $columns, $rows);
+    }
 
     public function konfirmasi(Request $request, Order $order)
     {
@@ -179,7 +177,5 @@ class OrderController extends Controller
             'success' => true,
             'message' => "Order {$order->order_number} telah ditolak.",
         ]);
-    }
-
-    
+    } 
 }

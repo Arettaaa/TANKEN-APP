@@ -78,22 +78,22 @@ class PaymentController extends Controller
     }
 
     public function export(Request $request)
-{
-    $payments = \App\Models\Order::whereNotNull('payment_method')->get();
- 
-    $columns = ['No. Order', 'Customer', 'Email', 'Metode', 'Bank/Via', 'Total Transfer', 'Status', 'Tanggal Bayar'];
- 
-    $rows = $payments->map(fn($p) => [
-        $p->order_number,
-        $p->customer_name,
-        $p->customer_email,
-        str_replace('_', ' ', $p->payment_method),
-        strtoupper($p->payment_reference ?? '-'),
-        $p->total_payment > 0 ? $p->total_payment : $p->total,
-        $p->payment_status,
-        $p->paid_at ? \Carbon\Carbon::parse($p->paid_at)->format('Y-m-d H:i') : '-',
-    ]);
- 
-   return ExportHelper::excel('Tanken_Payments', 'Laporan Pembayaran', $columns, $rows);
-}
+    {
+        $payments = \App\Models\Order::whereNotNull('payment_method')->get();
+    
+        $columns = ['No. Order', 'Customer', 'Email', 'Metode', 'Bank/Via', 'Total Transfer', 'Status', 'Tanggal Bayar'];
+    
+        $rows = $payments->map(fn($p) => [
+            $p->order_number,
+            $p->customer_name,
+            $p->customer_email,
+            str_replace('_', ' ', $p->payment_method),
+            strtoupper($p->payment_reference ?? '-'),
+            $p->total_payment > 0 ? $p->total_payment : $p->total,
+            $p->payment_status,
+            $p->paid_at ? \Carbon\Carbon::parse($p->paid_at)->format('Y-m-d H:i') : '-',
+        ]);
+    
+    return ExportHelper::excel('Tanken_Payments', 'Laporan Pembayaran', $columns, $rows);
+    }
 }

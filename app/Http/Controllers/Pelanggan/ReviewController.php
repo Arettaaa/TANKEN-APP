@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
-    // Tampilkan form ulasan
     public function create(Request $request)
     {
         $orderId = $request->query('order_id');
@@ -20,7 +19,6 @@ class ReviewController extends Controller
                         ->where('status', 'delivered')
                         ->firstOrFail();
 
-        // Cek produk mana yang belum diulas
         $reviewedProductIds = Review::where('user_id', Auth::id())
             ->whereIn('product_id', $order->items->pluck('product_id'))
             ->pluck('product_id')
@@ -29,7 +27,6 @@ class ReviewController extends Controller
         return view('pelanggan.ulasan', compact('order', 'reviewedProductIds'));
     }
 
-    // Simpan ulasan
     public function store(Request $request)
     {
         $request->validate([
@@ -46,7 +43,6 @@ class ReviewController extends Controller
                       ->firstOrFail();
 
         foreach ($request->reviews as $reviewData) {
-            // Cegah duplikat ulasan
             $exists = Review::where('user_id', Auth::id())
                             ->where('product_id', $reviewData['product_id'])
                             ->exists();

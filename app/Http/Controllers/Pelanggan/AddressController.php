@@ -26,7 +26,6 @@ class AddressController extends Controller
             'street' => 'required|string',
         ]);
 
-        // Kalau is_default true, reset semua dulu
         if ($request->is_default) {
             auth()->user()->addresses()->update(['is_default' => false]);
         }
@@ -48,7 +47,6 @@ class AddressController extends Controller
 
     public function update(Request $request, Address $address)
     {
-        // Pastikan alamat milik user yang login
         abort_if($address->user_id !== auth()->id(), 403);
 
         if ($request->is_default) {

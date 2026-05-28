@@ -60,22 +60,22 @@ class ReviewController extends Controller
     }
 
     public function exportExcel(Request $request)
-{
-    $reviews = \App\Models\Review::with(['product', 'user'])->latest()->get();
- 
-    $columns = ['ID', 'Produk', 'Customer', 'Email', 'Rating', 'Komentar', 'Status', 'Tanggal'];
- 
-    $rows = $reviews->map(fn($r) => [
-        $r->id,
-        $r->product->name ?? '-',
-        $r->user->name ?? '-',
-        $r->user->email ?? '-',
-        $r->rating,
-        $r->comment,
-        ucfirst($r->status),
-        $r->created_at->format('Y-m-d H:i'),
-    ]);
- 
-    return ExportHelper::excel('Tanken_Reviews', 'Laporan Ulasan', $columns, $rows);
-}
+    {
+        $reviews = \App\Models\Review::with(['product', 'user'])->latest()->get();
+    
+        $columns = ['ID', 'Produk', 'Customer', 'Email', 'Rating', 'Komentar', 'Status', 'Tanggal'];
+    
+        $rows = $reviews->map(fn($r) => [
+            $r->id,
+            $r->product->name ?? '-',
+            $r->user->name ?? '-',
+            $r->user->email ?? '-',
+            $r->rating,
+            $r->comment,
+            ucfirst($r->status),
+            $r->created_at->format('Y-m-d H:i'),
+        ]);
+    
+        return ExportHelper::excel('Tanken_Reviews', 'Laporan Ulasan', $columns, $rows);
+    }
 }
