@@ -137,18 +137,33 @@ Route::name('pelanggan.')->group(function () {
         Route::get('/voucher', [VoucherController::class, 'index'])->name('profil-voucher');
         Route::post('/voucher/claim', [VoucherController::class, 'claim'])->name('voucher.claim');
         Route::get('/voucher/info', function (\Illuminate\Http\Request $request) {
-            $voucher = \App\Models\Voucher::where('code', strtoupper($request->code))
-                ->where('is_active', true)
-                ->first();
-            
-            if (!$voucher) return response()->json(['discount' => 0]);
+    $voucher = \App\Models\Voucher::where('code', strtoupper($request->code))
+        ->where('is_active', true)
+        ->first();
+    
+    if (!$voucher) return response()->json(['discount' => 0]);
 
-            $discount = $voucher->type === 'fixed' 
-                ? $voucher->value 
-                : 0; 
+    $discount = 0;
 
-            return response()->json(['discount' => $discount]);
-        })->name('voucher.info');
+    // PERUBAHAN: Logika matematika untuk membedakan Harga Pas vs Persentase
+    if ($voucher->type === 'fixed') {
+        $discount = $voucher->value;
+    } else {
+        // Ambil isi keranjang belanja user yang login
+        $cartItems = \App\Models\Cart::where('user_id', auth()->id())->get();
+        
+        // Hitung total belanja (Subtotal)
+        $subtotal = 0;
+        foreach($cartItems as $item) {
+            $subtotal += $item->product->price * $item->quantity; 
+        }
+        
+        // Rumus Persentase: (Persen / 100) * Subtotal Belanja
+        $discount = ($voucher->value / 100) * $subtotal;
+    }
+
+    return response()->json(['discount' => $discount]);
+})->name('voucher.info');
 
 
         // ==== PAYMENT & REVIEW ====

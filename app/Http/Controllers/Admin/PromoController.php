@@ -10,129 +10,105 @@ use App\Helpers\ExportHelper;
 class PromoController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Voucher::query();
+    {
+        $query = Voucher::query();
 
-    // SEARCH
-    if ($request->filled('search')) {
+        // SEARCH
+        if ($request->filled('search')) {
+            $search = strtolower($request->search);
 
-        $search = strtolower($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                ->orWhere('type', 'like', "%{$search}%")
+                ->orWhere('value', 'like', "%{$search}%")
+                ->orWhere('min_purchase', 'like', "%{$search}%")
+                ->orWhere('quota', 'like', "%{$search}%")
+                ->orWhere('used_count', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhereDate('expires_at', $search)
+                ->orWhere('expires_at', 'like', "%{$search}%");
 
-        $query->where(function ($q) use ($search) {
-
-            // Promo Code
-            $q->where('code', 'like', "%{$search}%")
-
-            // Type
-            ->orWhere('type', 'like', "%{$search}%")
-
-            // Value
-            ->orWhere('value', 'like', "%{$search}%")
-
-            // Min Purchase
-            ->orWhere('min_purchase', 'like', "%{$search}%")
-
-            // Quota
-            ->orWhere('quota', 'like', "%{$search}%")
-
-            // Used Count
-            ->orWhere('used_count', 'like', "%{$search}%")
-
-            // Description
-            ->orWhere('description', 'like', "%{$search}%")
-
-            // Expiry
-            ->orWhereDate('expires_at', $search)
-            ->orWhere('expires_at', 'like', "%{$search}%");
-
-            // STATUS SEARCH
-            if ($search === 'active') {
-                $q->orWhere(function ($qq) {
-                    $qq->where('is_active', true)
-                    ->where(function ($x) {
-                        $x->whereNull('expires_at')
-                        ->orWhere('expires_at', '>', now());
+                if ($search === 'active') {
+                    $q->orWhere(function ($qq) {
+                        $qq->where('is_active', true)
+                        ->where(function ($x) {
+                            $x->whereNull('expires_at')
+                            ->orWhere('expires_at', '>', now());
+                        });
                     });
-                });
-            }
+                }
 
-            if ($search === 'disabled') {
-                $q->orWhere('is_active', false);
-            }
+                if ($search === 'disabled') {
+                    $q->orWhere('is_active', false);
+                }
 
-            if ($search === 'expired') {
-                $q->orWhere(function ($qq) {
-                    $qq->where('is_active', true)
+                if ($search === 'expired') {
+                    $q->orWhere(function ($qq) {
+                        $qq->where('is_active', true)
+                        ->whereNotNull('expires_at')
+                        ->where('expires_at', '<=', now());
+                    });
+                }
+            });
+        }
+
+        // FILTER TYPE
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // FILTER STATUS
+        if ($request->filled('status')) {
+            $now = now();
+            if ($request->status === 'active') {
+                $query->where('is_active', true)
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('expires_at')
+                        ->orWhere('expires_at', '>', $now);
+                    });
+            } elseif ($request->status === 'disabled') {
+                $query->where('is_active', false);
+            } elseif ($request->status === 'expired') {
+                $query->where('is_active', true)
                     ->whereNotNull('expires_at')
-                    ->where('expires_at', '<=', now());
-                });
+                    ->where('expires_at', '<=', $now);
             }
-        });
-    }
+        }
 
-    // FILTER TYPE
-    if ($request->filled('type')) {
-        $query->where('type', $request->type);
-    }
-
-    // FILTER STATUS
-    if ($request->filled('status')) {
+        $vouchers = $query
+            ->withCount('userVouchers')
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
 
         $now = now();
 
-        if ($request->status === 'active') {
+        $activePromos = Voucher::where('is_active', true)
+            ->where(function ($q) use ($now) {
+                $q->whereNull('expires_at')
+                ->orWhere('expires_at', '>', $now);
+            })->count();
 
-            $query->where('is_active', true)
-                ->where(function ($q) use ($now) {
-                    $q->whereNull('expires_at')
-                    ->orWhere('expires_at', '>', $now);
-                });
+        $expiredPromos = Voucher::where('is_active', true)
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<=', $now)
+            ->count();
 
-        } elseif ($request->status === 'disabled') {
+        $totalUsage = Voucher::sum('used_count');
 
-            $query->where('is_active', false);
+        // PERUBAHAN DI SINI: Hanya kalikan value untuk voucher tipe 'fixed'
+        $totalDiscount = Voucher::where('type', 'fixed')->sum(
+            \DB::raw('used_count * value')
+        );
 
-        } elseif ($request->status === 'expired') {
-
-            $query->where('is_active', true)
-                ->whereNotNull('expires_at')
-                ->where('expires_at', '<=', $now);
-        }
+        return view('admin.promo-voucher', compact(
+            'vouchers',
+            'activePromos',
+            'expiredPromos',
+            'totalUsage',
+            'totalDiscount'
+        ));
     }
-
-    $vouchers = $query
-        ->withCount('userVouchers')
-        ->latest()
-        ->paginate(15)
-        ->withQueryString();
-
-    $now = now();
-
-    $activePromos = Voucher::where('is_active', true)
-        ->where(function ($q) use ($now) {
-            $q->whereNull('expires_at')
-            ->orWhere('expires_at', '>', $now);
-        })->count();
-
-    $expiredPromos = Voucher::where('is_active', true)
-        ->whereNotNull('expires_at')
-        ->where('expires_at', '<=', $now)
-        ->count();
-
-    $totalUsage = Voucher::sum('used_count');
-
-    $totalDiscount = Voucher::sum(
-        \DB::raw('used_count * value')
-    );
-
-    return view('admin.promo-voucher', compact(
-        'vouchers',
-        'activePromos',
-        'expiredPromos',
-        'totalUsage',
-        'totalDiscount'
-    ));
-}
 
     public function store(Request $request)
     {
@@ -199,37 +175,35 @@ class PromoController extends Controller
     }
 
     public function exportExcel(Request $request)
-{
-    $vouchers = \App\Models\Voucher::withCount('userVouchers')->get();
- 
-    $now = now();
- 
-    $columns = ['ID', 'Kode', 'Tipe', 'Nilai', 'Min. Pembelian', 'Kuota', 'Diklaim', 'Sisa', 'Kadaluarsa', 'Welcome', 'Status'];
- 
-    $rows = $vouchers->map(function ($v) use ($now) {
-        $isExpired = $v->expires_at && $now->gt($v->expires_at);
-        $claimed   = $v->user_vouchers_count;
-        $sisa      = $v->quota ? ($v->quota - $claimed) : '∞';
- 
-        if (!$v->is_active) $status = 'Disabled';
-        elseif ($isExpired)  $status = 'Expired';
-        else                 $status = 'Active';
- 
-        return [
-            $v->id,
-            $v->code,
-            ucfirst($v->type),
-            $v->type === 'fixed' ? 'Rp ' . number_format($v->value, 0, ',', '.') : $v->value . '%',
-            'Rp ' . number_format($v->min_purchase, 0, ',', '.'),
-            $v->quota ?? '∞',
-            $claimed,
-            $sisa,
-            $v->expires_at ? $v->expires_at->format('Y-m-d') : 'Tanpa Batas',
-            $v->is_welcome ? 'Ya' : 'Tidak',
-            $status,
-        ];
-    });
- 
-   return ExportHelper::excel('Tanken_Promo_Vouchers', 'Laporan Promo & Voucher', $columns, $rows);
-}
+    {
+        $vouchers = \App\Models\Voucher::withCount('userVouchers')->get();
+        $now = now();
+        $columns = ['ID', 'Kode', 'Tipe', 'Nilai', 'Min. Pembelian', 'Kuota', 'Diklaim', 'Sisa', 'Kadaluarsa', 'Welcome', 'Status'];
+    
+        $rows = $vouchers->map(function ($v) use ($now) {
+            $isExpired = $v->expires_at && $now->gt($v->expires_at);
+            $claimed   = $v->user_vouchers_count;
+            $sisa      = $v->quota ? ($v->quota - $claimed) : '∞';
+    
+            if (!$v->is_active) $status = 'Disabled';
+            elseif ($isExpired)  $status = 'Expired';
+            else                 $status = 'Active';
+    
+            return [
+                $v->id,
+                $v->code,
+                ucfirst($v->type),
+                $v->type === 'fixed' ? 'Rp ' . number_format($v->value, 0, ',', '.') : $v->value . '%',
+                'Rp ' . number_format($v->min_purchase, 0, ',', '.'),
+                $v->quota ?? '∞',
+                $claimed,
+                $sisa,
+                $v->expires_at ? $v->expires_at->format('Y-m-d') : 'Tanpa Batas',
+                $v->is_welcome ? 'Ya' : 'Tidak',
+                $status,
+            ];
+        });
+    
+       return ExportHelper::excel('Tanken_Promo_Vouchers', 'Laporan Promo & Voucher', $columns, $rows);
+    }
 }
