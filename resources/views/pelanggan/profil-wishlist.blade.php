@@ -558,56 +558,74 @@ function openVariantModal(id, name, price, colors, sizeChartUrl) {
     }
 
     function submitAddToCart() {
-        let hasError = false;
+    let hasError = false;
 
-        // Validasi Inline (Ganti alert bawaan browser)
-        if (!selectedColor) {
-            document.getElementById('errorColor').classList.remove('hidden');
-            hasError = true;
-        }
-        if (!selectedSize) {
-            document.getElementById('errorSize').classList.remove('hidden');
-            hasError = true;
-        }
-        
-        if (hasError) return; // Stop fungsi kalau masih ada yang kosong
-
-        const qtyToAdd = parseInt(document.getElementById('productQty').value);
-        let cart = JSON.parse(sessionStorage.getItem('tanken_cart') || '[]');
-        
-        let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-
-        if (totalQty + qtyToAdd > 50) {
-            // Tampilkan error inline di atas tombol
-            document.getElementById('errorCartLimit').classList.remove('hidden');
-            return;
-        }
-
-        const btnSubmit = document.getElementById('btnSubmitCart');
-        const originalText = btnSubmit.innerHTML;
-        btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> BERHASIL DITAMBAHKAN';
-        btnSubmit.classList.replace('bg-black', 'bg-emerald-600');
-        btnSubmit.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-700');
-
-        const productId = document.getElementById('modalProductId').value;
-        let existingItem = cart.find(item => item.id == productId && item.color == selectedColor && item.size == selectedSize);
-        if (existingItem) {
-            existingItem.qty += qtyToAdd;
-        } else {
-            cart.push({ id: productId, color: selectedColor, size: selectedSize, qty: qtyToAdd });
-        }
-        
-        sessionStorage.setItem('tanken_cart', JSON.stringify(cart));
-        window.dispatchEvent(new Event('cartUpdated'));
-
-        setTimeout(() => {
-            btnSubmit.innerHTML = originalText;
-            btnSubmit.classList.replace('bg-emerald-600', 'bg-black');
-            btnSubmit.classList.replace('hover:bg-emerald-700', 'hover:bg-gray-800');
-            closeVariantModal();
-        }, 1200);
+    if (!selectedColor) {
+        document.getElementById('errorColor').classList.remove('hidden');
+        hasError = true;
     }
+    if (!selectedSize) {
+        document.getElementById('errorSize').classList.remove('hidden');
+        hasError = true;
+    }
+    if (hasError) return;
 
+    const productId = document.getElementById('modalProductId').value;
+    const qty = parseInt(document.getElementById('productQty').value);
+
+    const btnSubmit = document.getElementById('btnSubmitCart');
+    const originalHTML = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menambahkan...';
+
+    // Pakai URLSearchParams biar Laravel bisa baca tanpa perlu ubah controller
+    const params = new URLSearchParams();
+    params.append('product_id', productId);
+    params.append('color', selectedColor);
+    params.append('size', selectedSize);
+    params.append('quantity', qty);
+    params.append('_token', '{{ csrf_token() }}');
+
+    fetch('{{ route("pelanggan.keranjang.store") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: params.toString()
+    })
+    .then(r => {
+        if (!r.ok) throw new Error('Server error: ' + r.status);
+        return r.json();
+    })
+    .then(data => {
+        if (data.success) {
+            btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> BERHASIL DITAMBAHKAN';
+            btnSubmit.classList.replace('bg-black', 'bg-emerald-600');
+            btnSubmit.classList.replace('hover:bg-gray-800', 'hover:bg-emerald-700');
+
+            // Update badge keranjang jika ada di navbar
+            const badge = document.getElementById('cart-count-badge');
+            if (badge && data.cart_count !== undefined) {
+                badge.textContent = data.cart_count;
+            }
+
+            setTimeout(() => {
+                btnSubmit.innerHTML = originalHTML;
+                btnSubmit.classList.replace('bg-emerald-600', 'bg-black');
+                btnSubmit.classList.replace('hover:bg-emerald-700', 'hover:bg-gray-800');
+                btnSubmit.disabled = false;
+                closeVariantModal();
+            }, 1200);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        btnSubmit.innerHTML = originalHTML;
+        btnSubmit.disabled = false;
+        alert('Gagal menambahkan ke keranjang, coba lagi.');
+    });
+}
     // === LOGIKA MODAL SIZE GUIDE ===
     const sizeGuideModal = document.getElementById('sizeGuideModal');
     function openSizeGuide() {
