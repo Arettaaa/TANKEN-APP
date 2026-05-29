@@ -105,8 +105,8 @@
                     Kebijakan Retur 7 Hari
                 </h2>
                 <p class="text-sm text-gray-400 leading-relaxed mb-7">
-                    Pesanan tidak sesuai, cacat, atau salah ukuran? Ajukan pengembalian maksimal 7 hari
-                    setelah barang diterima atau sebelum kamu mengklik tombol "Pesanan Selesai".
+                    Pesanan tidak sesuai, cacat, atau salah ukuran? Ajukan pengembalian maksimal 7 hari 
+                    setelah pesanan kamu berstatus "Selesai" di sistem kami.
                 </p>
                 <div class="grid grid-cols-3">
                     <div class="policy-stat pr-6">
@@ -135,20 +135,20 @@
                 @php
                 $steps = [
                     [
-                        'title' => 'Ajukan Retur',
-                        'desc'  => 'Masuk ke menu "Pesanan Saya" dan klik "Ajukan Pengembalian" sebelum menyelesaikan pesanan.',
+                        'title' => 'Hubungi via WhatsApp',
+                        'desc'  => 'Masuk ke menu "Pesanan Saya" dan cari pesanan dengan status "Selesai". Klik tombol "Ajukan Retur" untuk terhubung langsung ke WhatsApp Admin kami.',
                     ],
                     [
-                        'title' => 'Konfirmasi Tim',
-                        'desc'  => 'Tim internal Tanken akan segera menghubungi kamu secara langsung untuk memandu proses retur selanjutnya.',
+                        'title' => 'Kirim Bukti',
+                        'desc'  => 'Sampaikan kendala atau alasan pengembalian, lalu sertakan bukti video unboxing dengan jelas kepada Admin.',
                     ],
                     [
                         'title' => 'Kemas & Kirim',
-                        'desc'  => 'Kemas barang dengan aman menggunakan kemasan aslinya, tempelkan resi, dan serahkan ke cabang kurir terdekat.',
+                        'desc'  => 'Setelah disetujui, kemas barang dengan aman menggunakan kemasan aslinya. Tempelkan resi dan serahkan ke cabang kurir terdekat sesuai arahan Admin.',
                     ],
                     [
-                        'title' => 'Terima Refund',
-                        'desc'  => 'Dana akan dikembalikan ke metode pembayaran awal kamu setelah paket tiba di gudang dan lolos pengecekan.',
+                        'title' => 'Terima Refund / Pengganti',
+                        'desc'  => 'Dana akan dikembalikan atau barang pengganti dikirimkan setelah paket tiba di gudang dan lolos pengecekan.',
                     ],
                 ];
                 @endphp
@@ -181,7 +181,7 @@
                             'Barang belum dipakai, tag masih terpasang',
                             'Masih dalam kemasan original',
                             'Tidak ada kerusakan atau perubahan pada produk',
-                            'Dibeli dalam 30 hari terakhir',
+                            'Pengajuan tidak lebih dari 7 hari setelah status Selesai',
                         ];
                         @endphp
                         @foreach($eligible as $item)
@@ -204,7 +204,7 @@
                         $notEligible = [
                             'Barang tanpa tag original',
                             'Sudah dipakai atau dicuci',
-                            'Pembelian lebih dari 30 hari lalu',
+                            'Pembelian melewati batas waktu retur',
                             'Produk sale atau clearance',
                             'Pakaian dalam dan produk intim (alasan higienitas)',
                         ];
@@ -239,7 +239,7 @@
                     </p>
                     <p class="text-sm font-semibold text-gray-900 mb-1">Cara Penukaran</p>
                     <p class="text-sm text-gray-500 leading-relaxed">
-                        Kembalikan produk lama mengikuti alur retur seperti biasa, lalu buat pesanan baru untuk item
+                        Kembalikan produk lama mengikuti alur retur melalui WhatsApp seperti biasa, lalu buat pesanan baru untuk item
                         yang kamu inginkan. Cara ini memastikan ukuran atau warna pilihanmu langsung diproses secepat mungkin.
                     </p>
                 </div>
@@ -248,7 +248,7 @@
                     <p class="text-sm font-semibold text-gray-900 mb-1">Penukaran Ekspres</p>
                     <p class="text-sm text-gray-500 leading-relaxed">
                         Mau penukaran lebih cepat? Hubungi tim support kami, dan kami bisa mengirimkan pengganti
-                        sebelum barang returmu tiba. Produk original wajib dikembalikan dalam 14 hari.
+                        sebelum barang returmu tiba. Produk original wajib dikembalikan dalam 7 hari.
                     </p>
                 </div>
             </div>
@@ -271,7 +271,7 @@
                     <div>
                         <p class="text-sm font-semibold text-white mb-1">Waktu Pemrosesan</p>
                         <p class="text-sm text-gray-400 leading-relaxed">
-                            Refund diproses dalam 5–7 hari kerja setelah barang retur diterima. Kamu akan mendapat konfirmasi email saat refund berhasil diproses.
+                            Refund diproses dalam 5–7 hari kerja setelah barang retur diterima. Kamu akan mendapat konfirmasi pesan saat refund berhasil diproses.
                         </p>
                     </div>
                 </div>
@@ -285,7 +285,7 @@
                     <div>
                         <p class="text-sm font-semibold text-white mb-1">Metode Pengembalian Dana</p>
                         <p class="text-sm text-gray-400 leading-relaxed">
-                            Dana dikembalikan ke metode pembayaran awal kamu. Mohon tunggu 3–5 hari kerja setelah proses selesai agar dana masuk ke akunmu.
+                            Dana dikembalikan ke metode pembayaran awal kamu atau sesuai kesepakatan via Admin. Mohon tunggu 3–5 hari kerja setelah proses selesai agar dana masuk ke akunmu.
                         </p>
                     </div>
                 </div>
@@ -298,11 +298,10 @@
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
                     <div>
-                        <p class="text-sm font-semibold text-white mb-1">Opsi Kredit Toko</p>
+                        <p class="text-sm font-semibold text-white mb-1">Kebijakan Refund</p>
                         <p class="text-sm text-gray-400 leading-relaxed">
-                            Pilih kredit toko dan dapatkan bonus 10% ekstra! Cukup beritahu kami saat mengajukan retur dan kami akan langsung memprosesnya.
+                            Refund hanya berlaku untuk produk yang memenuhi syarat retur. Pastikan mengikuti prosedur retur dengan benar agar refund dapat diproses tanpa kendala.
                         </p>
-                    </div>
                 </div>
             </div>
         </section>
