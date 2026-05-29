@@ -522,8 +522,12 @@
 
 @push('scripts')
 <script>
-    // Claim voucher mockup (Frontend only)
-   function claimVoucher(btn, code) {
+  function claimVoucher(btn, code) {
+    @guest
+    window.location.href = '{{ route("login") }}';
+    return;
+    @endguest
+
     btn.textContent = '...';
     btn.disabled = true;
 
@@ -535,8 +539,15 @@
         },
         body: JSON.stringify({ code })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (r.status === 401) {
+            window.location.href = '{{ route("login") }}';
+            return null;
+        }
+        return r.json();
+    })
     .then(data => {
+        if (!data) return;
         if (data.success) {
             btn.textContent = 'CLAIMED!';
             btn.style.background = '#2d7a3a';
@@ -553,8 +564,14 @@
         }
     })
     .catch(() => {
-        btn.textContent = 'Error';
-        btn.disabled = false;
+        btn.textContent = 'LOGIN FIRST';
+        btn.style.background = '#111';
+        btn.style.fontSize = '0.55rem';
+        setTimeout(() => {
+            btn.textContent = 'CLAIM';
+            btn.style.fontSize = '';
+            btn.disabled = false;
+        }, 2500);
     });
 }
 

@@ -309,47 +309,59 @@
         document.getElementById('qty-display').textContent = qty;
     }
 
-    function addToCart() {
-        if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
-        if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
+  function addToCart() {
+    if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
+    if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
 
-        const btn = document.getElementById('btn-add-cart');
-        const originalHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Menambahkan...`;
+    @guest
+    window.location.href = '{{ route("login") }}';
+    return;
+    @endguest
 
-        fetch('{{ route("pelanggan.keranjang.store") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ product_id: {{ $product->id }}, size: selectedSize, quantity: qty })
-        })
-        .then(r => r.json())
-        .then(data => {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            if(data.success) { 
-                showToast('Produk masuk keranjang!'); 
-                if (typeof updateCartBadge === 'function') updateCartBadge(data.cart_count);
-            }
-            else showToast('Gagal menambahkan produk.', true);
-        }).catch(() => {
-            btn.disabled = false; btn.innerHTML = originalHTML;
-            showToast('Terjadi kesalahan.', true);
-        });
-    }
+    const btn = document.getElementById('btn-add-cart');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Menambahkan...`;
 
-    // ====== LOGIKA "BELI SEKARANG" LANGSUNG KE CHECKOUT ======
-    function buyNow() {
-        if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
-        if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
-        
-        const btn = document.getElementById('btn-buy-now');
-        btn.disabled = true;
-        btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Memproses...`;
+    fetch('{{ route("pelanggan.keranjang.store") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+        body: JSON.stringify({ product_id: {{ $product->id }}, size: selectedSize, quantity: qty })
+    })
+    .then(r => {
+        if (r.status === 401) { window.location.href = '{{ route("login") }}'; return; }
+        return r.json();
+    })
+    .then(data => {
+        if (!data) return;
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        if(data.success) { 
+            showToast('Produk masuk keranjang!'); 
+            if (typeof updateCartBadge === 'function') updateCartBadge(data.cart_count);
+        }
+        else showToast('Gagal menambahkan produk.', true);
+    }).catch(() => {
+        btn.disabled = false; btn.innerHTML = originalHTML;
+        showToast('Terjadi kesalahan.', true);
+    });
+}
 
-        // Redirect langsung via URL parameter (TANPA API ke keranjang)
-        window.location.href = `{{ route('pelanggan.checkout.index') }}?buy_now=1&product_id={{ $product->id }}&size=${selectedSize}&qty=${qty}`;
-    }
+function buyNow() {
+    if(!selectedSize) { document.getElementById('size-error').classList.remove('hidden'); return; }
+    if(maxStock <= 0) { showToast('Maaf, stok ukuran ini habis.', true); return; }
+
+    @guest
+    window.location.href = '{{ route("login") }}';
+    return;
+    @endguest
+
+    const btn = document.getElementById('btn-buy-now');
+    btn.disabled = true;
+    btn.innerHTML = `<svg class="animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Memproses...`;
+
+    window.location.href = `{{ route('pelanggan.checkout.index') }}?buy_now=1&product_id={{ $product->id }}&size=${selectedSize}&qty=${qty}`;
+}
 
     function toggleWishlist() {
         @auth
