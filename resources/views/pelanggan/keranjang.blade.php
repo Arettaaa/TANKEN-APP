@@ -292,6 +292,16 @@ $absoluteTotalQty = collect($cartItems)->sum('qty');
 <section class="bg-gray-50 min-h-screen py-10">
     <div class="max-w-7xl mx-auto px-6 lg:px-10">
 
+        {{-- TOMBOL BACK KE HOME --}}
+        <div class="mb-6">
+            <a href="{{ route('pelanggan.home') }}" class="inline-flex items-center gap-1.5 text-gray-500 hover:text-black transition-colors group">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span class="text-xs font-bold uppercase tracking-widest">Back to Home</span>
+            </a>
+        </div>
+
         @if(count($cartItems) > 0)
         <div class="flex flex-col lg:flex-row gap-6 items-start">
 
