@@ -17,9 +17,9 @@
         inset: 0;
         background-image: url('{{ asset("images/Nature-1.jpg") }}');
         background-size: cover;
-        background-position: center 35%;
+        background-position: center 64%;
         filter: brightness(0.45);
-        /* transform: scale(1.1); */
+        transform: scale(1.2);
     }
     .hero-section:hover .hero-bg {
         /* no zoom animation */
