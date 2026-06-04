@@ -2,6 +2,17 @@
 
 @push('styles')
 <style>
+    /* ==================================================
+       TRIK PAGE TRANSITION: Menyamarkan Kedipan Reload 
+       ================================================== */
+    .page-fade-in {
+        animation: smoothFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    @keyframes smoothFadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
     /* Sidebar menu item */
     .menu-item { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280; cursor: pointer; transition: background 0.15s, color 0.15s; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
     .menu-item:hover { background: #f3f4f6; color: #111; }
@@ -35,7 +46,8 @@
 @endpush
 
 @section('content')
-<div class="bg-gray-50/30 min-h-screen">
+{{-- Tambahkan class "page-fade-in" di pembungkus utama --}}
+<div class="bg-gray-50/30 min-h-screen page-fade-in">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-12">
 
         {{-- Breadcrumb --}}
@@ -66,7 +78,7 @@
                     </div>
 
                     {{-- Menu Navigasi Otomatis Aktif --}}
-                    <nav class="flex flex-row lg:flex-col lg:overflow-visible gap-2 lg:gap-1 pb-3 lg:pb-0 mobile-nav-scroll w-full">
+                    <nav class="flex flex-row lg:flex-col lg:overflow-visible gap-2 lg:gap-1 pb-3 lg:pb-0 mobile-nav-scroll w-full" id="mobileMenuNav">
                         <a href="{{ route('pelanggan.profil-edit') }}" class="menu-item {{ request()->routeIs('pelanggan.profil-edit') ? 'active' : '' }}">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             Edit Profil
@@ -138,5 +150,23 @@
 @endsection
 
 @push('scripts')
+    {{-- Script Auto-Scroll Instan Secepat Kilat --}}
+    <script>
+        // Pakai IIFE (Immediately Invoked Function Expression)
+        // Biar script dieksekusi instan tanpa nunggu struktur selesai gambar (mencegah glitch scroll)
+        (function() {
+            const navContainer = document.getElementById('mobileMenuNav');
+            
+            if (navContainer && window.innerWidth < 1024) {
+                const activeItem = navContainer.querySelector('.menu-item.active');
+                
+                if (activeItem) {
+                    const scrollPos = activeItem.offsetLeft - (navContainer.offsetWidth / 2) + (activeItem.offsetWidth / 2);
+                    navContainer.scrollLeft = scrollPos;
+                }
+            }
+        })();
+    </script>
+    
     @stack('akun-scripts')
 @endpush
