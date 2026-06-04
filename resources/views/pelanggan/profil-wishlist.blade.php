@@ -41,11 +41,18 @@
 
     /* Color Swatches (Display only on card) */
     .color-swatch-display {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         display: inline-block;
         border: 1px solid #e5e7eb;
+    }
+    
+    @media (min-width: 640px) {
+        .color-swatch-display {
+            width: 14px;
+            height: 14px;
+        }
     }
 
     /* Varian Button Style (Modal) */
@@ -130,7 +137,8 @@
         @if($wishlists->count() > 0)
         <a href="{{ route('pelanggan.katalog') ?? '#' }}"
             class="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-gray-900 hover:text-gray-500 transition-colors flex items-center gap-1.5 pb-1">
-            Lanjut Belanja
+            <span class="hidden sm:inline">Lanjut Belanja</span>
+            <span class="sm:hidden">Belanja</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
                 stroke-width="2.5" width="12" height="12">
                 <path d="M5 12h14M12 5l7 7-7 7" />
@@ -140,8 +148,8 @@
     </div>
 
     @if($wishlists->count() > 0)
-    {{-- Grid produk --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+    {{-- Grid produk: Mobile 2 Kolom, Tablet 2 Kolom, Desktop 3 Kolom --}}
+    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
         @foreach($wishlists as $item)
         @php
         $wid = $item->product_id;
@@ -160,10 +168,10 @@
         $detailUrl = route('pelanggan.produk.detail', $wslug);
         @endphp
 
-        <div class="wishlist-card group" id="wishlist-item-{{ $wid }}">
+        <div class="wishlist-card group h-full" id="wishlist-item-{{ $wid }}">
 
             {{-- Gambar Produk --}}
-            <a href="{{ $detailUrl }}" class="block mb-4">
+            <a href="{{ $detailUrl }}" class="block mb-3 sm:mb-4 flex-shrink-0">
                 <div class="wishlist-img-wrap rounded-md">
                     @if($wimage)
                     <img src="{{ $wimage }}" alt="{{ $wname }}" loading="lazy">
@@ -177,55 +185,62 @@
 
             {{-- Info Produk --}}
             <div class="flex-1 flex flex-col px-1">
-                @if($wcategory)
-                <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase mb-1">{{ $wcategory }}</p>
-                @endif
+                
+                {{-- Kategori (Fixed Height) --}}
+                <div class="h-[14px] mb-1">
+                    @if($wcategory)
+                    <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase truncate">{{ $wcategory }}</p>
+                    @endif
+                </div>
 
+                {{-- Judul Produk (Fixed Height: dipaksa maksimal 2 baris, lebihnya dipotong rapi) --}}
                 <a href="{{ $detailUrl }}"
-                    class="text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors leading-snug block mb-2">
+                    class="text-xs sm:text-sm font-semibold text-gray-900 hover:text-gray-600 transition-colors leading-snug block mb-1.5 sm:mb-2 line-clamp-2 h-[34px] sm:h-[40px] overflow-hidden">
                     {{ $wname }}
                 </a>
 
-                {{-- Area Harga & Diskon --}}
-                <div class="flex flex-col mb-3">
-                    <span class="text-sm font-extrabold text-gray-900">
+                {{-- Area Harga & Diskon (Fixed Height) --}}
+                <div class="flex flex-col justify-start h-[36px] sm:h-[40px] mb-2 sm:mb-3">
+                    <span class="text-xs sm:text-sm font-extrabold text-gray-900 mb-0.5">
                         Rp {{ number_format($wprice, 0, ',', '.') }}
                     </span>
 
                     @if($woldPrice && $wdiscount)
-                    <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-xs text-gray-400 font-medium line-through">
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <span class="text-[10px] sm:text-xs text-gray-400 font-medium line-through truncate">
                             Rp {{ number_format($woldPrice, 0, ',', '.') }}
                         </span>
-                        <span class="bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wide">
+                        <span class="bg-black text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded tracking-wide leading-none">
                             {{ $wdiscount }}
                         </span>
                     </div>
                     @endif
                 </div>
 
-                @if(count($wcolors) > 0)
-                <div class="flex items-center gap-1.5 mb-5 mt-auto">
-                    @foreach($item->product->colors_hex as $color)
-                    <span class="color-swatch-display"
-                        style="background-color: {{ $color['hex'] }};"
-                        title="{{ $color['name'] }}">
-                    </span>
-                    @endforeach
+                {{-- Varian Warna (Fixed Height) --}}
+                <div class="flex items-center gap-1 sm:gap-1.5 h-[14px] sm:h-[16px] mb-3 sm:mb-5">
+                    @if(count($wcolors) > 0)
+                        @foreach($item->product->colors_hex as $color)
+                        <span class="color-swatch-display"
+                            style="background-color: {{ $color['hex'] }};"
+                            title="{{ $color['name'] }}">
+                        </span>
+                        @endforeach
+                    @endif
                 </div>
-                @else
-                <div class="mb-5 mt-auto"></div>
-                @endif
 
-                <div class="flex items-center gap-2 mt-auto pt-4 border-t border-gray-100">
+                <div class="flex-grow"></div>
+
+                {{-- Bagian Tombol Tambah & Hapus (Akan selalu sejajar karena konten di atasnya dikunci ukurannya) --}}
+                <div class="flex items-center gap-1.5 sm:gap-2 mt-auto pt-3 sm:pt-4 border-t border-gray-100">
                     <button
-                        onclick="openVariantModal({{ $wid }}, '{{ $wname }}', {{ $wprice }}, {{ json_encode($wcolors) }}, '{{ $item->product->size_chart_image ? asset('storage/' . $item->product->size_chart_image) : '' }}')"
-                        class="flex-1 h-[44px] bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors">
+                        onclick="openVariantModal({{ $wid }}, '{{ addslashes($wname) }}', {{ $wprice }}, {{ json_encode($wcolors) }}, '{{ $item->product->size_chart_image ? asset('storage/' . $item->product->size_chart_image) : '' }}')"
+                        class="flex-1 h-[36px] sm:h-[44px] bg-black text-white text-[9px] sm:text-[10px] font-bold tracking-widest uppercase rounded-md hover:bg-gray-800 transition-colors">
                         TAMBAH
                     </button>
                     <button onclick="removeWishlist({{ $wid }}, '{{ addslashes($wname) }}')" title="Hapus"
-                        class="w-[44px] h-[44px] flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-colors">
-                        <i class="fa-regular fa-trash-can text-lg" style="color: rgb(38, 37, 37);"></i>
+                        class="w-[36px] sm:w-[44px] h-[36px] sm:h-[44px] flex-shrink-0 flex items-center justify-center border border-gray-200 rounded-md hover:bg-gray-50 hover:border-gray-300 transition-colors">
+                        <i class="fa-regular fa-trash-can text-sm sm:text-lg" style="color: rgb(38, 37, 37);"></i>
                     </button>
                 </div>
             </div>
@@ -286,12 +301,7 @@
                     Warna &mdash; <span id="selectedColorText" class="text-gray-900">Pilih warna</span>
                 </p>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="selectColor(this, 'Olive')"
-                        class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Olive</button>
-                    <button type="button" onclick="selectColor(this, 'Stone Grey')"
-                        class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Stone Grey</button>
-                    <button type="button" onclick="selectColor(this, 'Indigo')"
-                        class="color-btn variant-btn px-4 py-2 rounded text-xs font-semibold">Indigo</button>
+                    {{-- Tombol warna akan di-render via JS --}}
                 </div>
                 {{-- INLINE ERROR WARNA --}}
                 <p id="errorColor" class="hidden text-xs text-red-500 mt-2 flex items-center gap-1.5 font-medium">
