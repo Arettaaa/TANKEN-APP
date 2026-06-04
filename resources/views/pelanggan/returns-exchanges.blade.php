@@ -18,8 +18,14 @@
 
     /* Policy highlight card */
     .policy-card { background: #111; border-radius: 0; }
-    .policy-stat { border-right: 1px solid #2a2a2a; }
-    .policy-stat:last-child { border-right: none; }
+    
+    /* FIX RESPONSIVE BORDER */
+    @media (min-width: 768px) {
+        .policy-stat { border-right: 1px solid #2a2a2a; }
+    }
+    @media (max-width: 767px) {
+        .policy-stat { border-bottom: 1px solid #2a2a2a; }
+    }
 
     /* Step number dibuat KOTAK TAJAM */
     .step-number {
@@ -108,16 +114,16 @@
                     Pesanan tidak sesuai, cacat, atau salah ukuran? Ajukan pengembalian maksimal 7 hari 
                     setelah pesanan kamu berstatus "Selesai" di sistem kami.
                 </p>
-                <div class="grid grid-cols-3">
-                    <div class="policy-stat pr-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-0">
+                    <div class="policy-stat md:pr-6 pb-6 md:pb-0">
                         <p class="text-3xl font-extrabold text-white mb-1" style="font-family:'Inter',sans-serif;">7</p>
                         <p class="text-xs text-gray-500">Hari Batas Retur</p>
                     </div>
-                    <div class="policy-stat px-6">
+                    <div class="policy-stat md:px-6 pb-6 md:pb-0">
                         <p class="text-3xl font-extrabold text-white mb-1" style="font-family:'Inter',sans-serif;">GRATIS</p>
                         <p class="text-xs text-gray-500">Ongkir Retur</p>
                     </div>
-                    <div class="pl-6">
+                    <div class="md:pl-6">
                         <p class="text-3xl font-extrabold text-white mb-1" style="font-family:'Inter',sans-serif;">WAJIB</p>
                         <p class="text-xs text-gray-500">Video Unboxing</p>
                     </div>
@@ -302,29 +308,12 @@
                         <p class="text-sm text-gray-400 leading-relaxed">
                             Refund hanya berlaku untuk produk yang memenuhi syarat retur. Pastikan mengikuti prosedur retur dengan benar agar refund dapat diproses tanpa kendala.
                         </p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        {{-- ===== 6. RETUR INTERNASIONAL ===== --}}
-        <section class="mb-14 reveal">
-            <h2 class="text-lg font-bold text-gray-900 mb-6" style="font-family:'Inter',sans-serif;">
-                Retur Internasional
-            </h2>
-
-            <div class="border border-gray-100 rounded-none px-6 py-5">
-                <p class="text-sm text-gray-500 leading-relaxed mb-3">
-                    Pelanggan internasional menanggung biaya pengiriman retur. Kami sangat menyarankan penggunaan
-                    jasa pengiriman yang dapat dilacak karena kami tidak bertanggung jawab atas paket yang hilang dalam perjalanan.
-                </p>
-                <p class="text-sm text-gray-500 leading-relaxed">
-                    Bea cukai dan pajak yang dibayarkan pada pesanan original bersifat tidak dapat dikembalikan.
-                    Silakan hubungi kantor bea cukai setempat untuk informasi lebih lanjut mengenai pengembalian bea.
-                </p>
-            </div>
-        </section>
-
-        {{-- ===== 7. CTA ===== --}}
+        {{-- ===== 6. CTA ===== --}}
         <section class="reveal">
             <div class="cta-dark px-8 py-10 text-center">
                 <h2 class="text-xl font-bold text-white mb-2" style="font-family:'Inter',sans-serif;">
