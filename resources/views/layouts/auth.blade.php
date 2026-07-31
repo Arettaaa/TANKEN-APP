@@ -81,12 +81,14 @@
             @yield('content')
         </div>
 
-        <div class="mt-6 flex-shrink-0">
-            <a href="{{ route('pelanggan.home') }}" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-                Back to Home
-            </a>
-        </div>
+        @if(!request()->routeIs('otp.verify.page'))
+            <div class="mt-6 flex-shrink-0">
+                <a href="{{ route('pelanggan.home') }}" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                    Back to Home
+                </a>
+            </div>
+        @endif
     </div>
 
 <script>

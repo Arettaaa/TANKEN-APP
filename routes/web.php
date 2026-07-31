@@ -45,9 +45,13 @@ Route::post('/masuk', [AuthController::class, 'login']);
 Route::post('/daftar', [AuthController::class, 'register']);
 Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
 
-// Route Verifikasi OTP (Baru ditambahkan)
+// Route Verifikasi OTP 
 Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('otp.verify.page');
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('otp.verify.process');
+Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('otp.resend');
+
+// Tambahkan Route baru ini untuk fitur Daftar Ulang (Ganti Email)
+Route::get('/cancel-otp', [AuthController::class, 'cancelOtp'])->name('otp.cancel');
 
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
@@ -262,4 +266,8 @@ Route::get('/wilayah', [AddressController::class, 'getWilayah']);
 Route::get('/rahasia-link-storage', function () {
     Artisan::call('storage:link');
     return 'Jembatan storage (symlink) berhasil dibuat! Silakan upload ulang gambar dari menu admin.';
+});
+
+Route::get('/cek-ui-otp', function () {
+    return view('auth.verify-otp');
 });

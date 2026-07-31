@@ -55,10 +55,9 @@ class AuthController extends Controller
     // Fungsi untuk menampilkan tampilan input OTP
     public function showOtpForm()
     {
-        // Tolak akses jika tidak ada session registrasi aktif
         if (!session('verify_email')) {
             return redirect()->route('register');
-        }
+        };
         
         return view('auth.verify-otp'); 
     }
@@ -109,6 +108,37 @@ class AuthController extends Controller
         Auth::login($user);
 
         return redirect()->route('pelanggan.home')->with('success', 'Email berhasil diverifikasi! Selamat datang dan nikmati pengalaman berbelanja Anda.');
+    }
+
+    // Fungsi untuk mengirim ulang OTP
+    public function resendOtp()
+    {
+        // 1. Pastikan session email masih ada
+        if (!session('verify_email')) {
+            return redirect()->route('register')->with('error', 'Sesi telah habis, silakan daftar ulang.');
+        }
+
+        // 2. Cari user berdasarkan email di session
+        $user = User::where('email', session('verify_email'))->first();
+
+        if (!$user) {
+            return redirect()->route('register')->with('error', 'Akun tidak ditemukan.');
+        }
+
+        // 3. Generate angka OTP yang benar-benar baru
+        $newOtpCode = rand(100000, 999999);
+
+        // 4. Update data user di database dengan OTP baru dan reset waktu 10 menit
+        $user->update([
+            'otp_code' => $newOtpCode,
+            'otp_expires_at' => Carbon::now()->addMinutes(10)
+        ]);
+
+        // 5. Kirim email OTP yang baru
+        Mail::to($user->email)->send(new OtpMail($newOtpCode));
+
+        // 6. Kembalikan user ke halaman form dengan pesan sukses
+        return back()->with('success', 'Kode OTP baru telah dikirim ke email Anda! Waktu telah direset.');
     }
 
     public function login(Request $request)
@@ -227,5 +257,15 @@ class AuthController extends Controller
             'user_id'    => $user->id,
             'voucher_id' => $voucher->id,
         ]);
+    }
+
+    // Fungsi untuk membatalkan proses OTP dan kembali daftar ulang
+    public function cancelOtp()
+    {
+        // Hapus session email agar sistem tahu pengguna memulai dari awal
+        session()->forget('verify_email');
+        
+        // Arahkan kembali ke halaman register
+        return redirect()->route('register')->with('error', 'Silakan daftar ulang dengan alamat email yang benar.');
     }
 }
