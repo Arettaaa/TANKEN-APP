@@ -10,6 +10,10 @@ use App\Models\UserVoucher;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+// Tambahan untuk fitur OTP
+use App\Mail\OtpMail;
+use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -25,16 +29,86 @@ class AuthController extends Controller
             return back()->with('error', 'Gagal mendaftar. Pastikan email belum digunakan dan password minimal 8 karakter.');
         }
 
+        // Generate 6 Digit OTP
+        $otpCode = rand(100000, 999999);
+
+        // Buat user dengan status belum terverifikasi (menyimpan OTP)
         $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'role'     => 'customer',
+            'name'           => $request->name,
+            'email'          => $request->email,
+            'password'       => Hash::make($request->password),
+            'role'           => 'customer',
+            'otp_code'       => $otpCode,
+            'otp_expires_at' => Carbon::now()->addMinutes(10), // Batas kedaluwarsa 10 menit
         ]);
 
+        // Kirim email OTP menggunakan Mailable OtpMail
+        Mail::to($user->email)->send(new OtpMail($otpCode));
+
+        // Simpan email ke dalam session agar halaman verifikasi dapat melacak identitas pengguna
+        session(['verify_email' => $user->email]);
+
+        // Arahkan ke halaman input OTP
+        return redirect()->route('otp.verify.page');
+    }
+
+    // Fungsi untuk menampilkan tampilan input OTP
+    public function showOtpForm()
+    {
+        // Tolak akses jika tidak ada session registrasi aktif
+        if (!session('verify_email')) {
+            return redirect()->route('register');
+        }
+        
+        return view('auth.verify-otp'); 
+    }
+
+    // Fungsi untuk memvalidasi dan memproses kode OTP
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|numeric|digits:6'
+        ]);
+
+        // === TAMBAHKAN BARIS INI SEMENTARA ===
+        // dd([
+        //     'otp_yang_diketik' => $request->otp,
+        //     'email_di_session' => session('verify_email')
+        // ]);
+        // =====================================
+
+        $email = session('verify_email');
+        $user = User::where('email', $email)
+                    ->where('otp_code', $request->otp)
+                    ->first();
+
+        // Verifikasi kecocokan kode
+        if (!$user) {
+            return back()->with('error', 'Kode OTP salah. Silakan periksa kembali kotak masuk Anda.');
+        }
+
+        // Verifikasi batas waktu
+        if (Carbon::now()->greaterThan($user->otp_expires_at)) {
+            return back()->with('error', 'Kode OTP sudah kedaluwarsa. Silakan lakukan pendaftaran ulang.');
+        }
+
+        // Jika berhasil, perbarui data akun dan bersihkan kode OTP
+        $user->update([
+            'email_verified_at' => Carbon::now(),
+            'otp_code' => null,
+            'otp_expires_at' => null
+        ]);
+
+        // Berikan voucher sambutan eksklusif bagi pengguna yang berhasil terverifikasi
         $this->giveWelcomeVoucher($user);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Cek voucher sambutan di halaman Voucher Saya.');
+        // Hapus session sementara
+        session()->forget('verify_email');
+
+        // Autentikasi dan login pengguna secara otomatis
+        Auth::login($user);
+
+        return redirect()->route('pelanggan.home')->with('success', 'Email berhasil diverifikasi! Selamat datang dan nikmati pengalaman berbelanja Anda.');
     }
 
     public function login(Request $request)

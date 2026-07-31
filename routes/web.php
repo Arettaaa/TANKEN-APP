@@ -45,6 +45,10 @@ Route::post('/masuk', [AuthController::class, 'login']);
 Route::post('/daftar', [AuthController::class, 'register']);
 Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
 
+// Route Verifikasi OTP (Baru ditambahkan)
+Route::get('/verify-otp', [AuthController::class, 'showOtpForm'])->name('otp.verify.page');
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp'])->name('otp.verify.process');
+
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.login');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback']);
 

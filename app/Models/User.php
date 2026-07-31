@@ -24,7 +24,10 @@ class User extends Authenticatable
         'google_id',
         'role',
         'is_active',
-        'phone'
+        'phone',
+        'otp_code',          // <-- Tambahkan baris ini
+        'otp_expires_at',    // <-- Tambahkan baris ini
+        'email_verified_at', // <-- Tambahkan baris ini (jika belum ada)
     ];
 
     /**
