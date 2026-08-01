@@ -82,7 +82,13 @@ class CheckoutController extends Controller
     ];
 
     $shippingCost = 130000;
-    $total        = $subtotal + $shippingCost;
+    $voucherDiscount = session('tanken_voucher_discount', 0);
+
+    $taxable = max(0, $subtotal - $voucherDiscount);
+
+    $ppn = round($taxable * 0.11);
+
+    $total = $taxable + $ppn + $shippingCost;
 
     $userVouchers = auth()->user()
         ->userVouchers()
@@ -116,6 +122,8 @@ class CheckoutController extends Controller
         'subtotal',
         'shippingCost',
         'total',
+        'taxable',
+        'ppn',
         'shippingOptions',
         'userVouchers',
         'activeVoucherCode',
@@ -216,7 +224,8 @@ class CheckoutController extends Controller
     {
         $distId  = $request->city_id;
         $weight  = 1;
-        $apiKey  = env('BINDERBYTE_API_KEY');
+        $apiKey = config('services.biteship.api_key');
+        $baseUrl = config('services.biteship.base_url');
         $origin  = 'dist_32.75.02';
 
         $courierServices = [

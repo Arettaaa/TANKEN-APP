@@ -60,9 +60,12 @@ class PaymentController extends Controller
 
         $subtotal        = collect($cartItems)->sum(fn($i) => $i->price * $i->qty);
         $voucherDiscount = session('tanken_voucher_discount', 0);
-        $ppn             = 0; 
-        
-        $total = $subtotal + $shippingCost - $voucherDiscount;
+
+        $taxable = max(0, $subtotal - $voucherDiscount);
+
+        $ppn = round($taxable * 0.11);
+
+        $total = $taxable + $ppn + $shippingCost;
         if($total < 0) $total = 0;
 
         $uniqueCode = session('checkout_unique_code') ?? ((\App\Models\Order::max('unique_code') % 999) + 1);
@@ -146,11 +149,14 @@ class PaymentController extends Controller
         ];
 
         $subtotal = collect($cartItems)->sum(fn($i) => $i['price'] * $i['qty']);
-        $total    = $subtotal + $shippingCost - $voucherDiscount;
+        $taxable = max(0, $subtotal - $voucherDiscount);
+        $ppn = round($taxable * 0.11);
+
+        $total = $taxable + $ppn + $shippingCost;
         if($total < 0) $total = 0;
 
         return view('pelanggan.review-payment', compact(
-            'cartItems', 'shippingAddress', 'shippingCost', 'voucherDiscount', 'subtotal', 'total'
+            'cartItems', 'shippingAddress', 'shippingCost', 'voucherDiscount', 'subtotal', 'total', 'taxable', 'ppn'
         ));
     }
 
@@ -188,12 +194,15 @@ class PaymentController extends Controller
                 $subtotal = $cartItems->sum(fn($i) => $i->product->price * $i->quantity);
             }
 
-            $total = $subtotal + $shippingCost - $voucherDiscount;
+            $taxable = max(0, $subtotal - $voucherDiscount);
+
+            $ppn = round($taxable * 0.11);
+
+            $total = $taxable + $ppn + $shippingCost;
             if ($total < 0) $total = 0;
             $uniqueCode = (int) session('checkout_unique_code', (\App\Models\Order::max('unique_code') % 999) + 1);
             $totalPayment = $total + $uniqueCode;
 
-            // BUAT ORDER UTAMA
             $order = Order::create([
                 'user_id'              => auth()->id(),
                 'order_number'         => Order::generateNumber(),
@@ -213,7 +222,7 @@ class PaymentController extends Controller
                 'courier'              => $shipping,
                 'shipping_cost'        => $shippingCost,
                 'subtotal'             => $subtotal,
-                'ppn'                  => 0, // Dihapus
+                'ppn' => $ppn,
                 'discount'             => $voucherDiscount,
                 'total'                => $total,
                 'estimated_arrival'    => now()->addDays($daysMax)->toDateString(),

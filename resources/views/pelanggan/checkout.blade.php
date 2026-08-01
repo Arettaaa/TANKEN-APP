@@ -648,6 +648,14 @@ $shippingOptions = $shippingOptions ?? [
                                 </div>
                             </div>
                         </div>
+
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">PPN 11%</span>
+                            <span class="font-semibold text-gray-800" id="summaryPPN">
+                                Rp {{ number_format($ppn ?? 0, 0, ',', '.') }}
+                            </span>
+                        </div>
+
                     </div>
 
                     <hr class="summary-divider">
@@ -676,7 +684,8 @@ $shippingOptions = $shippingOptions ?? [
 <script>
     const subtotalBase = {{ $subtotal }};
     let currentShippingPrice = 0;
-    let voucherDiscount = 0;
+    let voucherDiscount = {{ $activeVoucherDiscount ?? 0 }};
+    const ppnRate = 0.11;
 
     function formatRp(val) {
         return 'Rp ' + Math.round(val).toLocaleString('id-ID');
@@ -709,9 +718,17 @@ $shippingOptions = $shippingOptions ?? [
         updateTotalSummary();
     }
 
-    function updateTotalSummary() {
-        let finalTotal = subtotalBase + currentShippingPrice - voucherDiscount;
-        if (finalTotal < 0) finalTotal = 0;
+   function updateTotalSummary() {
+
+        let taxable = subtotalBase - voucherDiscount;
+
+        if (taxable < 0) taxable = 0;
+
+        let ppn = Math.round(taxable * ppnRate);
+
+        let finalTotal = taxable + ppn + currentShippingPrice;
+
+        document.getElementById('summaryPPN').textContent = formatRp(ppn);
         document.getElementById('summaryTotal').textContent = formatRp(finalTotal);
     }
 
